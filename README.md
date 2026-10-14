@@ -1,6 +1,6 @@
 # WhartonGlobalChallengeCapitalCrew
 
-Plain Python (standard library only, no installs). Goal-based planning for Laura Gao: $300k in 2027, $150k in 2028, then a funded operating reserve (10 x $50k from 2033) and a facility contribution.
+Plain Python (standard library only, no installs). Goal-based planning: $300k in 2027, $150k in 2028, then a funded operating reserve (10 x $50k from 2033) and a facility contribution.
 
 ## Setup
 ```
