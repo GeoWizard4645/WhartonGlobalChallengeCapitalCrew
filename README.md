@@ -1,6 +1,6 @@
 # WhartonGlobalChallengeCapitalCrew
 
-Plain Python (standard library only, no installs). Goal-based planning: $300k in 2027, $150k in 2028, then a funded operating reserve (10 x $50k from 2033) and a facility contribution.
+Plain Python. The model itself uses only the standard library; only `fetch_data.py` (price download) needs one install, `yfinance`. Goal-based planning: $300k in 2027, $150k in 2028, then a funded operating reserve (10 x $50k from 2033) and a facility contribution.
 
 ## Setup (Mac, in Terminal)
 1. Check you have Python 3 and git (both print a version number; if macOS offers to install developer tools, accept):
@@ -17,9 +17,19 @@ cd WhartonGlobalChallengeCapitalCrew
 ```
 ls
 ```
-4. The price history in `data/` comes with the repo, so you can run the scripts below right away. To refresh it with the latest prices and T-bill rate (needs internet; prints each ticker's first date):
+4. The price history in `data/` comes with the repo, so you can skip to the scripts below and run them right away. To refresh it with the latest prices and T-bill rate, install the one library it needs and run it (needs internet; prints each ticker's first date):
+```
+pip3 install yfinance
+```
 ```
 python3 fetch_data.py
+```
+If `pip3 install` says the environment is "externally managed", make a private environment first, then install and run inside it:
+```
+python3 -m venv .venv
+source .venv/bin/activate
+pip install yfinance
+python fetch_data.py
 ```
 Later, to pick up teammates' changes: `git pull`.
 
