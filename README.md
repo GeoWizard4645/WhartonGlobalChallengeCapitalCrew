@@ -2,10 +2,27 @@
 
 Plain Python (standard library only, no installs). Goal-based planning: $300k in 2027, $150k in 2028, then a funded operating reserve (10 x $50k from 2033) and a facility contribution.
 
-## Setup
+## Setup (Mac, in Terminal)
+1. Check you have Python 3 and git (both print a version number; if macOS offers to install developer tools, accept):
 ```
-python3 fetch_data.py     # downloads price history + T-bill rate into data/ (re-run to refresh); prints each ticker's first date
+python3 --version
+git --version
 ```
+2. Clone the repository and move into it:
+```
+git clone https://github.com/GeoWizard4645/WhartonGlobalChallengeCapitalCrew.git
+cd WhartonGlobalChallengeCapitalCrew
+```
+3. Check you are in the right place (you should see `allocate.py`, `config.py`, `data` and the other files):
+```
+ls
+```
+4. The price history in `data/` comes with the repo, so you can run the scripts below right away. To refresh it with the latest prices and T-bill rate (needs internet; prints each ticker's first date):
+```
+python3 fetch_data.py
+```
+Later, to pick up teammates' changes: `git pull`.
+
 Edit `config.py` first: tickers per bucket (the youngest ticker limits how much history you get), planning yield, risk limits. Expected returns are calculated from the data; `EXPECTED_RETURNS` is only for stress tests.
 
 ## Main scripts
