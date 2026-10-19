@@ -1,0 +1,41 @@
+weighting,series,period,n,mean_pct_m,t_nw,ann_mean_pct,tracking_error_pct,info_ratio,hit_rate
+VW,BM5-OP5 corner minus Market (CRSP VW),Full sample (1963-07 on),758,0.373353,1.43158,4.48024,22.9253,0.195428,0.509235
+VW,BM5-OP5 corner minus Equal-weight avg of all 25,Full sample (1963-07 on),758,0.27468,1.19979,3.29616,20.6184,0.159865,0.502639
+VW,Top-2 x top-2 corner (avg of 4) minus Market (CRSP VW),Full sample (1963-07 on),758,0.376513,2.58373,4.51815,12.4568,0.362707,0.534301
+VW,Top-2 x top-2 corner (avg of 4) minus Equal-weight avg of all 25,Full sample (1963-07 on),758,0.277839,2.63813,3.33407,9.38077,0.355415,0.53562
+VW,BM5-OP5 corner minus Market (CRSP VW),1988-2004 (Greenblatt sample),204,0.966472,2.11137,11.5977,18.1216,0.63999,0.578431
+VW,BM5-OP5 corner minus Equal-weight avg of all 25,1988-2004 (Greenblatt sample),204,0.816786,2.24834,9.80143,15.4509,0.634359,0.578431
+VW,Top-2 x top-2 corner (avg of 4) minus Market (CRSP VW),1988-2004 (Greenblatt sample),204,0.621852,2.03034,7.46223,12.0393,0.619824,0.568627
+VW,Top-2 x top-2 corner (avg of 4) minus Equal-weight avg of all 25,1988-2004 (Greenblatt sample),204,0.472167,2.32821,5.666,8.40933,0.673775,0.568627
+VW,BM5-OP5 corner minus Market (CRSP VW),Pre-publication (to 2005-10),508,0.474844,1.64378,5.69812,19.9355,0.285827,0.527559
+VW,BM5-OP5 corner minus Equal-weight avg of all 25,Pre-publication (to 2005-10),508,0.333054,1.33434,3.99665,17.838,0.224052,0.521654
+VW,Top-2 x top-2 corner (avg of 4) minus Market (CRSP VW),Pre-publication (to 2005-10),508,0.54326,3.28308,6.51912,11.3061,0.576602,0.568898
+VW,Top-2 x top-2 corner (avg of 4) minus Equal-weight avg of all 25,Pre-publication (to 2005-10),508,0.40147,3.37682,4.81765,8.42636,0.571735,0.557087
+VW,BM5-OP5 corner minus Market (CRSP VW),Post-publication (2005-11 on),250,0.167126,0.3244,2.00551,28.0683,0.071451,0.472
+VW,BM5-OP5 corner minus Equal-weight avg of all 25,Post-publication (2005-11 on),250,0.156063,0.336865,1.87275,25.3827,0.0737806,0.464
+VW,Top-2 x top-2 corner (avg of 4) minus Market (CRSP VW),Post-publication (2005-11 on),250,0.0376827,0.138854,0.452192,14.4708,0.0312486,0.464
+VW,Top-2 x top-2 corner (avg of 4) minus Equal-weight avg of all 25,Post-publication (2005-11 on),250,0.0266199,0.133795,0.319439,11.0373,0.0289417,0.492
+VW,BM5-OP5 corner minus Market (CRSP VW),2010-2026,200,-0.486982,-0.934693,-5.84378,27.272,-0.214277,0.44
+VW,BM5-OP5 corner minus Equal-weight avg of all 25,2010-2026,200,-0.471185,-1.01195,-5.65422,24.5405,-0.230404,0.43
+VW,Top-2 x top-2 corner (avg of 4) minus Market (CRSP VW),2010-2026,200,-0.192156,-0.662425,-2.30588,14.4357,-0.159734,0.435
+VW,Top-2 x top-2 corner (avg of 4) minus Equal-weight avg of all 25,2010-2026,200,-0.176359,-0.84155,-2.11631,10.9574,-0.19314,0.465
+EW,BM5-OP5 corner minus Market (CRSP VW),Full sample (1963-07 on),758,0.547244,1.87457,6.56692,23.7776,0.276181,0.496042
+EW,BM5-OP5 corner minus Equal-weight avg of all 25,Full sample (1963-07 on),758,0.262386,1.19714,3.14863,18.2089,0.172917,0.494723
+EW,Top-2 x top-2 corner (avg of 4) minus Market (CRSP VW),Full sample (1963-07 on),758,0.634249,3.2927,7.61099,15.0205,0.506707,0.559367
+EW,Top-2 x top-2 corner (avg of 4) minus Equal-weight avg of all 25,Full sample (1963-07 on),758,0.349391,3.3527,4.1927,8.27782,0.506498,0.569921
+EW,BM5-OP5 corner minus Market (CRSP VW),1988-2004 (Greenblatt sample),204,0.790156,2.09766,9.48188,17.705,0.535548,0.539216
+EW,BM5-OP5 corner minus Equal-weight avg of all 25,1988-2004 (Greenblatt sample),204,0.372879,1.3463,4.47455,12.358,0.362078,0.519608
+EW,Top-2 x top-2 corner (avg of 4) minus Market (CRSP VW),1988-2004 (Greenblatt sample),204,0.799822,2.54384,9.59786,12.4426,0.771373,0.578431
+EW,Top-2 x top-2 corner (avg of 4) minus Equal-weight avg of all 25,1988-2004 (Greenblatt sample),204,0.382545,2.32717,4.59054,6.63858,0.691494,0.573529
+EW,BM5-OP5 corner minus Market (CRSP VW),Pre-publication (to 2005-10),508,0.717607,2.79249,8.61129,18.9957,0.453327,0.537402
+EW,BM5-OP5 corner minus Equal-weight avg of all 25,Pre-publication (to 2005-10),508,0.274002,1.48273,3.28802,13.7197,0.239658,0.523622
+EW,Top-2 x top-2 corner (avg of 4) minus Market (CRSP VW),Pre-publication (to 2005-10),508,0.917692,4.9119,11.0123,12.6361,0.871493,0.606299
+EW,Top-2 x top-2 corner (avg of 4) minus Equal-weight avg of all 25,Pre-publication (to 2005-10),508,0.474087,5.20084,5.68904,6.14669,0.925545,0.608268
+EW,BM5-OP5 corner minus Market (CRSP VW),Post-publication (2005-11 on),250,0.201064,0.295722,2.41277,31.3362,0.0769963,0.412
+EW,BM5-OP5 corner minus Equal-weight avg of all 25,Post-publication (2005-11 on),250,0.238781,0.453338,2.86537,24.9947,0.114639,0.436
+EW,Top-2 x top-2 corner (avg of 4) minus Market (CRSP VW),Post-publication (2005-11 on),250,0.0582941,0.142934,0.699529,18.8369,0.0371361,0.464
+EW,Top-2 x top-2 corner (avg of 4) minus Equal-weight avg of all 25,Post-publication (2005-11 on),250,0.0960109,0.395991,1.15213,11.4121,0.100957,0.492
+EW,BM5-OP5 corner minus Market (CRSP VW),2010-2026,200,-0.218169,-0.359963,-2.61802,30.1001,-0.0869773,0.395
+EW,BM5-OP5 corner minus Equal-weight avg of all 25,2010-2026,200,-0.0989842,-0.212561,-1.18781,24.4029,-0.048675,0.44
+EW,Top-2 x top-2 corner (avg of 4) minus Market (CRSP VW),2010-2026,200,-0.0957475,-0.230476,-1.14897,18.7483,-0.0612841,0.455
+EW,Top-2 x top-2 corner (avg of 4) minus Equal-weight avg of all 25,2010-2026,200,0.0234368,0.0921812,0.281242,11.5838,0.0242788,0.5

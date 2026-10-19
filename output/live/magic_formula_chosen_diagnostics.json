@@ -1,0 +1,181 @@
+{
+  "strategy": "magic_formula",
+  "variant": "chosen",
+  "params": {
+    "ranking": "MF",
+    "n": 25,
+    "min_cap": 5000000000.0,
+    "holding": "staggered",
+    "universe": "SP900",
+    "cost_bps": 10.0,
+    "excess_cash": "min_ca_cl",
+    "ebit": "opinc"
+  },
+  "asof": "2026-10-16T00:00:00",
+  "picks": [
+    {
+      "ticker": "GEN",
+      "weight": 0.04,
+      "rank": 1.0
+    },
+    {
+      "ticker": "HRB",
+      "weight": 0.04,
+      "rank": 2.0
+    },
+    {
+      "ticker": "ADBE",
+      "weight": 0.04,
+      "rank": 3.0
+    },
+    {
+      "ticker": "CROX",
+      "weight": 0.04,
+      "rank": 4.0
+    },
+    {
+      "ticker": "CI",
+      "weight": 0.04,
+      "rank": 5.0
+    },
+    {
+      "ticker": "GDDY",
+      "weight": 0.04,
+      "rank": 6.0
+    },
+    {
+      "ticker": "ACN",
+      "weight": 0.04,
+      "rank": 7.0
+    },
+    {
+      "ticker": "MO",
+      "weight": 0.04,
+      "rank": 8.0
+    },
+    {
+      "ticker": "HON",
+      "weight": 0.04,
+      "rank": 9.0
+    },
+    {
+      "ticker": "MU",
+      "weight": 0.04,
+      "rank": 10.0
+    },
+    {
+      "ticker": "IT",
+      "weight": 0.04,
+      "rank": 11.0
+    },
+    {
+      "ticker": "INCY",
+      "weight": 0.04,
+      "rank": 12.0
+    },
+    {
+      "ticker": "TPR",
+      "weight": 0.04,
+      "rank": 13.0
+    },
+    {
+      "ticker": "BMY",
+      "weight": 0.04,
+      "rank": 14.0
+    },
+    {
+      "ticker": "SAIC",
+      "weight": 0.04,
+      "rank": 15.0
+    },
+    {
+      "ticker": "BAH",
+      "weight": 0.04,
+      "rank": 16.0
+    },
+    {
+      "ticker": "G",
+      "weight": 0.04,
+      "rank": 17.0
+    },
+    {
+      "ticker": "SOLV",
+      "weight": 0.04,
+      "rank": 18.0
+    },
+    {
+      "ticker": "SNDK",
+      "weight": 0.04,
+      "rank": 19.0
+    },
+    {
+      "ticker": "CTSH",
+      "weight": 0.04,
+      "rank": 20.0
+    },
+    {
+      "ticker": "TTEK",
+      "weight": 0.04,
+      "rank": 21.0
+    },
+    {
+      "ticker": "HPQ",
+      "weight": 0.04,
+      "rank": 22.0
+    },
+    {
+      "ticker": "BKNG",
+      "weight": 0.04,
+      "rank": 23.0
+    },
+    {
+      "ticker": "ANF",
+      "weight": 0.04,
+      "rank": 24.0
+    },
+    {
+      "ticker": "LDOS",
+      "weight": 0.04,
+      "rank": 25.0
+    }
+  ],
+  "age": {
+    "max_age_days": 138.0,
+    "median_age_days": 108.0,
+    "n_older_than_150": 0,
+    "n_older_than_200": 0
+  },
+  "attrs": {
+    "sector_counts": "see magic_formula_chosen_sector_counts.csv",
+    "summary": {
+      "asof": "2026-10-16T00:00:00",
+      "params": {
+        "ranking": "MF",
+        "n": 25,
+        "min_cap": 5000000000.0,
+        "holding": "staggered",
+        "universe": "SP900",
+        "cost_bps": 10.0,
+        "excess_cash": "min_ca_cl",
+        "ebit": "opinc"
+      },
+      "universe": "SP900: point-in-time S&P 500 + MidCap 400 members (limits survivorship bias; S&P 600 history starts 2018-09)",
+      "n_universe": 899,
+      "n_eligible": 509,
+      "n_picks": 25,
+      "n_alternates": 10,
+      "n_stale": 0,
+      "median_age_days": 108.0,
+      "excluded_by_first_reason": {
+        "sector": 246,
+        "mcap_lt_min": 56,
+        "debt_unmapped": 32,
+        "ebit_nonpos": 31,
+        "no_classified_bs": 13,
+        "ebit_missing": 6,
+        "mcap_missing": 5,
+        "no_snapshot": 1
+      }
+    }
+  }
+}

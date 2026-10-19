@@ -1,0 +1,17 @@
+metric,value
+Last daily observation,2026-08-31
+WML (126d) annualized vol,53.0%
+"WML long-run vol: monthly-file spread (1927-2026) / daily-file, all days",27.6% / 23.8%
+WML vol percentile vs own daily history,97th
+"BSC weight on WML (12% target, uncapped)",0.23
+Winners D10 (126d) annualized vol,41.6%
+"Winners D10 long-run vol: monthly-file / daily-file, all days",22.6% / 23.4%
+Winners D10 vol percentile vs own daily history,95th
+"Long-only weight, 20% own-vol target, cap 1",0.48
+"Long-only weight, min(1, 12%/WML vol)",0.23
+French Mom 2x3 (126d) annualized vol (daily-file long-run 12.6%),23.8%
+"Market return, last 24 calendar months (Daniel-Moskowitz definition)",39.7%
+"Market return, last 504 trading days (the window research/01 section 13 used)",41.7%
+DM bear state for the NEXT month,no
+WML last 3 monthly returns (oldest..latest),"15.4%, -22.7%, -14.4%"
+Winners D10 last 3 monthly returns,"8.4%, -15.4%, -0.1%"

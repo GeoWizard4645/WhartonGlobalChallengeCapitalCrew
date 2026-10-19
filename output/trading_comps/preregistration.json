@@ -1,0 +1,509 @@
+{
+  "strategy": "trading_comps",
+  "timestamp": "2026-10-19T02:29:30+00:00",
+  "primary_metric": "net_sharpe",
+  "selection_rule": "plateau_v1",
+  "lam": 1.0,
+  "peak_ratio_max": 1.25,
+  "tie_tol": 0.02,
+  "cat_margin": 0.1,
+  "stability": {
+    "B": 500,
+    "min_share_within_one_step": 0.5
+  },
+  "split": {
+    "train_end": "2018-12-31",
+    "test_start": "2019-01-01"
+  },
+  "test_window_policy": "single_look",
+  "n_cells": 54,
+  "grid_hash": "92b7a8819a9f6384",
+  "content_hash": "64eaec5015d99446",
+  "axes": {
+    "theta": [
+      0.1,
+      0.15,
+      0.2
+    ],
+    "pe_cap": [
+      30,
+      40,
+      50
+    ],
+    "ev_cap": [
+      25,
+      35,
+      45
+    ]
+  },
+  "categorical": {
+    "size_filter": [
+      true,
+      false
+    ]
+  },
+  "default": {
+    "theta": 0.15,
+    "pe_cap": 40,
+    "ev_cap": 35,
+    "size_filter": true,
+    "basis": "TTM"
+  },
+  "grid": [
+    {
+      "theta": 0.1,
+      "pe_cap": 30,
+      "ev_cap": 25,
+      "size_filter": true,
+      "basis": "TTM"
+    },
+    {
+      "theta": 0.1,
+      "pe_cap": 30,
+      "ev_cap": 35,
+      "size_filter": true,
+      "basis": "TTM"
+    },
+    {
+      "theta": 0.1,
+      "pe_cap": 30,
+      "ev_cap": 45,
+      "size_filter": true,
+      "basis": "TTM"
+    },
+    {
+      "theta": 0.1,
+      "pe_cap": 40,
+      "ev_cap": 25,
+      "size_filter": true,
+      "basis": "TTM"
+    },
+    {
+      "theta": 0.1,
+      "pe_cap": 40,
+      "ev_cap": 35,
+      "size_filter": true,
+      "basis": "TTM"
+    },
+    {
+      "theta": 0.1,
+      "pe_cap": 40,
+      "ev_cap": 45,
+      "size_filter": true,
+      "basis": "TTM"
+    },
+    {
+      "theta": 0.1,
+      "pe_cap": 50,
+      "ev_cap": 25,
+      "size_filter": true,
+      "basis": "TTM"
+    },
+    {
+      "theta": 0.1,
+      "pe_cap": 50,
+      "ev_cap": 35,
+      "size_filter": true,
+      "basis": "TTM"
+    },
+    {
+      "theta": 0.1,
+      "pe_cap": 50,
+      "ev_cap": 45,
+      "size_filter": true,
+      "basis": "TTM"
+    },
+    {
+      "theta": 0.15,
+      "pe_cap": 30,
+      "ev_cap": 25,
+      "size_filter": true,
+      "basis": "TTM"
+    },
+    {
+      "theta": 0.15,
+      "pe_cap": 30,
+      "ev_cap": 35,
+      "size_filter": true,
+      "basis": "TTM"
+    },
+    {
+      "theta": 0.15,
+      "pe_cap": 30,
+      "ev_cap": 45,
+      "size_filter": true,
+      "basis": "TTM"
+    },
+    {
+      "theta": 0.15,
+      "pe_cap": 40,
+      "ev_cap": 25,
+      "size_filter": true,
+      "basis": "TTM"
+    },
+    {
+      "theta": 0.15,
+      "pe_cap": 40,
+      "ev_cap": 35,
+      "size_filter": true,
+      "basis": "TTM"
+    },
+    {
+      "theta": 0.15,
+      "pe_cap": 40,
+      "ev_cap": 45,
+      "size_filter": true,
+      "basis": "TTM"
+    },
+    {
+      "theta": 0.15,
+      "pe_cap": 50,
+      "ev_cap": 25,
+      "size_filter": true,
+      "basis": "TTM"
+    },
+    {
+      "theta": 0.15,
+      "pe_cap": 50,
+      "ev_cap": 35,
+      "size_filter": true,
+      "basis": "TTM"
+    },
+    {
+      "theta": 0.15,
+      "pe_cap": 50,
+      "ev_cap": 45,
+      "size_filter": true,
+      "basis": "TTM"
+    },
+    {
+      "theta": 0.2,
+      "pe_cap": 30,
+      "ev_cap": 25,
+      "size_filter": true,
+      "basis": "TTM"
+    },
+    {
+      "theta": 0.2,
+      "pe_cap": 30,
+      "ev_cap": 35,
+      "size_filter": true,
+      "basis": "TTM"
+    },
+    {
+      "theta": 0.2,
+      "pe_cap": 30,
+      "ev_cap": 45,
+      "size_filter": true,
+      "basis": "TTM"
+    },
+    {
+      "theta": 0.2,
+      "pe_cap": 40,
+      "ev_cap": 25,
+      "size_filter": true,
+      "basis": "TTM"
+    },
+    {
+      "theta": 0.2,
+      "pe_cap": 40,
+      "ev_cap": 35,
+      "size_filter": true,
+      "basis": "TTM"
+    },
+    {
+      "theta": 0.2,
+      "pe_cap": 40,
+      "ev_cap": 45,
+      "size_filter": true,
+      "basis": "TTM"
+    },
+    {
+      "theta": 0.2,
+      "pe_cap": 50,
+      "ev_cap": 25,
+      "size_filter": true,
+      "basis": "TTM"
+    },
+    {
+      "theta": 0.2,
+      "pe_cap": 50,
+      "ev_cap": 35,
+      "size_filter": true,
+      "basis": "TTM"
+    },
+    {
+      "theta": 0.2,
+      "pe_cap": 50,
+      "ev_cap": 45,
+      "size_filter": true,
+      "basis": "TTM"
+    },
+    {
+      "theta": 0.1,
+      "pe_cap": 30,
+      "ev_cap": 25,
+      "size_filter": false,
+      "basis": "TTM"
+    },
+    {
+      "theta": 0.1,
+      "pe_cap": 30,
+      "ev_cap": 35,
+      "size_filter": false,
+      "basis": "TTM"
+    },
+    {
+      "theta": 0.1,
+      "pe_cap": 30,
+      "ev_cap": 45,
+      "size_filter": false,
+      "basis": "TTM"
+    },
+    {
+      "theta": 0.1,
+      "pe_cap": 40,
+      "ev_cap": 25,
+      "size_filter": false,
+      "basis": "TTM"
+    },
+    {
+      "theta": 0.1,
+      "pe_cap": 40,
+      "ev_cap": 35,
+      "size_filter": false,
+      "basis": "TTM"
+    },
+    {
+      "theta": 0.1,
+      "pe_cap": 40,
+      "ev_cap": 45,
+      "size_filter": false,
+      "basis": "TTM"
+    },
+    {
+      "theta": 0.1,
+      "pe_cap": 50,
+      "ev_cap": 25,
+      "size_filter": false,
+      "basis": "TTM"
+    },
+    {
+      "theta": 0.1,
+      "pe_cap": 50,
+      "ev_cap": 35,
+      "size_filter": false,
+      "basis": "TTM"
+    },
+    {
+      "theta": 0.1,
+      "pe_cap": 50,
+      "ev_cap": 45,
+      "size_filter": false,
+      "basis": "TTM"
+    },
+    {
+      "theta": 0.15,
+      "pe_cap": 30,
+      "ev_cap": 25,
+      "size_filter": false,
+      "basis": "TTM"
+    },
+    {
+      "theta": 0.15,
+      "pe_cap": 30,
+      "ev_cap": 35,
+      "size_filter": false,
+      "basis": "TTM"
+    },
+    {
+      "theta": 0.15,
+      "pe_cap": 30,
+      "ev_cap": 45,
+      "size_filter": false,
+      "basis": "TTM"
+    },
+    {
+      "theta": 0.15,
+      "pe_cap": 40,
+      "ev_cap": 25,
+      "size_filter": false,
+      "basis": "TTM"
+    },
+    {
+      "theta": 0.15,
+      "pe_cap": 40,
+      "ev_cap": 35,
+      "size_filter": false,
+      "basis": "TTM"
+    },
+    {
+      "theta": 0.15,
+      "pe_cap": 40,
+      "ev_cap": 45,
+      "size_filter": false,
+      "basis": "TTM"
+    },
+    {
+      "theta": 0.15,
+      "pe_cap": 50,
+      "ev_cap": 25,
+      "size_filter": false,
+      "basis": "TTM"
+    },
+    {
+      "theta": 0.15,
+      "pe_cap": 50,
+      "ev_cap": 35,
+      "size_filter": false,
+      "basis": "TTM"
+    },
+    {
+      "theta": 0.15,
+      "pe_cap": 50,
+      "ev_cap": 45,
+      "size_filter": false,
+      "basis": "TTM"
+    },
+    {
+      "theta": 0.2,
+      "pe_cap": 30,
+      "ev_cap": 25,
+      "size_filter": false,
+      "basis": "TTM"
+    },
+    {
+      "theta": 0.2,
+      "pe_cap": 30,
+      "ev_cap": 35,
+      "size_filter": false,
+      "basis": "TTM"
+    },
+    {
+      "theta": 0.2,
+      "pe_cap": 30,
+      "ev_cap": 45,
+      "size_filter": false,
+      "basis": "TTM"
+    },
+    {
+      "theta": 0.2,
+      "pe_cap": 40,
+      "ev_cap": 25,
+      "size_filter": false,
+      "basis": "TTM"
+    },
+    {
+      "theta": 0.2,
+      "pe_cap": 40,
+      "ev_cap": 35,
+      "size_filter": false,
+      "basis": "TTM"
+    },
+    {
+      "theta": 0.2,
+      "pe_cap": 40,
+      "ev_cap": 45,
+      "size_filter": false,
+      "basis": "TTM"
+    },
+    {
+      "theta": 0.2,
+      "pe_cap": 50,
+      "ev_cap": 25,
+      "size_filter": false,
+      "basis": "TTM"
+    },
+    {
+      "theta": 0.2,
+      "pe_cap": 50,
+      "ev_cap": 35,
+      "size_filter": false,
+      "basis": "TTM"
+    },
+    {
+      "theta": 0.2,
+      "pe_cap": 50,
+      "ev_cap": 45,
+      "size_filter": false,
+      "basis": "TTM"
+    }
+  ],
+  "extra": {
+    "notes": "Pre-registered grid for the trading-comps strategy (research/04_trading_comps.md sections 5-7). 3 theta {0.10,0.15,0.20} x 3 P/E cap {30,40,50} x 3 EV/EBITDA cap {25,35,45} x size filter {on,off} = 54 cells, TTM basis only. The team doc also lists 'TTM vs forward': forward multiples CANNOT be backtested point-in-time with free data (there are no historical consensus estimates and realized future earnings would be look-ahead), so 'forward' is pre-registered as NOT BACKTESTABLE; yfinance forwardPE is shown for the live date as an information-only cross-check column (not tuned, not in the selection). The last-fiscal-year (LFY) basis is a pre-registered robustness check run ONLY at the cell chosen on the train window (basis='LFY'); it is not part of the selection grid and counts as an extra trial in the ledger. Train window: signals 2012-01-31..2018-12-31; test window 2019-01..latest, looked at once for the chosen cell (plateau rule research/06 5.4, research/04 7.3-7.4). Rules fixed across all cells: sub-industry peers with industry fallback if < 4, size window 0.5x-2x with the 5 closest peers (size filter on) or all valid peers (off), caps applied to peers AND targets, negative multiples ignored, stale (>135d) and recent IPO/merger names excluded, peers trimmed to 0.5x-2x of their median (>= 3 kept), BUY if multiple < (1-theta) x benchmark for BOTH multiples, key-metric gates (ND/EBITDA <= 3, FCF + margin stability, ROIC > WACC) on the target only, top 20 by average discount, equal weight 1/max(k,5), 10 bps one-way costs, universe = point-in-time S&P 900 (S&P 500 + MidCap 400) ex Financials/Real Estate, mcap >= $300M, price >= $5, peers drawn from the same universe. UNIVERSE CHANGED TO SP900 BEFORE ANY GRID RUN BECAUSE S&P 600 HISTORY STARTS 2018-09 (Wikipedia has no earlier S&P 600 membership; including it would add about 600 small caps exactly at the 2019 train/test boundary and confound the comparison). The first version of this registration (2026-10-19T02:09:35Z, same 54-cell grid) named the S&P 1500; only a train-window sanity run of the DEFAULT cell (stage counts, no return statistics) had been looked at before the change. Known biases and data constraints: survivorship of the index membership, GICS as per the membership snapshots (point-in-time names/codes, not restated), no analyst estimates; names without a GICS sub-industry code are dropped and counted; peer groups are thinner in a 900-name universe, so the industry fallback and the 'no signal' share are high and are reported per rebalance (diagnostics); the 135-day staleness gate removes names that have not yet filed their 10-K at February month-ends - all reported, none tuned.",
+    "forward_multiples": "not_backtestable_point_in_time; live cross-check only (yfinance forwardPE)",
+    "lfy_robustness": "basis='LFY' at the chosen cell only; extra trial, never used for selection",
+    "fixed_params": {
+      "universe": "SP900",
+      "top_n": 20,
+      "min_hold": 5,
+      "min_mcap": 300000000.0,
+      "min_price": 5.0,
+      "exclude_sectors": [
+        "Financials",
+        "Real Estate"
+      ],
+      "gates": [
+        "leverage",
+        "quality",
+        "roic"
+      ],
+      "size_lo": 0.5,
+      "size_hi": 2.0,
+      "k_min": 4,
+      "k_max": 5,
+      "trim_lo": 0.5,
+      "trim_hi": 2.0,
+      "k_trim_min": 3,
+      "stale_days": 135,
+      "km_params": null
+    },
+    "windows": {
+      "train_start": "2012-01-31",
+      "train_end": "2018-12-31",
+      "test_start": "2019-01-01",
+      "test_policy": "single look at the chosen cell"
+    },
+    "doc_defaults": {
+      "theta": 0.15,
+      "pe_cap": 40,
+      "ev_cap": 35,
+      "size_filter": true,
+      "basis": "TTM"
+    },
+    "cost_bps_one_way": 10,
+    "rebalance": "month-end signal, trade at next close, hold one month"
+  },
+  "history": [
+    {
+      "timestamp": "2026-10-19T02:09:35+00:00",
+      "content_hash": "64eaec5015d99446",
+      "n_cells": 54,
+      "grid_hash": "92b7a8819a9f6384",
+      "superseded_extra": {
+        "top_n": 20,
+        "min_hold": 5,
+        "min_mcap": 300000000.0,
+        "min_price": 5.0,
+        "exclude_sectors": [
+          "Financials",
+          "Real Estate"
+        ],
+        "gates": [
+          "leverage",
+          "quality",
+          "roic"
+        ],
+        "size_lo": 0.5,
+        "size_hi": 2.0,
+        "k_min": 4,
+        "k_max": 5,
+        "trim_lo": 0.5,
+        "trim_hi": 2.0,
+        "k_trim_min": 3,
+        "stale_days": 135,
+        "km_params": null
+      }
+    }
+  ]
+}

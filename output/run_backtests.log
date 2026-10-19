@@ -1,0 +1,514 @@
+22:42:31 INFO quant.run_backtests: quality_momentum: preregistration matches the module GRID
+22:42:32 INFO quant.run_backtests: context loaded in 0.6s: prices 2007-01-03 .. 2026-10-16, factors to 2026-08-31
+22:42:53 INFO quant.run_backtests: survivorship audit written in 21s
+22:42:53 INFO quant.run_backtests: === quality_momentum: 216 cells, preregistered 2026-10-19T01:55:58+00:00 ===
+22:42:55 INFO quant.run_backtests: [time] start_date: 1.4s
+22:42:55 INFO quant.run_backtests: quality_momentum: start (first signal month-end) 2011-01-31, end 2026-09-30
+22:43:16 INFO quant.run_backtests: [time] grid: 21.0s
+22:43:16 INFO quant.run_backtests: quality_momentum: grid months 2011-02-28 .. 2026-09-30 (188), errors=0
+22:43:17 INFO quant.run_backtests: quality_momentum: CHOSEN order=MF, shortlist=0.2, x_debt=1, N=10, quality=Q3a, technical=sma_rsi, stop_loss=none, vol_target=none | default order=MF, shortlist=0.2, x_debt=1, N=10, quality=Q3a, technical=sma_rsi, stop_loss=none, vol_target=none | fallback=True | train Sharpe 0.54 (default 0.54)
+22:43:17 INFO quant.run_backtests: [time] select_confirm: 1.1s
+22:43:41 INFO quant.run_backtests: [time] pbo_regression: 24.4s
+22:43:41 INFO quant.run_backtests: [time] grid_figures: 0.4s
+22:43:41 INFO quant.run_backtests: [time] final_backtests: 0.0s
+22:43:41 INFO quant.run_backtests: quality_momentum: consistency check, max |daily-engine monthly - grid column| = 0.00e+00
+22:43:42 INFO quant.run_backtests: [time] benchmarks: 0.5s
+22:43:42 INFO quant.run_backtests: [time] analysis: 0.0s
+22:43:42 INFO quant.run_backtests: quality_momentum: robustness 'cost 0 bps': CAGR 15.6% Sharpe 0.68 (0s)
+22:43:42 INFO quant.run_backtests: quality_momentum: robustness 'cost 25 bps': CAGR 11.4% Sharpe 0.52 (0s)
+22:43:42 INFO quant.run_backtests: quality_momentum: robustness 'cost 50 bps': CAGR 7.3% Sharpe 0.35 (0s)
+22:43:42 INFO quant.run_backtests: quality_momentum: robustness 'quality arm Q4-0.25 (blend)': CAGR 11.9% Sharpe 0.56 (0s)
+22:43:43 INFO quant.run_backtests: quality_momentum: robustness 'quality arm Q4-0.5 (blend)': CAGR 10.8% Sharpe 0.55 (0s)
+22:43:43 INFO quant.run_backtests: quality_momentum: robustness 'order QF (quality first)': CAGR 15.1% Sharpe 0.66 (0s)
+22:43:43 INFO quant.run_backtests: quality_momentum: robustness 'trend_exit_daily (sell below SMA200 daily)': CAGR 10.2% Sharpe 0.47 (0s)
+22:43:43 INFO quant.run_backtests: [time] robustness: 0.9s
+22:43:43 INFO quant.run_backtests: quality_momentum: LADDER 1/7 -> does not work
+22:43:45 INFO quant.run_backtests: [time] horizon: 1.9s
+22:43:47 INFO quant.run_backtests: [time] tearsheets: 1.8s
+22:43:47 INFO quant.run_backtests: quality_momentum live (chosen): 10 picks: PBF, ILMN, VLO, APA, NUE, ANF, SN, STLD, CHRD, VAL
+22:43:47 INFO quant.run_backtests: quality_momentum live (default): 10 picks: PBF, ILMN, VLO, APA, NUE, ANF, SN, STLD, CHRD, VAL
+22:43:47 INFO quant.run_backtests: [time] live: 0.1s
+22:43:47 INFO quant.run_backtests: quality_momentum: DONE in 54s; CHOSEN order=MF, shortlist=0.2, x_debt=1, N=10, quality=Q3a, technical=sma_rsi, stop_loss=none, vol_target=none; test Sharpe 0.69 vs SPY 0.89
+22:43:47 INFO quant.run_backtests: finished in 75s; failures: none
+22:45:12 INFO quant.run_backtests: magic_formula: preregistration matches the module GRID
+22:45:13 INFO quant.run_backtests: context loaded in 0.7s: prices 2007-01-03 .. 2026-10-16, factors to 2026-08-31
+22:45:36 INFO quant.run_backtests: survivorship audit written in 24s
+22:45:36 INFO quant.run_backtests: === magic_formula: 18 cells, preregistered 2026-10-19T02:28:52+00:00 ===
+22:45:44 INFO quant.run_backtests: [time] start_date: 7.6s
+22:45:44 INFO quant.run_backtests: magic_formula: start (first signal month-end) 2011-09-30, end 2026-09-30
+22:46:11 INFO quant.run_backtests: [time] grid: 27.0s
+22:46:11 INFO quant.run_backtests: magic_formula: grid months 2011-10-31 .. 2026-09-30 (180), errors=0
+22:46:11 INFO quant.run_backtests: magic_formula: CHOSEN ranking=MF, n=20, min_cap=5e+09, holding=staggered, universe=SP900, cost_bps=10, excess_cash=min_ca_cl, ebit=opinc | default ranking=MF, n=30, min_cap=1e+09, holding=staggered, universe=SP900, cost_bps=10, excess_cash=min_ca_cl, ebit=opinc | fallback=False | train Sharpe 1.12 (default 1.00)
+22:46:11 INFO quant.run_backtests: [time] select_confirm: 0.1s
+22:46:13 INFO quant.run_backtests: [time] pbo_regression: 2.1s
+22:46:14 INFO quant.run_backtests: [time] grid_figures: 0.8s
+22:46:15 INFO quant.run_backtests: [time] final_backtests: 1.6s
+22:46:15 INFO quant.run_backtests: magic_formula: consistency check, max |daily-engine monthly - grid column| = 0.00e+00
+22:46:16 INFO quant.run_backtests: [time] benchmarks: 0.5s
+22:46:16 INFO quant.run_backtests: [time] analysis: 0.0s
+22:46:17 INFO quant.run_backtests: magic_formula: robustness 'cost 0 bps': CAGR 15.0% Sharpe 0.81 (1s)
+22:46:18 INFO quant.run_backtests: magic_formula: robustness 'ablation ey_only': CAGR 11.1% Sharpe 0.51 (1s)
+22:46:18 INFO quant.run_backtests: magic_formula: robustness 'ablation roc_only': CAGR 14.3% Sharpe 0.78 (1s)
+22:46:19 INFO quant.run_backtests: magic_formula: robustness 'ablation gpa_quality': CAGR 13.0% Sharpe 0.66 (1s)
+22:46:19 WARNING quant.strategies.magic_formula: universe US_ALL: SURVIVORSHIP-BIASED: today's listed US companies only (dead/acquired names are missing)
+22:46:36 INFO quant.run_backtests: magic_formula: robustness 'ablation us_all_universe': CAGR 13.1% Sharpe 0.72 (16s)
+22:46:36 WARNING quant.strategies.magic_formula: universe SP1500: point-in-time S&P 500 + 400 + 600 members (600 only from 2018-09)
+22:46:47 INFO quant.run_backtests: magic_formula: robustness 'ablation sp1500_universe': CAGR 14.9% Sharpe 0.81 (11s)
+22:46:52 INFO quant.run_backtests: magic_formula: robustness 'ablation all_cash': CAGR 14.5% Sharpe 0.79 (5s)
+22:46:56 INFO quant.run_backtests: magic_formula: robustness 'ablation ebit_pretax_interest': CAGR 15.5% Sharpe 0.85 (5s)
+22:46:57 INFO quant.run_backtests: magic_formula: robustness 'ablation cost_25bps': CAGR 14.6% Sharpe 0.79 (1s)
+22:46:58 INFO quant.run_backtests: magic_formula: robustness 'ablation cost_50bps': CAGR 14.3% Sharpe 0.77 (1s)
+22:46:58 INFO quant.run_backtests: [time] robustness: 42.4s
+22:46:58 INFO quant.run_backtests: magic_formula: LADDER 4/7 -> mixed
+22:47:02 INFO quant.run_backtests: [time] horizon: 3.8s
+22:47:05 INFO quant.run_backtests: [time] tearsheets: 3.2s
+22:47:06 INFO quant.run_backtests: magic_formula live (chosen): 20 picks: GEN, HRB, ADBE, CROX, CI, GDDY, ACN, MO, HON, MU, IT, INCY, TPR, BMY, SAIC, BAH, G, SOLV, SNDK, CTSH
+22:47:06 INFO quant.run_backtests: magic_formula live (default): 30 picks: GEN, HRB, ADBE, KBR, CROX, CI, GDDY, ACN, MO, HON, MU, VNT, INCY, BMY, TPR, IT, SAIC, G, BAH, SOLV, BBWI, CTSH, HPQ, SNDK, ANF, LDOS, PNR, TTEK, BKNG, THC
+22:47:06 INFO quant.run_backtests: [time] live: 0.2s
+22:47:06 INFO quant.run_backtests: magic_formula: DONE in 89s; CHOSEN ranking=MF, n=20, min_cap=5e+09, holding=staggered, universe=SP900, cost_bps=10, excess_cash=min_ca_cl, ebit=opinc; test Sharpe 0.60 vs SPY 0.89
+22:47:06 INFO quant.run_backtests: finished in 114s; failures: none
+22:47:13 INFO quant.run_backtests: trading_comps: preregistration matches the module GRID
+22:47:14 INFO quant.run_backtests: context loaded in 0.9s: prices 2007-01-03 .. 2026-10-16, factors to 2026-08-31
+22:47:36 INFO quant.run_backtests: survivorship audit written in 23s
+22:47:36 INFO quant.run_backtests: === trading_comps: 54 cells, preregistered 2026-10-19T02:29:30+00:00 ===
+22:47:36 INFO quant.run_backtests: [time] start_date: 0.0s
+22:47:36 INFO quant.run_backtests: trading_comps: start (first signal month-end) 2012-01-01, end 2026-09-30
+22:49:19 INFO quant.run_backtests: [time] grid: 102.3s
+22:49:19 INFO quant.run_backtests: trading_comps: grid months 2012-02-29 .. 2026-09-30 (176), errors=0
+22:49:19 INFO quant.run_backtests: trading_comps: CHOSEN theta=0.15, pe_cap=40, ev_cap=35, size_filter=True, basis=TTM | default theta=0.15, pe_cap=40, ev_cap=35, size_filter=True, basis=TTM | fallback=True | train Sharpe 0.34 (default 0.34)
+22:49:19 INFO quant.run_backtests: [time] select_confirm: 0.3s
+22:49:25 INFO quant.run_backtests: [time] pbo_regression: 6.2s
+22:49:27 INFO quant.run_backtests: [time] grid_figures: 1.9s
+22:49:28 INFO quant.run_backtests: [time] final_backtests: 1.3s
+22:49:28 INFO quant.run_backtests: trading_comps: consistency check, max |daily-engine monthly - grid column| = 0.00e+00
+22:49:29 INFO quant.run_backtests: [time] benchmarks: 0.5s
+22:49:29 INFO quant.run_backtests: [time] analysis: 0.0s
+22:49:30 INFO quant.run_backtests: trading_comps: robustness 'cost 0 bps': CAGR 8.2% Sharpe 0.41 (1s)
+22:49:31 INFO quant.run_backtests: trading_comps: robustness 'cost 25 bps': CAGR 6.2% Sharpe 0.32 (1s)
+22:49:32 INFO quant.run_backtests: trading_comps: robustness 'cost 50 bps': CAGR 4.3% Sharpe 0.23 (1s)
+22:49:39 INFO quant.run_backtests: trading_comps: robustness 'basis LFY (last fiscal year)': CAGR 7.8% Sharpe 0.39 (6s)
+22:49:39 INFO quant.run_backtests: [time] robustness: 9.9s
+22:49:39 INFO quant.run_backtests: trading_comps: LADDER 1/7 -> does not work
+22:49:41 INFO quant.run_backtests: [time] horizon: 1.8s
+22:49:42 INFO quant.run_backtests: [time] tearsheets: 1.6s
+22:49:43 INFO quant.run_backtests: trading_comps live (chosen): 18 picks: UHS, THC, G, GAP, HRB, MMS, BAH, SNA, MLI, GEN, DBX, CDW, GEHC, BSX, LVS, PTC, PNR, EHC
+22:49:43 INFO quant.run_backtests: trading_comps live (default): 18 picks: UHS, THC, G, GAP, HRB, MMS, BAH, SNA, MLI, GEN, DBX, CDW, GEHC, BSX, LVS, PTC, PNR, EHC
+22:49:43 INFO quant.run_backtests: [time] live: 0.2s
+22:49:43 INFO quant.run_backtests: trading_comps: DONE in 126s; CHOSEN theta=0.15, pe_cap=40, ev_cap=35, size_filter=True, basis=TTM; test Sharpe 0.40 vs SPY 0.89
+22:49:43 INFO quant.run_backtests: finished in 150s; failures: none
+22:50:13 INFO quant.run_backtests: context loaded in 0.6s: prices 2007-01-03 .. 2026-10-16, factors to 2026-08-31
+22:50:34 INFO quant.run_backtests: survivorship audit written in 21s
+22:50:38 INFO quant.run_backtests: blend: test Sharpe 0.71 CAGR 15.6% | full Sharpe 0.72 | FF5+MOM alpha (full) -0.015592304390284186
+22:50:38 INFO quant.run_backtests: finished in 25s; failures: none
+22:51:23 INFO quant.run_backtests: quality_momentum: preregistration matches the module GRID
+22:51:23 INFO quant.run_backtests: magic_formula: preregistration matches the module GRID
+22:51:23 INFO quant.run_backtests: trading_comps: preregistration matches the module GRID
+22:51:23 INFO quant.run_backtests: context loaded in 0.6s: prices 2007-01-03 .. 2026-10-16, factors to 2026-08-31
+22:51:45 INFO quant.run_backtests: survivorship audit written in 22s
+22:51:45 INFO quant.run_backtests: === quality_momentum: 216 cells, preregistered 2026-10-19T01:55:58+00:00 ===
+22:51:47 INFO quant.run_backtests: [time] start_date: 1.3s
+22:51:47 INFO quant.run_backtests: quality_momentum: start (first signal month-end) 2011-01-31, end 2026-09-30
+22:52:05 INFO quant.run_backtests: [time] grid: 18.7s
+22:52:05 INFO quant.run_backtests: quality_momentum: grid months 2011-02-28 .. 2026-09-30 (188), errors=0
+22:52:06 INFO quant.run_backtests: quality_momentum: CHOSEN order=MF, shortlist=0.2, x_debt=1, N=10, quality=Q3a, technical=sma_rsi, stop_loss=none, vol_target=none | default order=MF, shortlist=0.2, x_debt=1, N=10, quality=Q3a, technical=sma_rsi, stop_loss=none, vol_target=none | fallback=True | train Sharpe 0.54 (default 0.54)
+22:52:06 INFO quant.run_backtests: [time] select_confirm: 1.0s
+22:52:31 INFO quant.run_backtests: [time] pbo_regression: 24.3s
+22:52:34 INFO quant.run_backtests: [time] grid_figures: 3.1s
+22:52:34 INFO quant.run_backtests: [time] final_backtests: 0.0s
+22:52:34 INFO quant.run_backtests: quality_momentum: consistency check, max |daily-engine monthly - grid column| = 0.00e+00
+22:52:34 INFO quant.run_backtests: [time] benchmarks: 0.5s
+22:52:34 INFO quant.run_backtests: [time] analysis: 0.0s
+22:52:34 INFO quant.run_backtests: quality_momentum: robustness 'cost 0 bps': CAGR 15.6% Sharpe 0.68 (0s)
+22:52:34 INFO quant.run_backtests: quality_momentum: robustness 'cost 25 bps': CAGR 11.4% Sharpe 0.52 (0s)
+22:52:34 INFO quant.run_backtests: quality_momentum: robustness 'cost 50 bps': CAGR 7.3% Sharpe 0.35 (0s)
+22:52:35 INFO quant.run_backtests: quality_momentum: robustness 'quality arm Q4-0.25 (blend)': CAGR 11.9% Sharpe 0.56 (0s)
+22:52:35 INFO quant.run_backtests: quality_momentum: robustness 'quality arm Q4-0.5 (blend)': CAGR 10.8% Sharpe 0.55 (0s)
+22:52:35 INFO quant.run_backtests: quality_momentum: robustness 'order QF (quality first)': CAGR 15.1% Sharpe 0.66 (0s)
+22:52:35 INFO quant.run_backtests: quality_momentum: robustness 'trend_exit_daily (sell below SMA200 daily)': CAGR 10.2% Sharpe 0.47 (0s)
+22:52:35 INFO quant.run_backtests: [time] robustness: 0.8s
+22:52:35 INFO quant.run_backtests: quality_momentum: LADDER 1/7 -> does not work
+22:52:37 INFO quant.run_backtests: [time] horizon: 1.9s
+22:52:39 INFO quant.run_backtests: [time] tearsheets: 1.6s
+22:52:39 INFO quant.run_backtests: quality_momentum live (chosen): 10 picks: PBF, ILMN, VLO, APA, NUE, ANF, SN, STLD, CHRD, VAL
+22:52:39 INFO quant.run_backtests: quality_momentum live (default): 10 picks: PBF, ILMN, VLO, APA, NUE, ANF, SN, STLD, CHRD, VAL
+22:52:39 INFO quant.run_backtests: [time] live: 0.1s
+22:52:39 INFO quant.run_backtests: quality_momentum: DONE in 53s; CHOSEN order=MF, shortlist=0.2, x_debt=1, N=10, quality=Q3a, technical=sma_rsi, stop_loss=none, vol_target=none; test Sharpe 0.69 vs SPY 0.89
+22:52:39 INFO quant.run_backtests: === magic_formula: 18 cells, preregistered 2026-10-19T02:28:52+00:00 ===
+22:52:47 INFO quant.run_backtests: [time] start_date: 8.1s
+22:52:47 INFO quant.run_backtests: magic_formula: start (first signal month-end) 2011-09-30, end 2026-09-30
+22:53:10 INFO quant.run_backtests: [time] grid: 23.6s
+22:53:10 INFO quant.run_backtests: magic_formula: grid months 2011-10-31 .. 2026-09-30 (180), errors=0
+22:53:10 INFO quant.run_backtests: magic_formula: CHOSEN ranking=MF, n=20, min_cap=5e+09, holding=staggered, universe=SP900, cost_bps=10, excess_cash=min_ca_cl, ebit=opinc | default ranking=MF, n=30, min_cap=1e+09, holding=staggered, universe=SP900, cost_bps=10, excess_cash=min_ca_cl, ebit=opinc | fallback=False | train Sharpe 1.12 (default 1.00)
+22:53:10 INFO quant.run_backtests: [time] select_confirm: 0.1s
+22:53:13 INFO quant.run_backtests: [time] pbo_regression: 2.2s
+22:53:13 INFO quant.run_backtests: [time] grid_figures: 0.7s
+22:53:15 INFO quant.run_backtests: [time] final_backtests: 1.6s
+22:53:15 INFO quant.run_backtests: magic_formula: consistency check, max |daily-engine monthly - grid column| = 0.00e+00
+22:53:15 INFO quant.run_backtests: [time] benchmarks: 0.5s
+22:53:15 INFO quant.run_backtests: [time] analysis: 0.0s
+22:53:16 INFO quant.run_backtests: magic_formula: robustness 'cost 0 bps': CAGR 15.0% Sharpe 0.81 (1s)
+22:53:17 INFO quant.run_backtests: magic_formula: robustness 'ablation ey_only': CAGR 11.1% Sharpe 0.51 (1s)
+22:53:18 INFO quant.run_backtests: magic_formula: robustness 'ablation roc_only': CAGR 14.3% Sharpe 0.78 (1s)
+22:53:19 INFO quant.run_backtests: magic_formula: robustness 'ablation gpa_quality': CAGR 13.0% Sharpe 0.66 (1s)
+22:53:19 WARNING quant.strategies.magic_formula: universe US_ALL: SURVIVORSHIP-BIASED: today's listed US companies only (dead/acquired names are missing)
+22:53:35 INFO quant.run_backtests: magic_formula: robustness 'ablation us_all_universe': CAGR 13.1% Sharpe 0.72 (16s)
+22:53:35 WARNING quant.strategies.magic_formula: universe SP1500: point-in-time S&P 500 + 400 + 600 members (600 only from 2018-09)
+22:53:46 INFO quant.run_backtests: magic_formula: robustness 'ablation sp1500_universe': CAGR 14.9% Sharpe 0.81 (11s)
+22:53:51 INFO quant.run_backtests: magic_formula: robustness 'ablation all_cash': CAGR 14.5% Sharpe 0.79 (5s)
+22:53:56 INFO quant.run_backtests: magic_formula: robustness 'ablation ebit_pretax_interest': CAGR 15.5% Sharpe 0.85 (5s)
+22:53:56 INFO quant.run_backtests: magic_formula: robustness 'ablation cost_25bps': CAGR 14.6% Sharpe 0.79 (1s)
+22:53:57 INFO quant.run_backtests: magic_formula: robustness 'ablation cost_50bps': CAGR 14.3% Sharpe 0.77 (1s)
+22:53:57 INFO quant.run_backtests: [time] robustness: 41.7s
+22:53:57 INFO quant.run_backtests: magic_formula: LADDER 4/7 -> mixed
+22:54:01 INFO quant.run_backtests: [time] horizon: 3.6s
+22:54:04 INFO quant.run_backtests: [time] tearsheets: 3.1s
+22:54:04 INFO quant.run_backtests: magic_formula live (chosen): 20 picks: GEN, HRB, ADBE, CROX, CI, GDDY, ACN, MO, HON, MU, IT, INCY, TPR, BMY, SAIC, BAH, G, SOLV, SNDK, CTSH
+22:54:04 INFO quant.run_backtests: magic_formula live (default): 30 picks: GEN, HRB, ADBE, KBR, CROX, CI, GDDY, ACN, MO, HON, MU, VNT, INCY, BMY, TPR, IT, SAIC, G, BAH, SOLV, BBWI, CTSH, HPQ, SNDK, ANF, LDOS, PNR, TTEK, BKNG, THC
+22:54:04 INFO quant.run_backtests: [time] live: 0.1s
+22:54:04 INFO quant.run_backtests: magic_formula: DONE in 85s; CHOSEN ranking=MF, n=20, min_cap=5e+09, holding=staggered, universe=SP900, cost_bps=10, excess_cash=min_ca_cl, ebit=opinc; test Sharpe 0.60 vs SPY 0.89
+22:54:04 INFO quant.run_backtests: === trading_comps: 54 cells, preregistered 2026-10-19T02:29:30+00:00 ===
+22:54:04 INFO quant.run_backtests: [time] start_date: 0.0s
+22:54:04 INFO quant.run_backtests: trading_comps: start (first signal month-end) 2012-01-01, end 2026-09-30
+22:55:31 INFO quant.run_backtests: [time] grid: 87.0s
+22:55:31 INFO quant.run_backtests: trading_comps: grid months 2012-02-29 .. 2026-09-30 (176), errors=0
+22:55:31 INFO quant.run_backtests: trading_comps: CHOSEN theta=0.15, pe_cap=40, ev_cap=35, size_filter=True, basis=TTM | default theta=0.15, pe_cap=40, ev_cap=35, size_filter=True, basis=TTM | fallback=True | train Sharpe 0.34 (default 0.34)
+22:55:31 INFO quant.run_backtests: [time] select_confirm: 0.3s
+22:55:38 INFO quant.run_backtests: [time] pbo_regression: 6.3s
+22:55:40 INFO quant.run_backtests: [time] grid_figures: 1.8s
+22:55:41 INFO quant.run_backtests: [time] final_backtests: 1.4s
+22:55:41 INFO quant.run_backtests: trading_comps: consistency check, max |daily-engine monthly - grid column| = 0.00e+00
+22:55:41 INFO quant.run_backtests: [time] benchmarks: 0.5s
+22:55:41 INFO quant.run_backtests: [time] analysis: 0.0s
+22:55:43 INFO quant.run_backtests: trading_comps: robustness 'cost 0 bps': CAGR 8.2% Sharpe 0.41 (1s)
+22:55:44 INFO quant.run_backtests: trading_comps: robustness 'cost 25 bps': CAGR 6.2% Sharpe 0.32 (1s)
+22:55:45 INFO quant.run_backtests: trading_comps: robustness 'cost 50 bps': CAGR 4.3% Sharpe 0.23 (1s)
+22:55:52 INFO quant.run_backtests: trading_comps: robustness 'basis LFY (last fiscal year)': CAGR 7.8% Sharpe 0.39 (7s)
+22:55:52 INFO quant.run_backtests: [time] robustness: 10.2s
+22:55:52 INFO quant.run_backtests: trading_comps: LADDER 1/7 -> does not work
+22:55:53 INFO quant.run_backtests: [time] horizon: 1.9s
+22:55:55 INFO quant.run_backtests: [time] tearsheets: 1.7s
+22:56:23 INFO quant.run_backtests: forward P/E fetched for 155 tickers in 28s
+22:56:23 INFO quant.run_backtests: trading_comps live (chosen): 18 picks: UHS, THC, G, GAP, HRB, MMS, BAH, SNA, MLI, GEN, DBX, CDW, GEHC, BSX, LVS, PTC, PNR, EHC
+22:56:23 INFO quant.run_backtests: trading_comps live (default): 18 picks: UHS, THC, G, GAP, HRB, MMS, BAH, SNA, MLI, GEN, DBX, CDW, GEHC, BSX, LVS, PTC, PNR, EHC
+22:56:23 INFO quant.run_backtests: [time] live: 27.9s
+22:56:23 INFO quant.run_backtests: trading_comps: DONE in 139s; CHOSEN theta=0.15, pe_cap=40, ev_cap=35, size_filter=True, basis=TTM; test Sharpe 0.40 vs SPY 0.89
+22:56:27 INFO quant.run_backtests: blend: test Sharpe 0.71 CAGR 15.6% | full Sharpe 0.72 | FF5+MOM alpha (full) -0.015592304390284186
+22:56:27 INFO quant.run_backtests: finished in 304s; failures: none
+22:57:55 INFO quant.run_backtests: quality_momentum: preregistration matches the module GRID
+22:57:56 INFO quant.run_backtests: context loaded in 0.8s: prices 2007-01-03 .. 2026-10-16, factors to 2026-08-31
+22:58:17 INFO quant.run_backtests: survivorship audit written in 21s
+22:58:17 INFO quant.run_backtests: === quality_momentum: 216 cells, preregistered 2026-10-19T02:57:36+00:00 ===
+22:58:19 INFO quant.run_backtests: [time] start_date: 1.3s
+22:58:19 INFO quant.run_backtests: quality_momentum: start (first signal month-end) 2011-01-31, end 2026-09-30
+22:58:37 INFO quant.run_backtests: [time] grid: 18.6s
+22:58:37 INFO quant.run_backtests: quality_momentum: grid months 2011-02-28 .. 2026-09-30 (188), errors=0
+22:58:38 INFO quant.run_backtests: quality_momentum: CHOSEN order=MF, shortlist=0.2, x_debt=1, N=10, quality=Q3a, technical=sma_rsi, stop_loss=none, vol_target=none | default order=MF, shortlist=0.2, x_debt=1, N=10, quality=Q3a, technical=sma_rsi, stop_loss=none, vol_target=none | fallback=True | train Sharpe 0.54 (default 0.54)
+22:58:38 INFO quant.run_backtests: [time] select_confirm: 1.0s
+22:59:03 INFO quant.run_backtests: [time] pbo_regression: 24.2s
+22:59:06 INFO quant.run_backtests: [time] grid_figures: 3.2s
+22:59:06 INFO quant.run_backtests: [time] final_backtests: 0.0s
+22:59:06 INFO quant.run_backtests: quality_momentum: consistency check, max |daily-engine monthly - grid column| = 0.00e+00
+22:59:06 INFO quant.run_backtests: [time] benchmarks: 0.5s
+22:59:06 INFO quant.run_backtests: [time] analysis: 0.0s
+22:59:06 INFO quant.run_backtests: quality_momentum: robustness 'cost 0 bps': CAGR 15.6% Sharpe 0.68 (0s)
+22:59:06 INFO quant.run_backtests: quality_momentum: robustness 'cost 25 bps': CAGR 11.4% Sharpe 0.52 (0s)
+22:59:06 INFO quant.run_backtests: quality_momentum: robustness 'cost 50 bps': CAGR 7.3% Sharpe 0.35 (0s)
+22:59:07 INFO quant.run_backtests: quality_momentum: robustness 'quality arm Q4-0.25 (blend)': CAGR 11.9% Sharpe 0.56 (0s)
+22:59:07 INFO quant.run_backtests: quality_momentum: robustness 'quality arm Q4-0.5 (blend)': CAGR 10.8% Sharpe 0.55 (0s)
+22:59:07 INFO quant.run_backtests: quality_momentum: robustness 'order QF (quality first)': CAGR 15.1% Sharpe 0.66 (0s)
+22:59:07 INFO quant.run_backtests: quality_momentum: robustness 'trend_exit_daily (sell below SMA200 daily)': CAGR 10.2% Sharpe 0.47 (0s)
+22:59:07 INFO quant.run_backtests: [time] robustness: 0.8s
+22:59:07 INFO quant.run_backtests: quality_momentum: LADDER 1/7 -> does not work
+22:59:09 INFO quant.run_backtests: [time] horizon: 1.9s
+22:59:11 INFO quant.run_backtests: [time] tearsheets: 1.6s
+22:59:11 INFO quant.run_backtests: quality_momentum: DONE in 53s; CHOSEN order=MF, shortlist=0.2, x_debt=1, N=10, quality=Q3a, technical=sma_rsi, stop_loss=none, vol_target=none; test Sharpe 0.69 vs SPY 0.89
+22:59:11 INFO quant.run_backtests: finished in 75s; failures: none
+22:59:18 INFO quant.run_backtests: quality_momentum: preregistration matches the module GRID
+22:59:18 INFO quant.run_backtests: magic_formula: preregistration matches the module GRID
+22:59:18 INFO quant.run_backtests: trading_comps: preregistration matches the module GRID
+22:59:19 INFO quant.run_backtests: context loaded in 0.8s: prices 2007-01-03 .. 2026-10-16, factors to 2026-08-31
+22:59:40 INFO quant.run_backtests: survivorship audit written in 21s
+22:59:40 INFO quant.run_backtests: === quality_momentum: 216 cells, preregistered 2026-10-19T02:57:36+00:00 ===
+22:59:42 INFO quant.run_backtests: [time] start_date: 1.3s
+22:59:42 INFO quant.run_backtests: quality_momentum: start (first signal month-end) 2011-01-31, end 2026-09-30
+23:00:00 INFO quant.run_backtests: [time] grid: 18.7s
+23:00:00 INFO quant.run_backtests: quality_momentum: grid months 2011-02-28 .. 2026-09-30 (188), errors=0
+23:00:01 INFO quant.run_backtests: quality_momentum: CHOSEN order=MF, shortlist=0.2, x_debt=1, N=10, quality=Q3a, technical=sma_rsi, stop_loss=none, vol_target=none | default order=MF, shortlist=0.2, x_debt=1, N=10, quality=Q3a, technical=sma_rsi, stop_loss=none, vol_target=none | fallback=True | train Sharpe 0.54 (default 0.54)
+23:00:01 INFO quant.run_backtests: [time] select_confirm: 1.0s
+23:00:26 INFO quant.run_backtests: [time] pbo_regression: 24.8s
+23:00:29 INFO quant.run_backtests: [time] grid_figures: 3.1s
+23:00:29 INFO quant.run_backtests: [time] final_backtests: 0.0s
+23:00:29 INFO quant.run_backtests: quality_momentum: consistency check, max |daily-engine monthly - grid column| = 0.00e+00
+23:00:30 INFO quant.run_backtests: [time] benchmarks: 0.5s
+23:00:30 INFO quant.run_backtests: [time] analysis: 0.0s
+23:00:30 INFO quant.run_backtests: quality_momentum: robustness 'cost 0 bps': CAGR 15.6% Sharpe 0.68 (0s)
+23:00:30 INFO quant.run_backtests: quality_momentum: robustness 'cost 25 bps': CAGR 11.4% Sharpe 0.52 (0s)
+23:00:30 INFO quant.run_backtests: quality_momentum: robustness 'cost 50 bps': CAGR 7.3% Sharpe 0.35 (0s)
+23:00:30 INFO quant.run_backtests: quality_momentum: robustness 'quality arm Q4-0.25 (blend)': CAGR 11.9% Sharpe 0.56 (0s)
+23:00:30 INFO quant.run_backtests: quality_momentum: robustness 'quality arm Q4-0.5 (blend)': CAGR 10.8% Sharpe 0.55 (0s)
+23:00:31 INFO quant.run_backtests: quality_momentum: robustness 'order QF (quality first)': CAGR 15.1% Sharpe 0.66 (0s)
+23:00:31 INFO quant.run_backtests: quality_momentum: robustness 'trend_exit_daily (sell below SMA200 daily)': CAGR 10.2% Sharpe 0.47 (0s)
+23:00:31 INFO quant.run_backtests: [time] robustness: 0.8s
+23:00:31 INFO quant.run_backtests: quality_momentum: LADDER 1/7 -> does not work
+23:00:32 INFO quant.run_backtests: [time] horizon: 1.9s
+23:00:34 INFO quant.run_backtests: [time] tearsheets: 1.7s
+23:00:34 INFO quant.run_backtests: quality_momentum live (chosen): 10 picks: PBF, ILMN, VLO, APA, NUE, ANF, SN, STLD, CHRD, VAL
+23:00:34 INFO quant.run_backtests: quality_momentum live (default): 10 picks: PBF, ILMN, VLO, APA, NUE, ANF, SN, STLD, CHRD, VAL
+23:00:34 INFO quant.run_backtests: [time] live: 0.1s
+23:00:34 INFO quant.run_backtests: quality_momentum: DONE in 54s; CHOSEN order=MF, shortlist=0.2, x_debt=1, N=10, quality=Q3a, technical=sma_rsi, stop_loss=none, vol_target=none; test Sharpe 0.69 vs SPY 0.89
+23:00:34 INFO quant.run_backtests: === magic_formula: 18 cells, preregistered 2026-10-19T02:57:36+00:00 ===
+23:00:44 INFO quant.run_backtests: [time] start_date: 10.0s
+23:00:44 INFO quant.run_backtests: magic_formula: start (first signal month-end) 2011-09-30, end 2026-09-30
+23:01:06 INFO quant.run_backtests: [time] grid: 22.0s
+23:01:06 INFO quant.run_backtests: magic_formula: grid months 2011-10-31 .. 2026-09-30 (180), errors=0
+23:01:06 INFO quant.run_backtests: magic_formula: CHOSEN ranking=MF, n=25, min_cap=5e+09, holding=staggered, universe=SP900, cost_bps=10, excess_cash=min_ca_cl, ebit=opinc | default ranking=MF, n=30, min_cap=1e+09, holding=staggered, universe=SP900, cost_bps=10, excess_cash=min_ca_cl, ebit=opinc | fallback=False | train Sharpe 1.13 (default 1.01)
+23:01:06 INFO quant.run_backtests: [time] select_confirm: 0.1s
+23:01:08 INFO quant.run_backtests: [time] pbo_regression: 2.1s
+23:01:09 INFO quant.run_backtests: [time] grid_figures: 0.7s
+23:01:11 INFO quant.run_backtests: [time] final_backtests: 1.6s
+23:01:11 INFO quant.run_backtests: magic_formula: consistency check, max |daily-engine monthly - grid column| = 0.00e+00
+23:01:11 INFO quant.run_backtests: [time] benchmarks: 0.4s
+23:01:11 INFO quant.run_backtests: [time] analysis: 0.0s
+23:01:12 INFO quant.run_backtests: magic_formula: robustness 'cost 0 bps': CAGR 15.1% Sharpe 0.82 (1s)
+23:01:13 INFO quant.run_backtests: magic_formula: robustness 'ablation ey_only': CAGR 11.4% Sharpe 0.53 (1s)
+23:01:14 INFO quant.run_backtests: magic_formula: robustness 'ablation roc_only': CAGR 14.5% Sharpe 0.82 (1s)
+23:01:15 INFO quant.run_backtests: magic_formula: robustness 'ablation gpa_quality': CAGR 14.0% Sharpe 0.72 (1s)
+23:01:15 WARNING quant.strategies.magic_formula: universe US_ALL: SURVIVORSHIP-BIASED: today's listed US companies only (dead/acquired names are missing)
+23:01:54 INFO quant.run_backtests: magic_formula: robustness 'ablation us_all_universe': CAGR 13.3% Sharpe 0.73 (39s)
+23:01:54 WARNING quant.strategies.magic_formula: universe SP1500: point-in-time S&P 500 + 400 + 600 members (600 only from 2018-09)
+23:02:08 INFO quant.run_backtests: magic_formula: robustness 'ablation sp1500_universe': CAGR 14.8% Sharpe 0.81 (14s)
+23:02:15 INFO quant.run_backtests: magic_formula: robustness 'ablation all_cash': CAGR 14.7% Sharpe 0.81 (7s)
+23:02:22 INFO quant.run_backtests: magic_formula: robustness 'ablation ebit_pretax_interest': CAGR 15.4% Sharpe 0.85 (7s)
+23:02:22 INFO quant.run_backtests: magic_formula: robustness 'ablation cost_25bps': CAGR 14.7% Sharpe 0.80 (1s)
+23:02:23 INFO quant.run_backtests: magic_formula: robustness 'ablation cost_50bps': CAGR 14.4% Sharpe 0.78 (1s)
+23:02:23 INFO quant.run_backtests: [time] robustness: 71.9s
+23:02:23 INFO quant.run_backtests: magic_formula: LADDER 4/7 -> mixed
+23:02:27 INFO quant.run_backtests: [time] horizon: 3.8s
+23:02:30 INFO quant.run_backtests: [time] tearsheets: 3.1s
+23:02:30 INFO quant.run_backtests: magic_formula live (chosen): 25 picks: GEN, HRB, ADBE, CROX, CI, GDDY, ACN, MO, HON, MU, IT, INCY, TPR, BMY, SAIC, BAH, G, SOLV, SNDK, CTSH, TTEK, HPQ, BKNG, ANF, LDOS
+23:02:30 INFO quant.run_backtests: magic_formula live (default): 30 picks: GEN, HRB, ADBE, KBR, CROX, CI, GDDY, ACN, MO, HON, MU, VNT, INCY, BMY, TPR, IT, SAIC, G, BAH, SOLV, BBWI, CTSH, SNDK, HPQ, ANF, LDOS, TTEK, PNR, BKNG, THC
+23:02:30 INFO quant.run_backtests: [time] live: 0.1s
+23:02:30 INFO quant.run_backtests: magic_formula: DONE in 116s; CHOSEN ranking=MF, n=25, min_cap=5e+09, holding=staggered, universe=SP900, cost_bps=10, excess_cash=min_ca_cl, ebit=opinc; test Sharpe 0.61 vs SPY 0.89
+23:02:30 INFO quant.run_backtests: === trading_comps: 54 cells, preregistered 2026-10-19T02:29:30+00:00 ===
+23:02:30 INFO quant.run_backtests: [time] start_date: 0.0s
+23:02:30 INFO quant.run_backtests: trading_comps: start (first signal month-end) 2012-01-01, end 2026-09-30
+23:03:56 INFO quant.run_backtests: [time] grid: 85.9s
+23:03:56 INFO quant.run_backtests: trading_comps: grid months 2012-02-29 .. 2026-09-30 (176), errors=0
+23:03:56 INFO quant.run_backtests: trading_comps: CHOSEN theta=0.1, pe_cap=40, ev_cap=35, size_filter=False, basis=TTM | default theta=0.15, pe_cap=40, ev_cap=35, size_filter=True, basis=TTM | fallback=False | train Sharpe 0.53 (default 0.16)
+23:03:56 INFO quant.run_backtests: [time] select_confirm: 0.3s
+23:04:03 INFO quant.run_backtests: [time] pbo_regression: 6.2s
+23:04:05 INFO quant.run_backtests: [time] grid_figures: 2.1s
+23:04:07 INFO quant.run_backtests: [time] final_backtests: 2.4s
+23:04:07 INFO quant.run_backtests: trading_comps: consistency check, max |daily-engine monthly - grid column| = 0.00e+00
+23:04:08 INFO quant.run_backtests: [time] benchmarks: 0.6s
+23:04:08 INFO quant.run_backtests: [time] analysis: 0.0s
+23:04:09 INFO quant.run_backtests: trading_comps: robustness 'cost 0 bps': CAGR 11.5% Sharpe 0.55 (1s)
+23:04:10 INFO quant.run_backtests: trading_comps: robustness 'cost 25 bps': CAGR 9.6% Sharpe 0.47 (1s)
+23:04:11 INFO quant.run_backtests: trading_comps: robustness 'cost 50 bps': CAGR 7.8% Sharpe 0.39 (1s)
+23:04:19 INFO quant.run_backtests: trading_comps: robustness 'basis LFY (last fiscal year)': CAGR 12.5% Sharpe 0.60 (8s)
+23:04:19 INFO quant.run_backtests: [time] robustness: 11.5s
+23:04:19 INFO quant.run_backtests: trading_comps: LADDER 3/7 -> mixed
+23:04:23 INFO quant.run_backtests: [time] horizon: 3.6s
+23:04:26 INFO quant.run_backtests: [time] tearsheets: 3.1s
+23:05:26 INFO quant.run_backtests: forward P/E fetched for 336 tickers in 60s
+23:05:26 INFO quant.run_backtests: trading_comps live (chosen): 20 picks: GAP, HPQ, MMS, ANF, AA, UHS, HRB, G, GEN, KBR, ENS, BAH, THC, SFM, INCY, MU, ZTS, PNR, SON, CRUS
+23:05:29 INFO quant.run_backtests: forward P/E fetched for 161 tickers in 3s
+23:05:29 INFO quant.run_backtests: trading_comps live (default): 19 picks: UHS, THC, G, GAP, HRB, MMS, BAH, SNA, BKNG, MLI, GEN, DBX, CDW, GEHC, BSX, LVS, PNR, EHC, PTC
+23:05:29 INFO quant.run_backtests: [time] live: 62.9s
+23:05:29 INFO quant.run_backtests: trading_comps: DONE in 179s; CHOSEN theta=0.1, pe_cap=40, ev_cap=35, size_filter=False, basis=TTM; test Sharpe 0.53 vs SPY 0.89
+23:05:33 INFO quant.run_backtests: blend: test Sharpe 0.77 CAGR 16.9% | full Sharpe 0.78 | FF5+MOM alpha (full) -0.004570381936188717
+23:05:33 INFO quant.run_backtests: finished in 374s; failures: none
+23:06:28 INFO quant.run_backtests: quality_momentum: preregistration matches the module GRID
+23:06:28 INFO quant.run_backtests: context loaded in 0.7s: prices 2007-01-03 .. 2026-10-16, factors to 2026-08-31
+23:06:30 INFO quant.run_backtests: quality_momentum live (chosen): 10 picks: PBF, ILMN, VLO, APA, NUE, ANF, SN, STLD, CHRD, VAL
+23:06:30 INFO quant.run_backtests: quality_momentum live (default): 10 picks: PBF, ILMN, VLO, APA, NUE, ANF, SN, STLD, CHRD, VAL
+23:06:30 INFO quant.run_backtests: finished in 2s; failures: none
+23:13:20 INFO quant.run_backtests: quality_momentum: preregistration matches the module GRID
+23:13:20 INFO quant.run_backtests: magic_formula: preregistration matches the module GRID
+23:13:20 INFO quant.run_backtests: trading_comps: preregistration matches the module GRID
+23:13:21 INFO quant.run_backtests: context loaded in 0.8s: prices 2007-01-03 .. 2026-10-16, factors to 2026-08-31
+23:13:42 INFO quant.run_backtests: survivorship audit written in 21s
+23:13:42 INFO quant.run_backtests: === quality_momentum: 216 cells, preregistered 2026-10-19T02:57:36+00:00 ===
+23:13:43 INFO quant.run_backtests: [time] start_date: 1.3s
+23:13:43 INFO quant.run_backtests: quality_momentum: start (first signal month-end) 2011-01-31, end 2026-09-30
+23:14:03 INFO quant.run_backtests: [time] grid: 20.1s
+23:14:03 INFO quant.run_backtests: quality_momentum: grid months 2011-02-28 .. 2026-09-30 (188), errors=0
+23:14:04 INFO quant.run_backtests: quality_momentum: CHOSEN order=MF, shortlist=0.2, x_debt=1, N=10, quality=Q3a, technical=sma_rsi, stop_loss=none, vol_target=none | default order=MF, shortlist=0.2, x_debt=1, N=10, quality=Q3a, technical=sma_rsi, stop_loss=none, vol_target=none | fallback=True | train Sharpe 0.53 (default 0.53)
+23:14:04 INFO quant.run_backtests: [time] select_confirm: 1.0s
+23:14:29 INFO quant.run_backtests: [time] pbo_regression: 24.4s
+23:14:32 INFO quant.run_backtests: [time] grid_figures: 3.1s
+23:14:32 INFO quant.run_backtests: [time] final_backtests: 0.0s
+23:14:32 INFO quant.run_backtests: quality_momentum: consistency check, max |daily-engine monthly - grid column| = 0.00e+00
+23:14:32 INFO quant.run_backtests: [time] benchmarks: 0.5s
+23:14:32 INFO quant.run_backtests: [time] analysis: 0.0s
+23:14:32 INFO quant.run_backtests: quality_momentum: robustness 'cost 0 bps': CAGR 15.5% Sharpe 0.67 (0s)
+23:14:32 INFO quant.run_backtests: quality_momentum: robustness 'cost 25 bps': CAGR 11.3% Sharpe 0.51 (0s)
+23:14:32 INFO quant.run_backtests: quality_momentum: robustness 'cost 50 bps': CAGR 7.2% Sharpe 0.35 (0s)
+23:14:33 INFO quant.run_backtests: quality_momentum: robustness 'quality arm Q4-0.25 (blend)': CAGR 11.9% Sharpe 0.56 (0s)
+23:14:33 INFO quant.run_backtests: quality_momentum: robustness 'quality arm Q4-0.5 (blend)': CAGR 10.8% Sharpe 0.55 (0s)
+23:14:33 INFO quant.run_backtests: quality_momentum: robustness 'order QF (quality first)': CAGR 15.0% Sharpe 0.65 (0s)
+23:14:33 INFO quant.run_backtests: quality_momentum: robustness 'trend_exit_daily (sell below SMA200 daily)': CAGR 10.1% Sharpe 0.46 (0s)
+23:14:33 INFO quant.run_backtests: [time] robustness: 0.8s
+23:14:33 INFO quant.run_backtests: quality_momentum: LADDER 1/7 -> does not work
+23:14:35 INFO quant.run_backtests: [time] horizon: 1.9s
+23:14:37 INFO quant.run_backtests: [time] tearsheets: 1.6s
+23:14:37 INFO quant.run_backtests: quality_momentum live (chosen): 10 picks: PBF, ILMN, VLO, APA, NUE, ANF, SN, STLD, CHRD, VAL
+23:14:37 INFO quant.run_backtests: quality_momentum live (default): 10 picks: PBF, ILMN, VLO, APA, NUE, ANF, SN, STLD, CHRD, VAL
+23:14:37 INFO quant.run_backtests: [time] live: 0.1s
+23:14:37 INFO quant.run_backtests: quality_momentum: DONE in 55s; CHOSEN order=MF, shortlist=0.2, x_debt=1, N=10, quality=Q3a, technical=sma_rsi, stop_loss=none, vol_target=none; test Sharpe 0.69 vs SPY 0.89
+23:14:37 INFO quant.run_backtests: === magic_formula: 18 cells, preregistered 2026-10-19T02:57:36+00:00 ===
+23:14:46 INFO quant.run_backtests: [time] start_date: 9.5s
+23:14:46 INFO quant.run_backtests: magic_formula: start (first signal month-end) 2011-09-30, end 2026-09-30
+23:15:10 INFO quant.run_backtests: [time] grid: 24.0s
+23:15:10 INFO quant.run_backtests: magic_formula: grid months 2011-10-31 .. 2026-09-30 (180), errors=0
+23:15:10 INFO quant.run_backtests: magic_formula: CHOSEN ranking=MF, n=25, min_cap=5e+09, holding=staggered, universe=SP900, cost_bps=10, excess_cash=min_ca_cl, ebit=opinc | default ranking=MF, n=30, min_cap=1e+09, holding=staggered, universe=SP900, cost_bps=10, excess_cash=min_ca_cl, ebit=opinc | fallback=False | train Sharpe 1.12 (default 1.02)
+23:15:10 INFO quant.run_backtests: [time] select_confirm: 0.1s
+23:15:12 INFO quant.run_backtests: [time] pbo_regression: 2.1s
+23:15:13 INFO quant.run_backtests: [time] grid_figures: 0.8s
+23:15:15 INFO quant.run_backtests: [time] final_backtests: 1.6s
+23:15:15 INFO quant.run_backtests: magic_formula: consistency check, max |daily-engine monthly - grid column| = 0.00e+00
+23:15:15 INFO quant.run_backtests: [time] benchmarks: 0.4s
+23:15:15 INFO quant.run_backtests: [time] analysis: 0.0s
+23:15:16 INFO quant.run_backtests: magic_formula: robustness 'cost 0 bps': CAGR 15.0% Sharpe 0.82 (1s)
+23:15:17 INFO quant.run_backtests: magic_formula: robustness 'ablation ey_only': CAGR 11.5% Sharpe 0.54 (1s)
+23:15:18 INFO quant.run_backtests: magic_formula: robustness 'ablation roc_only': CAGR 14.5% Sharpe 0.82 (1s)
+23:15:18 INFO quant.run_backtests: magic_formula: robustness 'ablation gpa_quality': CAGR 13.9% Sharpe 0.71 (1s)
+23:15:18 WARNING quant.strategies.magic_formula: universe US_ALL: SURVIVORSHIP-BIASED: today's listed US companies only (dead/acquired names are missing)
+23:15:59 INFO quant.run_backtests: magic_formula: robustness 'ablation us_all_universe': CAGR 13.2% Sharpe 0.72 (41s)
+23:15:59 WARNING quant.strategies.magic_formula: universe SP1500: point-in-time S&P 500 + 400 + 600 members (600 only from 2018-09)
+23:16:14 INFO quant.run_backtests: magic_formula: robustness 'ablation sp1500_universe': CAGR 14.8% Sharpe 0.81 (14s)
+23:16:21 INFO quant.run_backtests: magic_formula: robustness 'ablation all_cash': CAGR 14.8% Sharpe 0.81 (7s)
+23:16:28 INFO quant.run_backtests: magic_formula: robustness 'ablation ebit_pretax_interest': CAGR 15.4% Sharpe 0.85 (7s)
+23:16:28 INFO quant.run_backtests: magic_formula: robustness 'ablation cost_25bps': CAGR 14.7% Sharpe 0.80 (1s)
+23:16:29 INFO quant.run_backtests: magic_formula: robustness 'ablation cost_50bps': CAGR 14.3% Sharpe 0.78 (1s)
+23:16:29 INFO quant.run_backtests: [time] robustness: 73.9s
+23:16:29 INFO quant.run_backtests: magic_formula: LADDER 4/7 -> mixed
+23:16:33 INFO quant.run_backtests: [time] horizon: 3.7s
+23:16:36 INFO quant.run_backtests: [time] tearsheets: 3.2s
+23:16:36 INFO quant.run_backtests: magic_formula live (chosen): 25 picks: GEN, HRB, ADBE, CROX, CI, GDDY, ACN, MO, HON, MU, IT, INCY, TPR, BMY, SAIC, BAH, G, SOLV, SNDK, CTSH, TTEK, HPQ, BKNG, ANF, LDOS
+23:16:36 INFO quant.run_backtests: magic_formula live (default): 30 picks: GEN, HRB, ADBE, KBR, CROX, CI, GDDY, ACN, MO, HON, MU, VNT, INCY, BMY, TPR, IT, SAIC, G, BAH, SOLV, BBWI, CTSH, SNDK, HPQ, ANF, LDOS, TTEK, PNR, BKNG, THC
+23:16:36 INFO quant.run_backtests: [time] live: 0.1s
+23:16:36 INFO quant.run_backtests: magic_formula: DONE in 119s; CHOSEN ranking=MF, n=25, min_cap=5e+09, holding=staggered, universe=SP900, cost_bps=10, excess_cash=min_ca_cl, ebit=opinc; test Sharpe 0.61 vs SPY 0.89
+23:16:36 INFO quant.run_backtests: === trading_comps: 54 cells, preregistered 2026-10-19T02:29:30+00:00 ===
+23:16:36 INFO quant.run_backtests: [time] start_date: 0.0s
+23:16:36 INFO quant.run_backtests: trading_comps: start (first signal month-end) 2012-01-01, end 2026-09-30
+23:18:03 INFO quant.run_backtests: [time] grid: 86.4s
+23:18:03 INFO quant.run_backtests: trading_comps: grid months 2012-02-29 .. 2026-09-30 (176), errors=0
+23:18:03 INFO quant.run_backtests: trading_comps: CHOSEN theta=0.15, pe_cap=40, ev_cap=35, size_filter=True, basis=TTM | default theta=0.15, pe_cap=40, ev_cap=35, size_filter=True, basis=TTM | fallback=True | train Sharpe 0.16 (default 0.16)
+23:18:03 INFO quant.run_backtests: [time] select_confirm: 0.3s
+23:18:09 INFO quant.run_backtests: [time] pbo_regression: 6.1s
+23:18:11 INFO quant.run_backtests: [time] grid_figures: 1.8s
+23:18:12 INFO quant.run_backtests: [time] final_backtests: 1.1s
+23:18:12 INFO quant.run_backtests: trading_comps: consistency check, max |daily-engine monthly - grid column| = 0.00e+00
+23:18:12 INFO quant.run_backtests: [time] benchmarks: 0.4s
+23:18:13 INFO quant.run_backtests: [time] analysis: 0.0s
+23:18:14 INFO quant.run_backtests: trading_comps: robustness 'cost 0 bps': CAGR 7.8% Sharpe 0.39 (1s)
+23:18:15 INFO quant.run_backtests: trading_comps: robustness 'cost 25 bps': CAGR 5.8% Sharpe 0.30 (1s)
+23:18:16 INFO quant.run_backtests: trading_comps: robustness 'cost 50 bps': CAGR 3.8% Sharpe 0.20 (1s)
+23:18:24 INFO quant.run_backtests: trading_comps: robustness 'basis LFY (last fiscal year)': CAGR 8.3% Sharpe 0.41 (7s)
+23:18:24 INFO quant.run_backtests: [time] robustness: 11.0s
+23:18:24 INFO quant.run_backtests: trading_comps: LADDER 1/7 -> does not work
+23:18:25 INFO quant.run_backtests: [time] horizon: 1.8s
+23:18:27 INFO quant.run_backtests: [time] tearsheets: 1.6s
+23:18:56 INFO quant.run_backtests: forward P/E fetched for 161 tickers in 29s
+23:18:56 INFO quant.run_backtests: trading_comps live (chosen): 19 picks: UHS, THC, G, GAP, HRB, MMS, BAH, SNA, BKNG, MLI, GEN, DBX, CDW, GEHC, BSX, LVS, PNR, EHC, PTC
+23:18:56 INFO quant.run_backtests: trading_comps live (default): 19 picks: UHS, THC, G, GAP, HRB, MMS, BAH, SNA, BKNG, MLI, GEN, DBX, CDW, GEHC, BSX, LVS, PNR, EHC, PTC
+23:18:56 INFO quant.run_backtests: [time] live: 29.5s
+23:18:56 INFO quant.run_backtests: trading_comps: DONE in 140s; CHOSEN theta=0.15, pe_cap=40, ev_cap=35, size_filter=True, basis=TTM; test Sharpe 0.47 vs SPY 0.89
+23:19:00 INFO quant.run_backtests: blend: test Sharpe 0.74 CAGR 16.3% | full Sharpe 0.71 | FF5+MOM alpha (full) -0.017016167010201543
+23:19:00 INFO quant.run_backtests: finished in 340s; failures: none
+00:09:46 INFO quant.run_backtests: quality_momentum: preregistration matches the module GRID
+00:09:46 INFO quant.run_backtests: magic_formula: preregistration matches the module GRID
+00:09:46 INFO quant.run_backtests: trading_comps: preregistration matches the module GRID
+00:09:47 INFO quant.run_backtests: context loaded in 0.8s: prices 2007-01-03 .. 2026-10-16, factors to 2026-08-31
+00:10:08 INFO quant.run_backtests: survivorship audit written in 20s
+00:10:08 INFO quant.run_backtests: === quality_momentum: 216 cells, preregistered 2026-10-19T02:57:36+00:00 ===
+00:10:09 INFO quant.run_backtests: [time] start_date: 1.2s
+00:10:09 INFO quant.run_backtests: quality_momentum: start (first signal month-end) 2011-01-31, end 2026-09-30
+00:10:29 INFO quant.run_backtests: [time] grid: 19.8s
+00:10:29 INFO quant.run_backtests: quality_momentum: grid months 2011-02-28 .. 2026-09-30 (188), errors=0
+00:10:30 INFO quant.run_backtests: quality_momentum: CHOSEN order=MF, shortlist=0.2, x_debt=1, N=10, quality=Q3a, technical=sma_rsi, stop_loss=none, vol_target=none | default order=MF, shortlist=0.2, x_debt=1, N=10, quality=Q3a, technical=sma_rsi, stop_loss=none, vol_target=none | fallback=True | train Sharpe 0.53 (default 0.53)
+00:10:30 INFO quant.run_backtests: [time] select_confirm: 1.0s
+00:10:54 INFO quant.run_backtests: [time] pbo_regression: 24.0s
+00:10:57 INFO quant.run_backtests: [time] grid_figures: 3.0s
+00:10:57 INFO quant.run_backtests: [time] final_backtests: 0.0s
+00:10:57 INFO quant.run_backtests: quality_momentum: consistency check, max |daily-engine monthly - grid column| = 0.00e+00
+00:10:57 INFO quant.run_backtests: [time] benchmarks: 0.5s
+00:10:57 INFO quant.run_backtests: [time] analysis: 0.0s
+00:10:57 INFO quant.run_backtests: quality_momentum: robustness 'cost 0 bps': CAGR 15.5% Sharpe 0.67 (0s)
+00:10:57 INFO quant.run_backtests: quality_momentum: robustness 'cost 25 bps': CAGR 11.3% Sharpe 0.51 (0s)
+00:10:57 INFO quant.run_backtests: quality_momentum: robustness 'cost 50 bps': CAGR 7.2% Sharpe 0.35 (0s)
+00:10:58 INFO quant.run_backtests: quality_momentum: robustness 'quality arm Q4-0.25 (blend)': CAGR 11.9% Sharpe 0.56 (0s)
+00:10:58 INFO quant.run_backtests: quality_momentum: robustness 'quality arm Q4-0.5 (blend)': CAGR 10.8% Sharpe 0.55 (0s)
+00:10:58 INFO quant.run_backtests: quality_momentum: robustness 'order QF (quality first)': CAGR 15.0% Sharpe 0.65 (0s)
+00:10:58 INFO quant.run_backtests: quality_momentum: robustness 'trend_exit_daily (sell below SMA200 daily)': CAGR 10.1% Sharpe 0.46 (0s)
+00:10:58 INFO quant.run_backtests: [time] robustness: 0.8s
+00:10:58 INFO quant.run_backtests: quality_momentum: LADDER 1/7 -> does not work
+00:11:00 INFO quant.run_backtests: [time] horizon: 1.9s
+00:11:02 INFO quant.run_backtests: [time] tearsheets: 1.6s
+00:11:02 INFO quant.run_backtests: quality_momentum live (chosen): 10 picks: PBF, ILMN, VLO, APA, NUE, ANF, SN, STLD, CHRD, VAL
+00:11:02 INFO quant.run_backtests: quality_momentum live (default): 10 picks: PBF, ILMN, VLO, APA, NUE, ANF, SN, STLD, CHRD, VAL
+00:11:02 INFO quant.run_backtests: [time] live: 0.1s
+00:11:02 INFO quant.run_backtests: quality_momentum: DONE in 54s; CHOSEN order=MF, shortlist=0.2, x_debt=1, N=10, quality=Q3a, technical=sma_rsi, stop_loss=none, vol_target=none; test Sharpe 0.69 vs SPY 0.89
+00:11:02 INFO quant.run_backtests: === magic_formula: 18 cells, preregistered 2026-10-19T02:57:36+00:00 ===
+00:11:11 INFO quant.run_backtests: [time] start_date: 9.5s
+00:11:11 INFO quant.run_backtests: magic_formula: start (first signal month-end) 2011-09-30, end 2026-09-30
+00:11:35 INFO quant.run_backtests: [time] grid: 23.9s
+00:11:35 INFO quant.run_backtests: magic_formula: grid months 2011-10-31 .. 2026-09-30 (180), errors=0
+00:11:35 INFO quant.run_backtests: magic_formula: CHOSEN ranking=MF, n=25, min_cap=5e+09, holding=staggered, universe=SP900, cost_bps=10, excess_cash=min_ca_cl, ebit=opinc | default ranking=MF, n=30, min_cap=1e+09, holding=staggered, universe=SP900, cost_bps=10, excess_cash=min_ca_cl, ebit=opinc | fallback=False | train Sharpe 1.13 (default 1.02)
+00:11:35 INFO quant.run_backtests: [time] select_confirm: 0.1s
+00:11:37 INFO quant.run_backtests: [time] pbo_regression: 2.1s
+00:11:38 INFO quant.run_backtests: [time] grid_figures: 0.7s
+00:11:40 INFO quant.run_backtests: [time] final_backtests: 1.6s
+00:11:40 INFO quant.run_backtests: magic_formula: consistency check, max |daily-engine monthly - grid column| = 0.00e+00
+00:11:40 INFO quant.run_backtests: [time] benchmarks: 0.5s
+00:11:40 INFO quant.run_backtests: [time] analysis: 0.0s
+00:11:41 INFO quant.run_backtests: magic_formula: robustness 'cost 0 bps': CAGR 15.0% Sharpe 0.82 (1s)
+00:11:42 INFO quant.run_backtests: magic_formula: robustness 'ablation ey_only': CAGR 11.5% Sharpe 0.54 (1s)
+00:11:43 INFO quant.run_backtests: magic_formula: robustness 'ablation roc_only': CAGR 14.5% Sharpe 0.82 (1s)
+00:11:43 INFO quant.run_backtests: magic_formula: robustness 'ablation gpa_quality': CAGR 13.9% Sharpe 0.71 (1s)
+00:11:43 WARNING quant.strategies.magic_formula: universe US_ALL: SURVIVORSHIP-BIASED: today's listed US companies only (dead/acquired names are missing)
+00:12:24 INFO quant.run_backtests: magic_formula: robustness 'ablation us_all_universe': CAGR 13.3% Sharpe 0.72 (41s)
+00:12:24 WARNING quant.strategies.magic_formula: universe SP1500: point-in-time S&P 500 + 400 + 600 members (600 only from 2018-09)
+00:12:38 INFO quant.run_backtests: magic_formula: robustness 'ablation sp1500_universe': CAGR 14.8% Sharpe 0.81 (14s)
+00:12:46 INFO quant.run_backtests: magic_formula: robustness 'ablation all_cash': CAGR 14.8% Sharpe 0.81 (7s)
+00:12:53 INFO quant.run_backtests: magic_formula: robustness 'ablation ebit_pretax_interest': CAGR 15.4% Sharpe 0.85 (7s)
+00:12:53 INFO quant.run_backtests: magic_formula: robustness 'ablation cost_25bps': CAGR 14.7% Sharpe 0.80 (1s)
+00:12:54 INFO quant.run_backtests: magic_formula: robustness 'ablation cost_50bps': CAGR 14.4% Sharpe 0.78 (1s)
+00:12:54 INFO quant.run_backtests: [time] robustness: 74.1s
+00:12:54 INFO quant.run_backtests: magic_formula: LADDER 4/7 -> mixed
+00:12:58 INFO quant.run_backtests: [time] horizon: 3.7s
+00:13:01 INFO quant.run_backtests: [time] tearsheets: 3.3s
+00:13:01 INFO quant.run_backtests: magic_formula live (chosen): 25 picks: GEN, HRB, ADBE, CROX, CI, GDDY, ACN, MO, HON, MU, IT, INCY, TPR, BMY, SAIC, BAH, G, SOLV, SNDK, CTSH, TTEK, HPQ, BKNG, ANF, LDOS
+00:13:01 INFO quant.run_backtests: magic_formula live (default): 30 picks: GEN, HRB, ADBE, KBR, CROX, CI, GDDY, ACN, MO, HON, MU, VNT, INCY, BMY, TPR, IT, SAIC, G, BAH, SOLV, BBWI, CTSH, SNDK, HPQ, ANF, LDOS, TTEK, PNR, BKNG, THC
+00:13:01 INFO quant.run_backtests: [time] live: 0.1s
+00:13:01 INFO quant.run_backtests: magic_formula: DONE in 120s; CHOSEN ranking=MF, n=25, min_cap=5e+09, holding=staggered, universe=SP900, cost_bps=10, excess_cash=min_ca_cl, ebit=opinc; test Sharpe 0.61 vs SPY 0.89
+00:13:01 INFO quant.run_backtests: === trading_comps: 54 cells, preregistered 2026-10-19T02:29:30+00:00 ===
+00:13:01 INFO quant.run_backtests: [time] start_date: 0.0s
+00:13:01 INFO quant.run_backtests: trading_comps: start (first signal month-end) 2012-01-01, end 2026-09-30
+00:14:28 INFO quant.run_backtests: [time] grid: 86.8s
+00:14:28 INFO quant.run_backtests: trading_comps: grid months 2012-02-29 .. 2026-09-30 (176), errors=0
+00:14:28 INFO quant.run_backtests: trading_comps: CHOSEN theta=0.1, pe_cap=40, ev_cap=35, size_filter=False, basis=TTM | default theta=0.15, pe_cap=40, ev_cap=35, size_filter=True, basis=TTM | fallback=False | train Sharpe 0.55 (default 0.20)
+00:14:28 INFO quant.run_backtests: [time] select_confirm: 0.3s
+00:14:35 INFO quant.run_backtests: [time] pbo_regression: 6.1s
+00:14:36 INFO quant.run_backtests: [time] grid_figures: 1.8s
+00:14:39 INFO quant.run_backtests: [time] final_backtests: 2.3s
+00:14:39 INFO quant.run_backtests: trading_comps: consistency check, max |daily-engine monthly - grid column| = 0.00e+00
+00:14:39 INFO quant.run_backtests: [time] benchmarks: 0.4s
+00:14:39 INFO quant.run_backtests: [time] analysis: 0.0s
+00:14:40 INFO quant.run_backtests: trading_comps: robustness 'cost 0 bps': CAGR 11.4% Sharpe 0.54 (1s)
+00:14:41 INFO quant.run_backtests: trading_comps: robustness 'cost 25 bps': CAGR 9.5% Sharpe 0.46 (1s)
+00:14:43 INFO quant.run_backtests: trading_comps: robustness 'cost 50 bps': CAGR 7.6% Sharpe 0.38 (1s)
+00:14:51 INFO quant.run_backtests: trading_comps: robustness 'basis LFY (last fiscal year)': CAGR 12.4% Sharpe 0.60 (8s)
+00:14:51 INFO quant.run_backtests: [time] robustness: 11.7s
+00:14:51 INFO quant.run_backtests: trading_comps: LADDER 3/7 -> mixed
+00:14:55 INFO quant.run_backtests: [time] horizon: 3.6s
+00:14:58 INFO quant.run_backtests: [time] tearsheets: 3.1s
+00:15:56 INFO quant.run_backtests: forward P/E fetched for 337 tickers in 58s
+00:15:56 INFO quant.run_backtests: trading_comps live (chosen): 20 picks: GAP, HPQ, MMS, ANF, AA, UHS, HRB, G, GEN, KBR, ENS, BAH, THC, SFM, INCY, MU, ZTS, PNR, SON, CRUS
+00:15:59 INFO quant.run_backtests: forward P/E fetched for 161 tickers in 3s
+00:15:59 INFO quant.run_backtests: trading_comps live (default): 19 picks: UHS, THC, G, GAP, HRB, MMS, BAH, SNA, BKNG, MLI, GEN, DBX, CDW, GEHC, BSX, LVS, PNR, EHC, PTC
+00:15:59 INFO quant.run_backtests: [time] live: 61.0s
+00:15:59 INFO quant.run_backtests: trading_comps: DONE in 177s; CHOSEN theta=0.1, pe_cap=40, ev_cap=35, size_filter=False, basis=TTM; test Sharpe 0.51 vs SPY 0.89
+00:16:03 INFO quant.run_backtests: blend: test Sharpe 0.76 CAGR 16.7% | full Sharpe 0.78 | FF5+MOM alpha (full) -0.005038146655223709
+00:16:03 INFO quant.run_backtests: finished in 376s; failures: none

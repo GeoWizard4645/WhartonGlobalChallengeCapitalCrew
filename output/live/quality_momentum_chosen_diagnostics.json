@@ -1,0 +1,106 @@
+{
+  "strategy": "quality_momentum",
+  "variant": "chosen",
+  "params": {
+    "order": "MF",
+    "shortlist": 0.2,
+    "x_debt": 1.0,
+    "N": 10,
+    "quality": "Q3a",
+    "technical": "sma_rsi",
+    "stop_loss": "none",
+    "vol_target": "none"
+  },
+  "asof": "2026-10-16T00:00:00",
+  "picks": [
+    {
+      "ticker": "PBF",
+      "weight": 0.1,
+      "rank": 1.0
+    },
+    {
+      "ticker": "ILMN",
+      "weight": 0.1,
+      "rank": 2.0
+    },
+    {
+      "ticker": "VLO",
+      "weight": 0.1,
+      "rank": 3.0
+    },
+    {
+      "ticker": "APA",
+      "weight": 0.1,
+      "rank": 4.0
+    },
+    {
+      "ticker": "NUE",
+      "weight": 0.1,
+      "rank": 5.0
+    },
+    {
+      "ticker": "ANF",
+      "weight": 0.1,
+      "rank": 6.0
+    },
+    {
+      "ticker": "SN",
+      "weight": 0.1,
+      "rank": 7.0
+    },
+    {
+      "ticker": "STLD",
+      "weight": 0.1,
+      "rank": 8.0
+    },
+    {
+      "ticker": "CHRD",
+      "weight": 0.1,
+      "rank": 9.0
+    },
+    {
+      "ticker": "VAL",
+      "weight": 0.1,
+      "rank": 10.0
+    }
+  ],
+  "age": {
+    "max_age_days": 110.0,
+    "median_age_days": 108.0,
+    "n_older_than_150": 0,
+    "n_older_than_200": 0
+  },
+  "attrs": {
+    "asof": "2026-10-16T00:00:00",
+    "params": {
+      "order": "MF",
+      "shortlist": 0.2,
+      "x_debt": 1.0,
+      "N": 10,
+      "quality": "Q3a",
+      "technical": "sma_rsi",
+      "stop_loss": null,
+      "vol_target": null,
+      "y_nde": 3.0,
+      "trend_exit_daily": false
+    },
+    "vol_scalar": 1.0,
+    "book_vol": null,
+    "dropped": {
+      "quality": "77 rows, see quality_momentum_chosen_dropped_quality.csv",
+      "sma200": "20 rows, see quality_momentum_chosen_dropped_sma200.csv",
+      "rsi": "25 rows, see quality_momentum_chosen_dropped_rsi.csv",
+      "beyond_N": "7 rows, see quality_momentum_chosen_dropped_beyond_N.csv"
+    },
+    "n_held": 10,
+    "cash_weight": 0.0,
+    "funnel": {
+      "n_sp1500": 899,
+      "n_universe": 694,
+      "n_shortlist": 139,
+      "n_quality": 62,
+      "n_tech": 17,
+      "n_held": 10
+    }
+  }
+}

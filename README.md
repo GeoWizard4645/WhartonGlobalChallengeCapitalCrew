@@ -51,3 +51,39 @@ python3 montecarlo.py [bonds funds stocks]   # lump-sum Monte Carlo on historica
 python3 buckets.py                           # risk/reward map of every split
 python3 dcf.py                               # DCF + margin of safety for stock picks
 ```
+
+## Stock strategies: research, backtests and live picks (`quant/`)
+
+The three stock strategies from the team doc (quality-filtered momentum, Magic Formula, GICS trading comps) are
+implemented and backtested point-in-time in `quant/` (needs the packages in `requirements.txt`, unlike the
+stdlib-only planning scripts above). Start with **`output/REPORT.md`** (results, verdicts, limitations) and
+**`output/TRADE_PLAN.md`** (what each strategy buys now). Research notes with the math and sources are in `research/`.
+
+Setup (once):
+```
+python3 -m venv .venv
+.venv/bin/pip install -r requirements.txt
+```
+Rebuild the data (downloads SEC XBRL bulk files ~3 GB, Ken French/AQR factors, Wikipedia index history, Yahoo prices; ~15 min):
+```
+mkdir -p cache/sec && cd cache/sec
+curl -H "User-Agent: CapitalCrew Student Research Project research@capitalcrew-project.org" -O https://www.sec.gov/Archives/edgar/daily-index/xbrl/companyfacts.zip
+curl -H "User-Agent: CapitalCrew Student Research Project research@capitalcrew-project.org" -O https://www.sec.gov/Archives/edgar/daily-index/bulkdata/submissions.zip
+cd ../..
+.venv/bin/python -m quant.data.sec all
+.venv/bin/python -m quant.data.universe build
+.venv/bin/python -m quant.data.prices download
+.venv/bin/python -c "from quant.data import sec, fundamentals as F; sec.build_fsds_patch(); F.build_snapshots()"
+```
+Run everything (pre-registered grids, train/test selection, tear sheets, live picks; ~6 min):
+```
+.venv/bin/python -m quant.run_backtests
+.venv/bin/python -m quant.validation.factor_checks      # long-history academic evidence
+.venv/bin/python -m pytest tests -q                       # 548 tests
+```
+Before trading (after the 4 pm close): refresh prices, recompute the live picks, size the orders:
+```
+.venv/bin/python -m quant.data.prices update
+.venv/bin/python -m quant.run_backtests --strategy all --live-only
+.venv/bin/python -m quant.trade_plan --qm 25000 --mf 25000 --tc 25000
+```
