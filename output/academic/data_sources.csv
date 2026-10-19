@@ -1,9 +1,0 @@
-dataset,source,first,last,rows,status
-Mom deciles monthly VW/EW,10_Portfolios_Prior_12_2_CSV.zip,1927-01-31,2026-08-31,1196,ok
-Mom deciles daily VW/EW,10_Portfolios_Prior_12_2_Daily_CSV.zip,1926-11-03,2026-08-31,26216,ok
-FF3 monthly,F-F_Research_Data_Factors_CSV.zip,1926-07-31,2026-08-31,1202,ok
-FF5 (2x3) monthly,F-F_Research_Data_5_Factors_2x3_CSV.zip,1963-07-31,2026-08-31,758,ok
-Mom 2x3 monthly,F-F_Momentum_Factor_CSV.zip,1927-01-31,2026-08-31,1196,ok
-25 BM x OP monthly VW/EW,25_Portfolios_BEME_OP_5x5_CSV.zip,1963-07-31,2026-08-31,758,ok
-E/P portfolios monthly VW/EW,Portfolios_Formed_on_E-P_CSV.zip,1951-07-31,2026-08-31,902,ok
-AQR QMJ USA monthly,"aqr.com Quality-Minus-Junk-Factors-Monthly.xlsx (sheet 'QMJ Factors', column USA)",1957-07-31,2026-07-31,829,ok

@@ -26,6 +26,9 @@ rsi_wilder    exact Wilder (1978): seed = simple average of the first n gains / 
               avg_loss == 0 -> 100 (50 if avg_gain is also 0)   (research §6.1)
 high_52w_ratio(t) = P[t] / max(P[t-251 .. t])              (George & Hwang 2004, adapted)
 realized_vol  = sqrt(252 * mean(r^2)) over the last `window` daily returns, UNCENTERED (Barroso-Santa-Clara)
+residual_momentum  Blitz, Huij & Martens (2011): at month-end t regress each stock's monthly excess returns over
+              months t-36..t-1 on the Fama-French 3 factors; score = sum of the residuals of months t-11..t-1
+              divided by their standard deviation (12-1 convention, most recent month skipped)
 
 ``get_technicals(ctx)`` returns a lazily evaluated :class:`TechnicalPanel` cached on the DataContext, so the
 216 grid cells and every month-end read the same arrays.
@@ -48,6 +51,8 @@ RSI_BAND = (50.0, 70.0)
 HIGH_WINDOW = 252
 VOL_WINDOW = 126
 ANN = 252
+RESID_WINDOW = 36        # months in the factor regression (Blitz, Huij & Martens 2011)
+RESID_FORM = 11          # months t-11..t-1 of residuals summed (skip month t, like 12-1 momentum)
 
 
 # --------------------------------------------------------------------------------------------------
@@ -204,6 +209,57 @@ class TechnicalPanel:
         if self.returns is None:
             raise ValueError("no returns panel attached")
         return self._get("vol", lambda: realized_vol(self.returns))
+
+
+def residual_momentum(adjclose: pd.DataFrame, ff3_monthly: pd.DataFrame, window: int = RESID_WINDOW,
+                      form: int = RESID_FORM) -> pd.DataFrame:
+    """Residual (idiosyncratic) momentum of Blitz, Huij & Martens (2011), same shape as ``adjclose``.
+
+    Momentum ranked on a stock's OWN return after stripping out what the market, size and value factors explain.
+    Ordinary momentum loads on whatever factor just ran, so it crashes when that factor reverses (Daniel &
+    Moskowitz 2016); residual momentum roughly doubles the risk-adjusted return and avoids most of those crashes.
+
+    For each month-end row t (last trading day of a month): regress the monthly excess returns of months
+    t-window..t-1 on [1, Mkt-RF, SMB, HML] (one regression per stock, all stocks solved at once); the score is the
+    sum of the residuals of the last ``form`` months of the window divided by their standard deviation. Only
+    data through month t-1 is used. Stocks with a missing month in the window get NaN. Values are forward-filled
+    to the following days, so a mid-month date reads the latest month-end signal.
+    """
+    me = adjclose.groupby(adjclose.index.to_period("M")).tail(1)          # last trading day of every month
+    mret = me.pct_change(fill_method=None)
+    periods = me.index.to_period("M")
+    f = ff3_monthly.copy()
+    f.index = pd.DatetimeIndex(f.index).to_period("M")
+    cols = ["Mkt-RF", "SMB", "HML"]
+    out = np.full(me.shape, np.nan)
+    R = mret.to_numpy(dtype="float64")
+    for i in range(window + 1, len(periods)):
+        win = periods[i - window:i]
+        if not win.isin(f.index).all():
+            continue
+        F = f.loc[win]
+        X = np.column_stack([np.ones(window), F[cols].to_numpy(dtype="float64")])
+        Y = R[i - window:i] - F["RF"].to_numpy(dtype="float64")[:, None]
+        ok = np.isfinite(Y).all(axis=0)
+        if not ok.any():
+            continue
+        B, *_ = np.linalg.lstsq(X, Y[:, ok], rcond=None)
+        E = (Y[:, ok] - X @ B)[-form:]
+        sd = E.std(axis=0, ddof=1)
+        out[i, ok] = np.where(sd > 0, E.sum(axis=0) / np.where(sd > 0, sd, 1.0), np.nan)
+    sig = pd.DataFrame(out, index=me.index, columns=adjclose.columns)
+    return sig.reindex(adjclose.index).ffill()
+
+
+def get_residual_momentum(ctx) -> pd.DataFrame:
+    """:func:`residual_momentum` of a DataContext with Ken French's monthly FF3 factors, cached on the context."""
+    store = ctx.__dict__.setdefault("_residual_momentum", {})
+    key = id(ctx.adjclose)
+    if key not in store:
+        from quant.data import factors
+        store.clear()
+        store[key] = residual_momentum(ctx.adjclose, factors.ff3("M"))
+    return store[key]
 
 
 def get_technicals(ctx) -> TechnicalPanel:

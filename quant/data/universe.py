@@ -56,7 +56,7 @@ import numpy as np
 import pandas as pd
 import requests
 
-from quant.settings import BENCHMARKS, OUTPUT, UNIV_DIR, WIKI_USER_AGENT
+from quant.settings import BENCHMARKS, CACHE, OUTPUT, UNIV_DIR, WIKI_USER_AGENT
 
 log = logging.getLogger(__name__)
 
@@ -72,7 +72,7 @@ MASTER_PATH = UNIV_DIR / "security_master.parquet"
 US_ALL_PATH = UNIV_DIR / "us_all.parquet"
 PRICE_TICKERS_PATH = UNIV_DIR / "price_tickers.txt"
 SNAPSHOT_META_PATH = UNIV_DIR / "snapshots_meta.parquet"
-REPORT_PATH = OUTPUT / "data_audit" / "universe_report.md"
+REPORT_PATH = CACHE / "reports" / "universe_report.md"
 
 WIKI_API = "https://en.wikipedia.org/w/api.php"
 PAGES = {

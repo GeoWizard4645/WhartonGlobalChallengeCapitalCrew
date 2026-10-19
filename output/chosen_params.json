@@ -1,0 +1,32 @@
+{
+  "quality_momentum": {
+    "order": "MF",
+    "shortlist": 0.2,
+    "x_debt": 1.0,
+    "stop_loss": "none",
+    "vol_target": "none",
+    "N": 20,
+    "quality": "Q1-50",
+    "technical": "none",
+    "mom_type": "residual"
+  },
+  "magic_formula": {
+    "ranking": "MF",
+    "n": 25,
+    "min_cap": 5000000000.0,
+    "holding": "staggered",
+    "universe": "SP900",
+    "cost_bps": 10.0,
+    "excess_cash": "min_ca_cl",
+    "ebit": "opinc",
+    "mom_filter": 0.5
+  },
+  "trading_comps": {
+    "theta": 0.1,
+    "pe_cap": 40,
+    "ev_cap": 35,
+    "size_filter": false,
+    "basis": "TTM",
+    "mom_filter": 0.0
+  }
+}

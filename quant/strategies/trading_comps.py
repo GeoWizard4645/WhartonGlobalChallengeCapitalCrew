@@ -50,20 +50,20 @@ STRATEGY = "trading_comps"
 # --------------------------------------------------------------------------------------------------
 # parameters, grid, pre-registration
 # --------------------------------------------------------------------------------------------------
-DEFAULT: dict = dict(theta=0.15, pe_cap=40, ev_cap=35, size_filter=True, basis="TTM")
+# v1 (doc) grid, run 2026-10-19: theta {10,15,20%} x P/E cap {30,40,50} x EV/EBITDA cap {25,35,45} x size filter
+# {on, off} = 54 cells, TTM only ("forward" multiples cannot be backtested point-in-time). Train-window findings:
+# the size filter hurt in every cell, the caps made almost no difference; selected theta=10%, caps 40/35, no filter.
+DOC_DEFAULT: dict = dict(theta=0.15, pe_cap=40, ev_cap=35, size_filter=True, basis="TTM", mom_filter=0.0)
+V1_CHOSEN: dict = dict(theta=0.10, pe_cap=40, ev_cap=35, size_filter=False, basis="TTM", mom_filter=0.0)
 
+# v2 grid: keep the v1 choice of caps / size filter and add the value-trap momentum filter
+# (Asness, Moskowitz & Pedersen 2013). Default = the v1 choice, so v2 only changes it if the train data say so.
+DEFAULT: dict = dict(V1_CHOSEN)
 THETAS = [0.10, 0.15, 0.20]
-PE_CAPS = [30, 40, 50]
-EV_CAPS = [25, 35, 45]
-SIZE_FILTERS = [True, False]
-
-AXES: dict = {"theta": THETAS, "pe_cap": PE_CAPS, "ev_cap": EV_CAPS}           # ordinal
-CATEGORICAL: dict = {"size_filter": SIZE_FILTERS}                              # plateau within each level
-
-# 3 x 3 x 3 x 2 = 54 cells, TTM only ("forward" cannot be backtested point-in-time; LFY is a robustness check
-# at the chosen cell, run later with basis='LFY' and logged as an extra trial).
-GRID: list[dict] = [dict(theta=t, pe_cap=a, ev_cap=b, size_filter=s, basis="TTM")
-                    for s in SIZE_FILTERS for t in THETAS for a in PE_CAPS for b in EV_CAPS]
+MOM_FILTERS = [0.0, 0.3, 0.5]
+AXES: dict = {"theta": THETAS, "mom_filter": MOM_FILTERS}                       # ordinal
+CATEGORICAL: dict = {}
+GRID: list[dict] = [dict(DEFAULT, theta=t, mom_filter=m) for t in THETAS for m in MOM_FILTERS]
 
 # fixed (not tuned) knobs: research/04 section 7.1 "Fixed (not tuned) in the main grid"
 FIXED: dict = dict(
@@ -232,6 +232,20 @@ def clear_cache(ctx) -> None:
 def _signals(ctx, date, p: dict, return_peers: bool = False):
     st = _state(ctx, date, p)
     sig = C.comps_signals(ctx, st.date, st.univ, p, st.km, mt=st.mt, cache=st.cache, return_peers=return_peers)
+    mf = float(p.get("mom_filter", 0.0) or 0.0)
+    if mf > 0:
+        # Value-trap guard (Asness, Moskowitz & Pedersen 2013): a stock that screens cheap against its peers but is
+        # still in the bottom `mom_filter` of 12-1 momentum across the universe is not bought.
+        from quant.signals import technical as tech
+        mom = tech.get_technicals(ctx).mom
+        u = st.univ.drop_duplicates("cik").set_index("cik")["yf_ticker"]
+        vals = mom.loc[st.date].reindex(u.to_numpy()).to_numpy() if st.date in mom.index else float("nan")
+        pct = pd.Series(vals, index=u.index).rank(pct=True)
+        sig = sig.copy()
+        sig["mom_pct"] = pct.reindex(sig.index)
+        low = ~(sig["mom_pct"] >= mf)
+        sig["fail_mom"] = low
+        sig["eligible"] = sig["eligible"].astype(bool) & ~low
     return st, sig
 
 

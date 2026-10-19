@@ -1,6 +1,6 @@
 {
   "strategy": "magic_formula",
-  "timestamp": "2026-10-19T02:57:36+00:00",
+  "timestamp": "2026-10-19T21:58:38+00:00",
   "primary_metric": "net_sharpe",
   "selection_rule": "plateau_v1",
   "lam": 1.0,
@@ -17,56 +17,48 @@
   },
   "test_window_policy": "single_look",
   "n_cells": 18,
-  "grid_hash": "4692339c0d2240a1",
-  "content_hash": "f72a634e5d5ae6a8",
+  "grid_hash": "9742b6d9b14fb2e3",
+  "content_hash": "994c1ff4bfc80136",
   "axes": {
     "n": [
       20,
       25,
       30
     ],
-    "min_cap": [
-      50000000.0,
-      1000000000.0,
-      5000000000.0
+    "mom_filter": [
+      0.0,
+      0.3,
+      0.5
     ]
   },
   "categorical": {
-    "holding": [
-      "staggered",
-      "annual"
+    "ranking": [
+      "MF",
+      "GPA"
     ]
   },
   "default": {
     "ranking": "MF",
-    "n": 30,
-    "min_cap": 1000000000.0,
+    "n": 25,
+    "min_cap": 5000000000.0,
     "holding": "staggered",
     "universe": "SP900",
     "cost_bps": 10.0,
     "excess_cash": "min_ca_cl",
-    "ebit": "opinc"
+    "ebit": "opinc",
+    "mom_filter": 0.0
   },
   "grid": [
     {
       "ranking": "MF",
       "n": 20,
-      "min_cap": 50000000.0,
+      "min_cap": 5000000000.0,
       "holding": "staggered",
       "universe": "SP900",
       "cost_bps": 10.0,
       "excess_cash": "min_ca_cl",
-      "ebit": "opinc"
-    },
-    {
-      "ranking": "MF",
-      "n": 20,
-      "min_cap": 1000000000.0,
-      "holding": "staggered",
-      "universe": "SP900",
-      "cost_bps": 10.0,
-      "excess_cash": "min_ca_cl",
-      "ebit": "opinc"
+      "ebit": "opinc",
+      "mom_filter": 0.0
     },
     {
       "ranking": "MF",
@@ -76,157 +68,184 @@
       "universe": "SP900",
       "cost_bps": 10.0,
       "excess_cash": "min_ca_cl",
-      "ebit": "opinc"
-    },
-    {
-      "ranking": "MF",
-      "n": 25,
-      "min_cap": 50000000.0,
-      "holding": "staggered",
-      "universe": "SP900",
-      "cost_bps": 10.0,
-      "excess_cash": "min_ca_cl",
-      "ebit": "opinc"
-    },
-    {
-      "ranking": "MF",
-      "n": 25,
-      "min_cap": 1000000000.0,
-      "holding": "staggered",
-      "universe": "SP900",
-      "cost_bps": 10.0,
-      "excess_cash": "min_ca_cl",
-      "ebit": "opinc"
-    },
-    {
-      "ranking": "MF",
-      "n": 25,
-      "min_cap": 5000000000.0,
-      "holding": "staggered",
-      "universe": "SP900",
-      "cost_bps": 10.0,
-      "excess_cash": "min_ca_cl",
-      "ebit": "opinc"
-    },
-    {
-      "ranking": "MF",
-      "n": 30,
-      "min_cap": 50000000.0,
-      "holding": "staggered",
-      "universe": "SP900",
-      "cost_bps": 10.0,
-      "excess_cash": "min_ca_cl",
-      "ebit": "opinc"
-    },
-    {
-      "ranking": "MF",
-      "n": 30,
-      "min_cap": 1000000000.0,
-      "holding": "staggered",
-      "universe": "SP900",
-      "cost_bps": 10.0,
-      "excess_cash": "min_ca_cl",
-      "ebit": "opinc"
-    },
-    {
-      "ranking": "MF",
-      "n": 30,
-      "min_cap": 5000000000.0,
-      "holding": "staggered",
-      "universe": "SP900",
-      "cost_bps": 10.0,
-      "excess_cash": "min_ca_cl",
-      "ebit": "opinc"
-    },
-    {
-      "ranking": "MF",
-      "n": 20,
-      "min_cap": 50000000.0,
-      "holding": "annual",
-      "universe": "SP900",
-      "cost_bps": 10.0,
-      "excess_cash": "min_ca_cl",
-      "ebit": "opinc"
-    },
-    {
-      "ranking": "MF",
-      "n": 20,
-      "min_cap": 1000000000.0,
-      "holding": "annual",
-      "universe": "SP900",
-      "cost_bps": 10.0,
-      "excess_cash": "min_ca_cl",
-      "ebit": "opinc"
+      "ebit": "opinc",
+      "mom_filter": 0.3
     },
     {
       "ranking": "MF",
       "n": 20,
       "min_cap": 5000000000.0,
-      "holding": "annual",
+      "holding": "staggered",
       "universe": "SP900",
       "cost_bps": 10.0,
       "excess_cash": "min_ca_cl",
-      "ebit": "opinc"
-    },
-    {
-      "ranking": "MF",
-      "n": 25,
-      "min_cap": 50000000.0,
-      "holding": "annual",
-      "universe": "SP900",
-      "cost_bps": 10.0,
-      "excess_cash": "min_ca_cl",
-      "ebit": "opinc"
-    },
-    {
-      "ranking": "MF",
-      "n": 25,
-      "min_cap": 1000000000.0,
-      "holding": "annual",
-      "universe": "SP900",
-      "cost_bps": 10.0,
-      "excess_cash": "min_ca_cl",
-      "ebit": "opinc"
+      "ebit": "opinc",
+      "mom_filter": 0.5
     },
     {
       "ranking": "MF",
       "n": 25,
       "min_cap": 5000000000.0,
-      "holding": "annual",
+      "holding": "staggered",
       "universe": "SP900",
       "cost_bps": 10.0,
       "excess_cash": "min_ca_cl",
-      "ebit": "opinc"
+      "ebit": "opinc",
+      "mom_filter": 0.0
     },
     {
       "ranking": "MF",
-      "n": 30,
-      "min_cap": 50000000.0,
-      "holding": "annual",
+      "n": 25,
+      "min_cap": 5000000000.0,
+      "holding": "staggered",
       "universe": "SP900",
       "cost_bps": 10.0,
       "excess_cash": "min_ca_cl",
-      "ebit": "opinc"
+      "ebit": "opinc",
+      "mom_filter": 0.3
     },
     {
       "ranking": "MF",
-      "n": 30,
-      "min_cap": 1000000000.0,
-      "holding": "annual",
+      "n": 25,
+      "min_cap": 5000000000.0,
+      "holding": "staggered",
       "universe": "SP900",
       "cost_bps": 10.0,
       "excess_cash": "min_ca_cl",
-      "ebit": "opinc"
+      "ebit": "opinc",
+      "mom_filter": 0.5
     },
     {
       "ranking": "MF",
       "n": 30,
       "min_cap": 5000000000.0,
-      "holding": "annual",
+      "holding": "staggered",
       "universe": "SP900",
       "cost_bps": 10.0,
       "excess_cash": "min_ca_cl",
-      "ebit": "opinc"
+      "ebit": "opinc",
+      "mom_filter": 0.0
+    },
+    {
+      "ranking": "MF",
+      "n": 30,
+      "min_cap": 5000000000.0,
+      "holding": "staggered",
+      "universe": "SP900",
+      "cost_bps": 10.0,
+      "excess_cash": "min_ca_cl",
+      "ebit": "opinc",
+      "mom_filter": 0.3
+    },
+    {
+      "ranking": "MF",
+      "n": 30,
+      "min_cap": 5000000000.0,
+      "holding": "staggered",
+      "universe": "SP900",
+      "cost_bps": 10.0,
+      "excess_cash": "min_ca_cl",
+      "ebit": "opinc",
+      "mom_filter": 0.5
+    },
+    {
+      "ranking": "GPA",
+      "n": 20,
+      "min_cap": 5000000000.0,
+      "holding": "staggered",
+      "universe": "SP900",
+      "cost_bps": 10.0,
+      "excess_cash": "min_ca_cl",
+      "ebit": "opinc",
+      "mom_filter": 0.0
+    },
+    {
+      "ranking": "GPA",
+      "n": 20,
+      "min_cap": 5000000000.0,
+      "holding": "staggered",
+      "universe": "SP900",
+      "cost_bps": 10.0,
+      "excess_cash": "min_ca_cl",
+      "ebit": "opinc",
+      "mom_filter": 0.3
+    },
+    {
+      "ranking": "GPA",
+      "n": 20,
+      "min_cap": 5000000000.0,
+      "holding": "staggered",
+      "universe": "SP900",
+      "cost_bps": 10.0,
+      "excess_cash": "min_ca_cl",
+      "ebit": "opinc",
+      "mom_filter": 0.5
+    },
+    {
+      "ranking": "GPA",
+      "n": 25,
+      "min_cap": 5000000000.0,
+      "holding": "staggered",
+      "universe": "SP900",
+      "cost_bps": 10.0,
+      "excess_cash": "min_ca_cl",
+      "ebit": "opinc",
+      "mom_filter": 0.0
+    },
+    {
+      "ranking": "GPA",
+      "n": 25,
+      "min_cap": 5000000000.0,
+      "holding": "staggered",
+      "universe": "SP900",
+      "cost_bps": 10.0,
+      "excess_cash": "min_ca_cl",
+      "ebit": "opinc",
+      "mom_filter": 0.3
+    },
+    {
+      "ranking": "GPA",
+      "n": 25,
+      "min_cap": 5000000000.0,
+      "holding": "staggered",
+      "universe": "SP900",
+      "cost_bps": 10.0,
+      "excess_cash": "min_ca_cl",
+      "ebit": "opinc",
+      "mom_filter": 0.5
+    },
+    {
+      "ranking": "GPA",
+      "n": 30,
+      "min_cap": 5000000000.0,
+      "holding": "staggered",
+      "universe": "SP900",
+      "cost_bps": 10.0,
+      "excess_cash": "min_ca_cl",
+      "ebit": "opinc",
+      "mom_filter": 0.0
+    },
+    {
+      "ranking": "GPA",
+      "n": 30,
+      "min_cap": 5000000000.0,
+      "holding": "staggered",
+      "universe": "SP900",
+      "cost_bps": 10.0,
+      "excess_cash": "min_ca_cl",
+      "ebit": "opinc",
+      "mom_filter": 0.3
+    },
+    {
+      "ranking": "GPA",
+      "n": 30,
+      "min_cap": 5000000000.0,
+      "holding": "staggered",
+      "universe": "SP900",
+      "cost_bps": 10.0,
+      "excess_cash": "min_ca_cl",
+      "ebit": "opinc",
+      "mom_filter": 0.5
     }
   ],
   "extra": {
@@ -288,7 +307,9 @@
     "train_window": [
       "2010-01-01",
       "2018-12-31"
-    ]
+    ],
+    "version": "v2",
+    "v2_rationale": "v2 (registered before any v2 run): v1 choice (n=25, >=$5B, staggered) kept; adds a value-trap momentum filter (drop bottom 0/30/50% of 12-1 momentum; Asness, Moskowitz & Pedersen 2013) and GP/A as the quality rank (Novy-Marx 2013). Default = v1 choice."
   },
   "history": [
     {
@@ -303,7 +324,12 @@
       "grid_hash": "4692339c0d2240a1",
       "reason": "Lead re-stamp 2026-10-19, before any grid run or any 2019+ result was seen: universe changed from point-in-time S&P 1500 to S&P 900 (S&P 500 + MidCap 400) because Wikipedia has no S&P 600 history before 2018-09, so SP1500 would add ~600 small caps exactly at the 2019 train/test boundary; QM also excludes GICS Real Estate (REITs were inside Financials until 2016-08-31) for a consistent universe.",
       "superseded_extra_universe": "SP900"
+    },
+    {
+      "timestamp": "2026-10-19T02:57:36+00:00",
+      "content_hash": "f72a634e5d5ae6a8",
+      "n_cells": 18,
+      "grid_hash": "4692339c0d2240a1"
     }
-  ],
-  "restamp_reason": "Lead re-stamp 2026-10-19, before any grid run or any 2019+ result was seen: universe changed from point-in-time S&P 1500 to S&P 900 (S&P 500 + MidCap 400) because Wikipedia has no S&P 600 history before 2018-09, so SP1500 would add ~600 small caps exactly at the 2019 train/test boundary; QM also excludes GICS Real Estate (REITs were inside Financials until 2016-08-31) for a consistent universe."
+  ]
 }

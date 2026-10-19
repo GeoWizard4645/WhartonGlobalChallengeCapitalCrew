@@ -1,0 +1,10 @@
+theta,pe_cap,ev_cap,size_filter,basis,mom_filter,train_sharpe,train_cagr,test_sharpe,test_cagr,chosen
+0.1,40,35,False,TTM,0.0,0.5467,0.08,0.5109,0.1299,True
+0.1,40,35,False,TTM,0.3,0.5654,0.0815,0.5744,0.1359,False
+0.1,40,35,False,TTM,0.5,0.7412,0.1051,0.5764,0.1333,False
+0.15,40,35,False,TTM,0.0,0.5005,0.071,0.5206,0.1329,False
+0.15,40,35,False,TTM,0.3,0.3621,0.0489,0.5801,0.1386,False
+0.15,40,35,False,TTM,0.5,0.4628,0.0625,0.599,0.1411,False
+0.2,40,35,False,TTM,0.0,0.418,0.0571,0.5121,0.1302,False
+0.2,40,35,False,TTM,0.3,0.2997,0.0399,0.568,0.1367,False
+0.2,40,35,False,TTM,0.5,0.5932,0.0852,0.6121,0.1441,False

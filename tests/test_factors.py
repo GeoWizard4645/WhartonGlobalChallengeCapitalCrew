@@ -1,4 +1,4 @@
-"""Tests for quant/data/factors.py (French/AQR parsing, caching) and quant/validation/factor_checks.py (formulas).
+"""Tests for quant/data/factors.py (French/AQR parsing, caching).
 
 No network access is needed: parsing is tested on embedded snippets in French's real multi-block layout,
 HTTP/caching on fakes, and the Barroso-Santa-Clara weights on synthetic daily returns. One integration test uses
@@ -14,7 +14,6 @@ import pandas as pd
 import pytest
 
 from quant.data import factors as F
-from quant.validation import factor_checks as fc
 
 # --------------------------------------------------------------------------------------
 # Embedded French-format snippets
@@ -313,7 +312,7 @@ def test_qmj_rejects_non_monthly():
 # --------------------------------------------------------------------------------------
 needs_cache = pytest.mark.skipif(
     not all((F.FACTOR_DIR / f"{k}.parquet").exists() for k in ("ff5_M", "ff3_M", "mom_M", "mom_deciles_M_vw")),
-    reason="cache/factors not built (run `python -m quant.validation.factor_checks` once)",
+    reason="cache/factors not built (run factors.download_all() once)",
 )
 
 
@@ -348,154 +347,28 @@ def _daily(n=700, start="2019-12-02", seed=0, sd=0.01):
     return pd.Series(np.random.default_rng(seed).normal(0.0, sd, n), index=idx)
 
 
-def test_bsc_uncentered_vol_identity():
-    """21 * sum(r_d^2) / 126 is the monthly variance; x12 = 252 * mean(r_d^2): the formula in research/01 section 4.1."""
-    r = _daily().iloc[:126]
-    monthly_var = 21 * (r**2).sum() / 126
-    assert np.sqrt(12 * monthly_var) == pytest.approx(np.sqrt(252 * (r**2).mean()))
-    vol = fc.trailing_vol_ann(_daily(), 126)
-    assert vol.iloc[:125].isna().all() and vol.iloc[125] == pytest.approx(np.sqrt(252 * (_daily().iloc[:126] ** 2).mean()))
 
 
-def test_bsc_weight_constant_volatility_synthetic():
-    n, s = 700, 0.01
-    idx = pd.bdate_range("2019-12-02", periods=n)
-    r = pd.Series(np.where(np.arange(n) % 2 == 0, s, -s), index=idx)  # r^2 == s^2 on every day
-    w = fc.bsc_weights(r, target=0.12, window=126).dropna()
-    expected = 0.12 / (s * np.sqrt(252))
-    assert len(w) > 20 and np.allclose(w.to_numpy(), expected)
-    assert w.index[0] == pd.Timestamp("2020-06-30")  # first full 126-day window ends in May, applied to June
-    assert (w.index == w.index + pd.offsets.MonthEnd(0)).all()
-    # cap turns the rule into a no-leverage rule
-    assert fc.bsc_weights(r, 0.50, 126, cap=1.0).dropna().max() == pytest.approx(1.0)
-    # higher target -> proportionally bigger weight
-    assert fc.bsc_weights(r, 0.24, 126).dropna().iloc[-1] == pytest.approx(2 * expected)
 
 
-def test_bsc_weight_matches_manual_formula_on_random_data():
-    r = _daily(n=900, seed=3, sd=0.012)
-    w = fc.bsc_weights(r, 0.12, 126)
-    for month_end in [pd.Timestamp("2021-03-31"), pd.Timestamp("2022-07-31"), pd.Timestamp("2023-02-28")]:
-        prev_end = (month_end - pd.offsets.MonthEnd(1))
-        last_day = r.index[r.index <= prev_end][-1]  # last trading day of the previous month
-        window = r.loc[:last_day].iloc[-126:]
-        manual = 0.12 / np.sqrt(252 * np.mean(window.to_numpy() ** 2))
-        assert w.loc[month_end] == pytest.approx(manual, rel=1e-12)
 
 
-def test_bsc_weight_has_no_look_ahead():
-    r = _daily(n=900, seed=5)
-    w0 = fc.bsc_weights(r)
-    shocked = r.copy()
-    month = pd.Period("2021-06", "M")
-    in_month = shocked.index.to_period("M") == month
-    shocked[in_month] = shocked[in_month] * 6.0
-    w1 = fc.bsc_weights(shocked)
-    m_end, next_end = pd.Timestamp("2021-06-30"), pd.Timestamp("2021-07-31")
-    assert w1.loc[m_end] == pytest.approx(w0.loc[m_end])  # weight for June cannot see June returns
-    assert w1.loc[next_end] < 0.9 * w0.loc[next_end]  # July's weight reacts to the volatile June
-    assert w1.loc[: m_end].equals(w0.loc[: m_end]) or np.allclose(w1.loc[:m_end].dropna(), w0.loc[:m_end].dropna())
 
 
-def test_compound_daily_to_monthly_and_last_obs():
-    idx = pd.bdate_range("2020-01-27", "2020-03-04")
-    r = pd.Series(0.001, index=idx)
-    m = fc.compound_daily_to_monthly(r)
-    assert list(m.index) == [pd.Timestamp("2020-01-31"), pd.Timestamp("2020-02-29"), pd.Timestamp("2020-03-31")]
-    jan_days = int((idx.month == 1).sum())
-    assert m.loc["2020-01-31"] == pytest.approx(1.001**jan_days - 1)
-    last = fc._last_obs_per_month(pd.Series(np.arange(len(idx), dtype=float), index=idx))
-    assert last.loc["2020-01-31"] == float(np.flatnonzero(idx.month == 1)[-1])
 
 
 # --------------------------------------------------------------------------------------
 # Statistics helpers
 # --------------------------------------------------------------------------------------
-def test_ols_hac_matches_statsmodels_and_private_fallback():
-    sm = pytest.importorskip("statsmodels.api")
-    rng = np.random.default_rng(1)
-    T = 240
-    x = rng.normal(size=(T, 2))
-    e = rng.normal(size=T)
-    e = e + 0.5 * np.r_[0.0, e[:-1]]  # autocorrelated errors so the HAC correction matters
-    y = 0.4 + x @ np.array([1.2, -0.7]) + e
-    X = np.column_stack([np.ones(T), x])
-    for L in (0, 4, 8):
-        mine = fc.ols_hac(y, X, L)
-        ref = sm.OLS(y, X).fit(cov_type="HAC", cov_kwds={"maxlags": L, "use_correction": True})
-        np.testing.assert_allclose(mine["beta"], ref.params, rtol=1e-10)
-        np.testing.assert_allclose(mine["se"], ref.bse, rtol=1e-8)
-        np.testing.assert_allclose(mine["t"], ref.tvalues, rtol=1e-8)
-        priv = fc._ols_hac_np(y, X, L)
-        np.testing.assert_allclose(priv["se"], ref.bse, rtol=1e-8)
-        assert priv["r2"] == pytest.approx(ref.rsquared) and priv["n"] == T
 
 
-def test_regress_and_lags():
-    assert fc.newey_west_lags(93) == 4 and fc.newey_west_lags(1000) == 6  # floor of 4 (research/06 default L=4)
-    rng = np.random.default_rng(2)
-    idx = pd.date_range("2000-01-31", periods=200, freq="ME")
-    mkt = pd.Series(rng.normal(0.005, 0.04, 200), index=idx, name="MKT")
-    y = 0.002 + 1.3 * mkt + pd.Series(rng.normal(0, 0.01, 200), index=idx)
-    res = fc.regress(y, mkt.to_frame())
-    assert res["alpha"] == pytest.approx(0.002, abs=0.002) and res["loadings"]["MKT"] == pytest.approx(1.3, abs=0.05)
-    assert fc.regress(y.iloc[:5], mkt.iloc[:5].to_frame()) is None  # too few observations
-    m, t = fc.mean_hac(pd.Series(rng.normal(0.01, 0.02, 300)))
-    assert 0.0 < m < 0.02 and t > 3
 
 
-def test_max_drawdown_cagr_and_perf_row():
-    assert fc.max_drawdown(np.array([0.1, -0.5, 0.2])) == pytest.approx(0.55 / 1.1 - 1.0)
-    assert fc.max_drawdown(np.array([0.01, 0.02])) == pytest.approx(0.0)
-    assert fc._max_drawdown_np(np.array([0.1, -0.5, 0.2])) == pytest.approx(-0.5)
-    assert fc.cagr(pd.Series([0.01] * 12)) == pytest.approx(1.01**12 - 1)
-    idx = pd.date_range("2001-01-31", periods=60, freq="ME")
-    r = pd.Series(np.tile([0.03, -0.01], 30), index=idx)
-    row = fc.perf_row(r)
-    assert row["n"] == 60 and row["start"] == "2001-01" and row["end"] == "2005-12"
-    assert row["mean_pct_m"] == pytest.approx(1.0) and row["ann_mean_pct"] == pytest.approx(12.0)
-    assert row["sharpe"] == pytest.approx(r.mean() / r.std() * np.sqrt(12)) and row["worst_month_pct"] == pytest.approx(-1.0)
 
 
-def test_prior_market_return_and_bear_flag():
-    idx = pd.date_range("2000-01-31", periods=40, freq="ME")
-    up = pd.Series(0.01, index=idx)
-    p = fc.prior_market_return(up, 24)
-    assert np.isnan(p.iloc[0]) and p.iloc[1] == pytest.approx(0.01)  # short history is used at the start
-    assert p.iloc[30] == pytest.approx(1.01**24 - 1)  # months t-24..t-1, excluding month t itself
-    path = pd.Series([0.05] * 10 + [-0.05] * 30, index=idx)
-    p = fc.prior_market_return(path, 24)
-    assert (p.iloc[10:20] > 0).all() and p.iloc[39] == pytest.approx(0.95**24 - 1) and p.iloc[39] < 0
-    # the flag at month t must not depend on month t's own return
-    shocked = path.copy()
-    shocked.iloc[39] = 5.0
-    assert fc.prior_market_return(shocked, 24).iloc[39] == pytest.approx(p.iloc[39])
 
 
-def test_mclean_pontiff_windows_partition():
-    idx = pd.date_range("1990-01-31", "2010-12-31", freq="ME")
-    s = pd.Series(np.arange(len(idx), dtype=float), index=idx)
-    spec = fc.PubSpec("T", "1995-01", "1999-12", "2002-06", "test")
-    w = fc._mp_windows(s, spec)
-    assert w["pre_sample"].index[-1] == pd.Timestamp("1994-12-31")
-    assert w["in_sample"].index[0] == pd.Timestamp("1995-01-31") and w["in_sample"].index[-1] == pd.Timestamp("1999-12-31")
-    assert w["oos_prepub"].index[0] == pd.Timestamp("2000-01-31") and w["oos_prepub"].index[-1] == pd.Timestamp("2002-05-31")
-    assert w["post_pub"].index[0] == pd.Timestamp("2002-06-30") and w["post_pub"].index[-1] == pd.Timestamp("2010-12-31")
-    assert sum(len(v) for v in w.values()) == len(s)  # disjoint and exhaustive
 
 
-def test_md_table_formats_numbers():
-    df = pd.DataFrame({"a": ["x", "y"], "n": [3, 4], "v": [1.23456, np.nan]})
-    out = fc.md_table(df, {"v": "{:.1f}"})
-    assert "| x | 3 | 1.2 |" in out and "| y | 4 | n/a |" in out
 
 
-def test_shared_hac_agrees_with_private_if_available():
-    stats = pytest.importorskip("quant.backtest.stats")
-    rng = np.random.default_rng(7)
-    X = np.column_stack([np.ones(150), rng.normal(size=150)])
-    y = X @ np.array([0.1, 0.5]) + rng.normal(size=150)
-    a = stats.ols_hac(y, X, lags=4)
-    b = fc._ols_hac_np(y, X, 4)
-    np.testing.assert_allclose(a["se"], b["se"], rtol=1e-9)
-    np.testing.assert_allclose(a["beta"], b["beta"], rtol=1e-9)

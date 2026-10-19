@@ -1,0 +1,20 @@
+{
+  "quality_momentum": {
+    "fallback": false,
+    "fallback_reason": null,
+    "pbo": 0.447,
+    "dsr": 0.946
+  },
+  "magic_formula": {
+    "fallback": false,
+    "fallback_reason": null,
+    "pbo": 0.175,
+    "dsr": 0.98
+  },
+  "trading_comps": {
+    "fallback": false,
+    "fallback_reason": null,
+    "pbo": 0.43,
+    "dsr": 0.719
+  }
+}

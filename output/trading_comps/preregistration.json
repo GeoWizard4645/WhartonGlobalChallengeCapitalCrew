@@ -1,6 +1,6 @@
 {
   "strategy": "trading_comps",
-  "timestamp": "2026-10-19T02:29:30+00:00",
+  "timestamp": "2026-10-19T21:58:38+00:00",
   "primary_metric": "net_sharpe",
   "selection_rule": "plateau_v1",
   "lam": 1.0,
@@ -16,417 +16,102 @@
     "test_start": "2019-01-01"
   },
   "test_window_policy": "single_look",
-  "n_cells": 54,
-  "grid_hash": "92b7a8819a9f6384",
-  "content_hash": "64eaec5015d99446",
+  "n_cells": 9,
+  "grid_hash": "2c051c1aa6ef4ad3",
+  "content_hash": "d1f1258984f5b63c",
   "axes": {
     "theta": [
       0.1,
       0.15,
       0.2
     ],
-    "pe_cap": [
-      30,
-      40,
-      50
-    ],
-    "ev_cap": [
-      25,
-      35,
-      45
+    "mom_filter": [
+      0.0,
+      0.3,
+      0.5
     ]
   },
-  "categorical": {
-    "size_filter": [
-      true,
-      false
-    ]
-  },
+  "categorical": {},
   "default": {
-    "theta": 0.15,
+    "theta": 0.1,
     "pe_cap": 40,
     "ev_cap": 35,
-    "size_filter": true,
-    "basis": "TTM"
+    "size_filter": false,
+    "basis": "TTM",
+    "mom_filter": 0.0
   },
   "grid": [
     {
       "theta": 0.1,
-      "pe_cap": 30,
-      "ev_cap": 25,
-      "size_filter": true,
-      "basis": "TTM"
-    },
-    {
-      "theta": 0.1,
-      "pe_cap": 30,
-      "ev_cap": 35,
-      "size_filter": true,
-      "basis": "TTM"
-    },
-    {
-      "theta": 0.1,
-      "pe_cap": 30,
-      "ev_cap": 45,
-      "size_filter": true,
-      "basis": "TTM"
-    },
-    {
-      "theta": 0.1,
       "pe_cap": 40,
-      "ev_cap": 25,
-      "size_filter": true,
-      "basis": "TTM"
-    },
-    {
-      "theta": 0.1,
-      "pe_cap": 40,
-      "ev_cap": 35,
-      "size_filter": true,
-      "basis": "TTM"
-    },
-    {
-      "theta": 0.1,
-      "pe_cap": 40,
-      "ev_cap": 45,
-      "size_filter": true,
-      "basis": "TTM"
-    },
-    {
-      "theta": 0.1,
-      "pe_cap": 50,
-      "ev_cap": 25,
-      "size_filter": true,
-      "basis": "TTM"
-    },
-    {
-      "theta": 0.1,
-      "pe_cap": 50,
-      "ev_cap": 35,
-      "size_filter": true,
-      "basis": "TTM"
-    },
-    {
-      "theta": 0.1,
-      "pe_cap": 50,
-      "ev_cap": 45,
-      "size_filter": true,
-      "basis": "TTM"
-    },
-    {
-      "theta": 0.15,
-      "pe_cap": 30,
-      "ev_cap": 25,
-      "size_filter": true,
-      "basis": "TTM"
-    },
-    {
-      "theta": 0.15,
-      "pe_cap": 30,
-      "ev_cap": 35,
-      "size_filter": true,
-      "basis": "TTM"
-    },
-    {
-      "theta": 0.15,
-      "pe_cap": 30,
-      "ev_cap": 45,
-      "size_filter": true,
-      "basis": "TTM"
-    },
-    {
-      "theta": 0.15,
-      "pe_cap": 40,
-      "ev_cap": 25,
-      "size_filter": true,
-      "basis": "TTM"
-    },
-    {
-      "theta": 0.15,
-      "pe_cap": 40,
-      "ev_cap": 35,
-      "size_filter": true,
-      "basis": "TTM"
-    },
-    {
-      "theta": 0.15,
-      "pe_cap": 40,
-      "ev_cap": 45,
-      "size_filter": true,
-      "basis": "TTM"
-    },
-    {
-      "theta": 0.15,
-      "pe_cap": 50,
-      "ev_cap": 25,
-      "size_filter": true,
-      "basis": "TTM"
-    },
-    {
-      "theta": 0.15,
-      "pe_cap": 50,
-      "ev_cap": 35,
-      "size_filter": true,
-      "basis": "TTM"
-    },
-    {
-      "theta": 0.15,
-      "pe_cap": 50,
-      "ev_cap": 45,
-      "size_filter": true,
-      "basis": "TTM"
-    },
-    {
-      "theta": 0.2,
-      "pe_cap": 30,
-      "ev_cap": 25,
-      "size_filter": true,
-      "basis": "TTM"
-    },
-    {
-      "theta": 0.2,
-      "pe_cap": 30,
-      "ev_cap": 35,
-      "size_filter": true,
-      "basis": "TTM"
-    },
-    {
-      "theta": 0.2,
-      "pe_cap": 30,
-      "ev_cap": 45,
-      "size_filter": true,
-      "basis": "TTM"
-    },
-    {
-      "theta": 0.2,
-      "pe_cap": 40,
-      "ev_cap": 25,
-      "size_filter": true,
-      "basis": "TTM"
-    },
-    {
-      "theta": 0.2,
-      "pe_cap": 40,
-      "ev_cap": 35,
-      "size_filter": true,
-      "basis": "TTM"
-    },
-    {
-      "theta": 0.2,
-      "pe_cap": 40,
-      "ev_cap": 45,
-      "size_filter": true,
-      "basis": "TTM"
-    },
-    {
-      "theta": 0.2,
-      "pe_cap": 50,
-      "ev_cap": 25,
-      "size_filter": true,
-      "basis": "TTM"
-    },
-    {
-      "theta": 0.2,
-      "pe_cap": 50,
-      "ev_cap": 35,
-      "size_filter": true,
-      "basis": "TTM"
-    },
-    {
-      "theta": 0.2,
-      "pe_cap": 50,
-      "ev_cap": 45,
-      "size_filter": true,
-      "basis": "TTM"
-    },
-    {
-      "theta": 0.1,
-      "pe_cap": 30,
-      "ev_cap": 25,
-      "size_filter": false,
-      "basis": "TTM"
-    },
-    {
-      "theta": 0.1,
-      "pe_cap": 30,
       "ev_cap": 35,
       "size_filter": false,
-      "basis": "TTM"
-    },
-    {
-      "theta": 0.1,
-      "pe_cap": 30,
-      "ev_cap": 45,
-      "size_filter": false,
-      "basis": "TTM"
-    },
-    {
-      "theta": 0.1,
-      "pe_cap": 40,
-      "ev_cap": 25,
-      "size_filter": false,
-      "basis": "TTM"
+      "basis": "TTM",
+      "mom_filter": 0.0
     },
     {
       "theta": 0.1,
       "pe_cap": 40,
       "ev_cap": 35,
       "size_filter": false,
-      "basis": "TTM"
+      "basis": "TTM",
+      "mom_filter": 0.3
     },
     {
       "theta": 0.1,
       "pe_cap": 40,
-      "ev_cap": 45,
-      "size_filter": false,
-      "basis": "TTM"
-    },
-    {
-      "theta": 0.1,
-      "pe_cap": 50,
-      "ev_cap": 25,
-      "size_filter": false,
-      "basis": "TTM"
-    },
-    {
-      "theta": 0.1,
-      "pe_cap": 50,
       "ev_cap": 35,
       "size_filter": false,
-      "basis": "TTM"
-    },
-    {
-      "theta": 0.1,
-      "pe_cap": 50,
-      "ev_cap": 45,
-      "size_filter": false,
-      "basis": "TTM"
-    },
-    {
-      "theta": 0.15,
-      "pe_cap": 30,
-      "ev_cap": 25,
-      "size_filter": false,
-      "basis": "TTM"
-    },
-    {
-      "theta": 0.15,
-      "pe_cap": 30,
-      "ev_cap": 35,
-      "size_filter": false,
-      "basis": "TTM"
-    },
-    {
-      "theta": 0.15,
-      "pe_cap": 30,
-      "ev_cap": 45,
-      "size_filter": false,
-      "basis": "TTM"
-    },
-    {
-      "theta": 0.15,
-      "pe_cap": 40,
-      "ev_cap": 25,
-      "size_filter": false,
-      "basis": "TTM"
+      "basis": "TTM",
+      "mom_filter": 0.5
     },
     {
       "theta": 0.15,
       "pe_cap": 40,
       "ev_cap": 35,
       "size_filter": false,
-      "basis": "TTM"
+      "basis": "TTM",
+      "mom_filter": 0.0
     },
     {
       "theta": 0.15,
       "pe_cap": 40,
-      "ev_cap": 45,
-      "size_filter": false,
-      "basis": "TTM"
-    },
-    {
-      "theta": 0.15,
-      "pe_cap": 50,
-      "ev_cap": 25,
-      "size_filter": false,
-      "basis": "TTM"
-    },
-    {
-      "theta": 0.15,
-      "pe_cap": 50,
       "ev_cap": 35,
       "size_filter": false,
-      "basis": "TTM"
+      "basis": "TTM",
+      "mom_filter": 0.3
     },
     {
       "theta": 0.15,
-      "pe_cap": 50,
-      "ev_cap": 45,
-      "size_filter": false,
-      "basis": "TTM"
-    },
-    {
-      "theta": 0.2,
-      "pe_cap": 30,
-      "ev_cap": 25,
-      "size_filter": false,
-      "basis": "TTM"
-    },
-    {
-      "theta": 0.2,
-      "pe_cap": 30,
-      "ev_cap": 35,
-      "size_filter": false,
-      "basis": "TTM"
-    },
-    {
-      "theta": 0.2,
-      "pe_cap": 30,
-      "ev_cap": 45,
-      "size_filter": false,
-      "basis": "TTM"
-    },
-    {
-      "theta": 0.2,
       "pe_cap": 40,
-      "ev_cap": 25,
+      "ev_cap": 35,
       "size_filter": false,
-      "basis": "TTM"
+      "basis": "TTM",
+      "mom_filter": 0.5
     },
     {
       "theta": 0.2,
       "pe_cap": 40,
       "ev_cap": 35,
       "size_filter": false,
-      "basis": "TTM"
+      "basis": "TTM",
+      "mom_filter": 0.0
     },
     {
       "theta": 0.2,
       "pe_cap": 40,
-      "ev_cap": 45,
-      "size_filter": false,
-      "basis": "TTM"
-    },
-    {
-      "theta": 0.2,
-      "pe_cap": 50,
-      "ev_cap": 25,
-      "size_filter": false,
-      "basis": "TTM"
-    },
-    {
-      "theta": 0.2,
-      "pe_cap": 50,
       "ev_cap": 35,
       "size_filter": false,
-      "basis": "TTM"
+      "basis": "TTM",
+      "mom_filter": 0.3
     },
     {
       "theta": 0.2,
-      "pe_cap": 50,
-      "ev_cap": 45,
+      "pe_cap": 40,
+      "ev_cap": 35,
       "size_filter": false,
-      "basis": "TTM"
+      "basis": "TTM",
+      "mom_filter": 0.5
     }
   ],
   "extra": {
@@ -465,14 +150,17 @@
       "test_policy": "single look at the chosen cell"
     },
     "doc_defaults": {
-      "theta": 0.15,
+      "theta": 0.1,
       "pe_cap": 40,
       "ev_cap": 35,
-      "size_filter": true,
-      "basis": "TTM"
+      "size_filter": false,
+      "basis": "TTM",
+      "mom_filter": 0.0
     },
     "cost_bps_one_way": 10,
-    "rebalance": "month-end signal, trade at next close, hold one month"
+    "rebalance": "month-end signal, trade at next close, hold one month",
+    "version": "v2",
+    "v2_rationale": "v2 (registered before any v2 run): v1 choice (caps 40/35, no size filter) kept; adds a value-trap momentum filter (0/30/50%); theta 10/15/20%. Default = v1 choice (theta 10%)."
   },
   "history": [
     {
@@ -504,6 +192,12 @@
         "stale_days": 135,
         "km_params": null
       }
+    },
+    {
+      "timestamp": "2026-10-19T02:29:30+00:00",
+      "content_hash": "64eaec5015d99446",
+      "n_cells": 54,
+      "grid_hash": "92b7a8819a9f6384"
     }
   ]
 }

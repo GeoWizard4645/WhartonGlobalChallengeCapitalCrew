@@ -189,20 +189,23 @@ def reference_q0(ctx, t, N, technical, order="MF", shortlist=0.2):
 # grid / params
 # --------------------------------------------------------------------------------------------------
 def test_grid_shape_default_in_grid_and_json_serializable():
-    assert len(qm.GRID) == 216 == 3 * 3 * 3 * 2 * 4
+    # v2 grid: N x momentum type x quality x technical (RSI band and stop-loss dropped after v1)
+    assert len(qm.GRID) == 24 == 3 * 2 * 2 * 2
     assert qm.DEFAULT in qm.GRID
-    assert len({json.dumps(c, sort_keys=True) for c in qm.GRID}) == 216
+    assert len({json.dumps(c, sort_keys=True) for c in qm.GRID}) == 24
     json.dumps(qm.GRID)
-    assert qm.DEFAULT == dict(order="MF", shortlist=0.2, x_debt=1.0, N=10, quality="Q3a", technical="sma_rsi",
-                              stop_loss="none", vol_target="none")
-    assert qm.AXES == {"N": [5, 10, 20], "stop_loss": ["none", 0.15, 0.10]}
-    assert qm.CATEGORICAL["quality"] == ["Q0", "Q3a", "Q1-50", "Q2-Q50"]
+    assert qm.DEFAULT == dict(order="MF", shortlist=0.2, x_debt=1.0, stop_loss="none", vol_target="none", N=10,
+                              quality="Q3a", technical="sma", mom_type="raw")
+    assert qm.AXES == {"N": [10, 20, 30]}
+    assert qm.CATEGORICAL == {"mom_type": ["raw", "residual"], "quality": ["Q3a", "Q1-50"],
+                              "technical": ["none", "sma"]}
+    assert qm.DOC_DEFAULT["technical"] == "sma_rsi" and qm.DOC_DEFAULT["quality"] == "Q3a"
 
 
 def test_preregister_roundtrip_and_run_grid_accepts_the_registered_cells(tmp_path):
     path = qm.register(out_dir=tmp_path)
     doc = json.loads(path.read_text())
-    assert doc["n_cells"] == 216 and doc["default"] == qm.DEFAULT
+    assert doc["n_cells"] == 24 and doc["default"] == qm.DEFAULT
     assert grid.grid_hash(qm.GRID) == doc["grid_hash"]
     assert qm.register(out_dir=tmp_path) == path                 # idempotent
     lay = grid._Layout.build(qm.GRID, qm.AXES, qm.CATEGORICAL, qm.DEFAULT)

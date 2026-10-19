@@ -75,23 +75,32 @@ TABLE_QUALITY_COLS = ["gpoa", "gpoa_pct", "gmar", "roe", "roa", "debt_to_equity"
 # ----------------------------------------------------------------------------------------------
 # DEFAULT / GRID (pre-registered, see register())
 # ----------------------------------------------------------------------------------------------
-FIXED = dict(order="MF", shortlist=0.20, x_debt=1.0)
-DEFAULT = dict(FIXED, N=10, quality="Q3a", technical="sma_rsi", stop_loss="none", vol_target="none")
+# v1 (doc) grid, run 2026-10-19: N {5,10,20} x stop {none,15%,10%} x technical {none, 200-DMA, 200-DMA+RSI}
+# x vol target {none, 20%} x quality {Q0, Q3a, Q1-50, Q2-Q50} = 216 cells; selection fell back to the doc default
+# (N=10, Q3a, 200-DMA + RSI 50-70). Train-window findings: stop-losses and the RSI band lowered Sharpe; the
+# research-backed gross-profitability quality screen (Q1-50, Novy-Marx 2013) beat the doc's heuristic Q3a.
+DOC_DEFAULT = dict(order="MF", shortlist=0.20, x_debt=1.0, N=10, quality="Q3a", technical="sma_rsi",
+                   stop_loss="none", vol_target="none", mom_type="raw")
 
-AXES = {"N": [5, 10, 20], "stop_loss": ["none", 0.15, 0.10]}          # ordinal, ordered loose -> tight
-CATEGORICAL = {"technical": ["none", "sma", "sma_rsi"], "vol_target": ["none", 0.20],
-               "quality": ["Q0", "Q3a", "Q1-50", "Q2-Q50"]}
+# v2 grid: drop the RSI band and stop-loss, add residual momentum (Blitz, Huij & Martens 2011) and test the
+# Novy-Marx quality screen against the doc's. Default = the doc rules minus RSI.
+FIXED = dict(order="MF", shortlist=0.20, x_debt=1.0, stop_loss="none", vol_target="none")
+DEFAULT = dict(FIXED, N=10, quality="Q3a", technical="sma", mom_type="raw")
+
+AXES = {"N": [10, 20, 30]}                                            # ordinal
+CATEGORICAL = {"mom_type": ["raw", "residual"], "quality": ["Q3a", "Q1-50"], "technical": ["none", "sma"]}
 
 GRID: list[dict] = [
-    dict(FIXED, N=n, quality=q, technical=tc, stop_loss=sl, vol_target=vt)
-    for q, tc, vt, sl, n in itertools.product(CATEGORICAL["quality"], CATEGORICAL["technical"],
-                                              CATEGORICAL["vol_target"], AXES["stop_loss"], AXES["N"])
+    dict(FIXED, N=n, quality=q, technical=tc, mom_type=mt)
+    for mt, q, tc, n in itertools.product(CATEGORICAL["mom_type"], CATEGORICAL["quality"],
+                                          CATEGORICAL["technical"], AXES["N"])
 ]
 
-_OPTIONAL = dict(y_nde=3.0, trend_exit_daily=False)           # not part of the cells; accepted for ablations
+_OPTIONAL = dict(y_nde=3.0, trend_exit_daily=False, mom_type="raw")   # accepted when not part of the cells
 _ALLOWED = set(DEFAULT) | set(_OPTIONAL)
 _TECHNICALS = ("none", "sma", "sma_rsi")
 _ORDERS = ("MF", "QF")
+_MOM_TYPES = ("raw", "residual")
 
 
 def register(force: bool = False, out_dir=None):
@@ -131,6 +140,8 @@ def _params(params: dict | None) -> dict:
         raise ValueError(f"technical must be one of {_TECHNICALS}")
     if p["order"] not in _ORDERS:
         raise ValueError(f"order must be one of {_ORDERS}")
+    if p["mom_type"] not in _MOM_TYPES:
+        raise ValueError(f"mom_type must be one of {_MOM_TYPES}")
     p["shortlist"] = float(p["shortlist"])
     if not 0.0 < p["shortlist"] <= 1.0:
         raise ValueError("shortlist must be in (0, 1]")
@@ -219,14 +230,17 @@ def _price_restore_factor(ctx, tickers, t: pd.Timestamp) -> np.ndarray:
 # ----------------------------------------------------------------------------------------------
 # per-date eligible frame
 # ----------------------------------------------------------------------------------------------
-def _frame(ctx, t: pd.Timestamp) -> pd.DataFrame:
+def _frame(ctx, t: pd.Timestamp, mom_type: str = "raw") -> pd.DataFrame:
     """Eligible universe at ``t`` sorted by momentum (desc, ties by ticker), with all technical inputs.
+
+    ``mom_type``: 'raw' = 12-1 total-return momentum; 'residual' = Blitz-Huij-Martens residual momentum (the
+    ranking variable ``mom``); the raw 12-1 return is always kept in ``mom_raw`` for display.
 
     ``frame.attrs`` holds the funnel counts n_sp1500 / n_fin / n_price / n_hist / n_mom (sequential).
     """
     cache = _cache(ctx)["frames"]
-    if t in cache:
-        return cache[t]
+    if (t, mom_type) in cache:
+        return cache[(t, mom_type)]
     tp = tech.get_technicals(ctx)
     u = ctx.universe(t, UNIVERSE)
     n0 = len(u)
@@ -250,7 +264,8 @@ def _frame(ctx, t: pd.Timestamp) -> pd.DataFrame:
     close_t = np.where(ok_col, row(ctx.close), np.nan)
     price = close_t * _price_restore_factor(ctx, tick, t)   # raw (as-traded) price on t
     hist = pos - _first_pos(ctx)[cols] + 1
-    mom = np.where(ok_col, row(tp.mom), np.nan)
+    mom_raw = np.where(ok_col, row(tp.mom), np.nan)
+    mom = mom_raw if mom_type == "raw" else np.where(ok_col, row(tech.get_residual_momentum(ctx)), np.nan)
 
     m_price = np.isfinite(price) & (price >= MIN_PRICE)
     m_hist = m_price & (hist >= MIN_HISTORY)
@@ -266,6 +281,7 @@ def _frame(ctx, t: pd.Timestamp) -> pd.DataFrame:
         "price": price,
         "close": close_t,
         "mom": mom,
+        "mom_raw": mom_raw,
         "sma200": np.where(ok_col, row(tp.sma200), np.nan),
         "rsi14": np.where(ok_col, row(tp.rsi14), np.nan),
         "hi52": np.where(ok_col, row(tp.hi52), np.nan),
@@ -274,7 +290,7 @@ def _frame(ctx, t: pd.Timestamp) -> pd.DataFrame:
     F["mom_rank"] = np.arange(1, len(F) + 1)
     F.attrs.update(n_sp1500=n0, n_fin=n_fin, n_price=int(m_price.sum()), n_hist=int(m_hist.sum()),
                    n_mom=int(m_mom.sum()))
-    cache[t] = F
+    cache[(t, mom_type)] = F
     return F
 
 
@@ -284,7 +300,9 @@ def _frame(ctx, t: pd.Timestamp) -> pd.DataFrame:
 def _qtable(ctx, t: pd.Timestamp, F: pd.DataFrame) -> pd.DataFrame:
     cache = _cache(ctx)["qt"]
     if t not in cache:
-        cache[t] = quality_mod.quality_table(ctx, t, F)
+        # percentiles / industry medians are always taken over the same cross-section (the raw-momentum
+        # eligible universe), whichever momentum definition is ranking the names
+        cache[t] = quality_mod.quality_table(ctx, t, _frame(ctx, t, "raw"))
     return cache[t]
 
 
@@ -354,11 +372,12 @@ def _masks(ctx, t, F: pd.DataFrame, p: dict) -> dict:
 
 def _signal(ctx, t: pd.Timestamp, p: dict) -> dict:
     """Ranked list of ALL names passing every stage at ``t`` (top N is a slice) plus the funnel counts."""
-    key = (t, p["quality"], p["technical"], p["order"], round(p["shortlist"], 9), p["x_debt"], p["y_nde"])
+    key = (t, p["quality"], p["technical"], p["order"], round(p["shortlist"], 9), p["x_debt"], p["y_nde"],
+           p["mom_type"])
     cache = _cache(ctx)["sig"]
     if key in cache:
         return cache[key]
-    F = _frame(ctx, t)
+    F = _frame(ctx, t, p["mom_type"])
     n = len(F)
     m = _masks(ctx, t, F, p)
     s1 = m["short"]
@@ -545,7 +564,7 @@ def live_picks(ctx, params: dict, asof=None) -> pd.DataFrame:
     """
     p = _params(params)
     t = _snap(ctx, ctx.dates[-1] if asof is None else asof)
-    F = _frame(ctx, t)
+    F = _frame(ctx, t, p["mom_type"])
     m = _masks(ctx, t, F, p)
     arm = p["quality"]
     sg = _signal(ctx, t, p)
@@ -556,7 +575,8 @@ def live_picks(ctx, params: dict, asof=None) -> pd.DataFrame:
     d["pass_sma200"] = m["sma"]
     d["pass_rsi"] = m["rsi"]
     d["sma200_gap"] = d["close"] / d["sma200"] - 1.0
-    d["mom_12_1"] = d["mom"]
+    d["mom_12_1"] = d["mom_raw"]
+    d["mom_score"] = d["mom"]
     stage = np.where(~d["pass_shortlist"], "shortlist", np.where(~d["pass_quality"], "quality",
              np.where(~d["pass_sma200"], "sma200", np.where(~d["pass_rsi"], "rsi", ""))))
     d["dropped_by"] = stage
@@ -576,7 +596,7 @@ def live_picks(ctx, params: dict, asof=None) -> pd.DataFrame:
     d["weight_after_vol"] = d["weight"] * scalar
 
     base = ["rank", "selected", "weight", "weight_after_vol", "dropped_by", "mom_rank", "ticker", "cik", "name",
-            "gics_sector", "gics_industry", "price", "mom_12_1", "sma200", "sma200_gap", "rsi14", "hi52",
+            "gics_sector", "gics_industry", "price", "mom_12_1", "mom_score", "sma200", "sma200_gap", "rsi14", "hi52",
             "pass_shortlist", "pass_quality", "pass_sma200", "pass_rsi"]
     d["ticker"] = d["yf_ticker"]
     out = d[d["pass_shortlist"]][base + [c for c in TABLE_QUALITY_COLS if c in d.columns]].copy()

@@ -636,13 +636,16 @@ def test_live_picks_shape_alternates_staleness_and_sector_summary():
 # pre-registered design
 # ------------------------------------------------------------------------------------------------
 def test_grid_is_18_unique_cells_and_contains_default():
+    # v2 grid: n x momentum filter x ranking, around the v1 choice (n=25, >= $5B, staggered)
     assert len(mf.GRID) == 18
-    keys = [(c["n"], c["min_cap"], c["holding"]) for c in mf.GRID]
+    keys = [(c["n"], c["mom_filter"], c["ranking"]) for c in mf.GRID]
     assert len(set(keys)) == 18
     assert mf.DEFAULT in mf.GRID
-    assert mf.DEFAULT["n"] == 30 and mf.DEFAULT["min_cap"] == 1e9 and mf.DEFAULT["holding"] == "staggered"
+    assert mf.DEFAULT["n"] == 25 and mf.DEFAULT["min_cap"] == 5e9 and mf.DEFAULT["holding"] == "staggered"
     assert mf.DEFAULT["ranking"] == "MF" and mf.DEFAULT["universe"] == "SP900" and mf.DEFAULT["cost_bps"] == 10
-    assert all(c["ranking"] == "MF" for c in mf.GRID)
+    assert mf.DEFAULT["mom_filter"] == 0.0
+    assert all(c["min_cap"] == 5e9 and c["holding"] == "staggered" for c in mf.GRID)
+    assert mf.DOC_DEFAULT["n"] == 30 and mf.DOC_DEFAULT["min_cap"] == 1e9
     json.dumps(mf.GRID)                                            # JSON-serializable
 
 
@@ -661,8 +664,8 @@ def test_preregistration_roundtrip_and_validates_against_grid_module(tmp_path):
     path = mf.preregister(out_dir=tmp_path)
     doc = json.loads(path.read_text())
     assert doc["n_cells"] == 18 and doc["default"] == mf.DEFAULT
-    assert doc["axes"] == {"n": [20, 25, 30], "min_cap": [50e6, 1e9, 5e9]}
-    assert doc["categorical"] == {"holding": ["staggered", "annual"]}
+    assert doc["axes"] == {"n": [20, 25, 30], "mom_filter": [0.0, 0.3, 0.5]}
+    assert doc["categorical"] == {"ranking": ["MF", "GPA"]}
     assert set(doc["extra"]["ablations"]) == set(mf.ABLATIONS)
     mtime = path.stat().st_mtime_ns
     assert mf.preregister(out_dir=tmp_path) == path and path.stat().st_mtime_ns == mtime     # idempotent

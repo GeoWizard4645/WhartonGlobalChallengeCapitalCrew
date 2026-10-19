@@ -1,0 +1,37 @@
+strategy,version,window,cagr_%,vol_%,sharpe,max_drawdown_%,months,alpha_%,alpha_t
+Quality momentum,improved,train,14.7,13.7,1.04,-15.7,95,2.1,1.0
+Quality momentum,improved,test,24.8,22.9,0.97,-24.2,93,4.2,0.96
+Quality momentum,improved,full,19.6,18.9,0.97,-24.2,188,3.3,1.33
+Quality momentum,doc rules,train,8.0,16.4,0.53,-27.9,95,-3.0,-0.76
+Quality momentum,doc rules,test,20.0,28.4,0.69,-32.7,93,3.8,0.52
+Quality momentum,doc rules,full,13.8,23.2,0.61,-32.7,188,0.3,0.07
+Quality momentum,equal-weight universe,train,11.3,13.1,0.85,-19.9,95,0.3,0.36
+Quality momentum,equal-weight universe,test,13.7,19.4,0.62,-28.5,93,-1.9,-1.45
+Quality momentum,equal-weight universe,full,12.5,16.5,0.7,-28.5,188,-0.7,-0.84
+Quality momentum,SPY,train,11.2,11.4,0.95,-16.2,96,-0.3,-1.23
+Quality momentum,SPY,test,17.2,16.4,0.89,-23.9,93,-0.1,-0.34
+Quality momentum,SPY,full,14.1,14.0,0.9,-23.9,189,-0.2,-0.85
+Magic Formula,improved,train,13.7,12.4,1.06,-19.3,90,1.6,0.98
+Magic Formula,improved,test,14.3,17.9,0.69,-26.9,93,-1.2,-0.56
+Magic Formula,improved,full,14.0,15.4,0.82,-26.9,183,0.5,0.34
+Magic Formula,doc rules,train,11.3,14.4,0.78,-19.7,90,0.2,0.11
+Magic Formula,doc rules,test,14.4,20.2,0.63,-24.8,93,0.0,0.01
+Magic Formula,doc rules,full,12.8,17.6,0.69,-24.8,183,0.4,0.22
+Magic Formula,equal-weight universe,train,10.8,14.3,0.76,-20.7,90,-0.4,-0.41
+Magic Formula,equal-weight universe,test,14.0,20.1,0.62,-29.3,93,-1.9,-1.37
+Magic Formula,equal-weight universe,full,12.4,17.5,0.67,-29.3,183,-1.0,-1.24
+Magic Formula,SPY,train,10.7,11.6,0.9,-15.3,91,-0.3,-1.29
+Magic Formula,SPY,test,17.2,16.4,0.89,-23.9,93,-0.1,-0.34
+Magic Formula,SPY,full,14.0,14.2,0.88,-23.9,184,-0.2,-0.9
+Trading comps,improved,train,8.0,15.3,0.55,-26.7,83,-3.2,-1.0
+Trading comps,improved,test,13.0,24.6,0.51,-38.7,93,-1.5,-0.46
+Trading comps,improved,full,10.6,20.7,0.51,-44.2,176,-2.0,-0.87
+Trading comps,doc rules,train,2.4,15.5,0.2,-31.6,83,-7.8,-2.21
+Trading comps,doc rules,test,11.9,24.0,0.47,-35.9,93,-3.0,-1.04
+Trading comps,doc rules,full,7.3,20.5,0.37,-42.7,176,-5.2,-2.41
+Trading comps,equal-weight universe,train,11.9,11.7,0.98,-15.7,83,0.5,0.54
+Trading comps,equal-weight universe,test,13.7,19.4,0.62,-28.5,93,-1.9,-1.45
+Trading comps,equal-weight universe,full,12.9,16.2,0.73,-28.5,176,-0.8,-0.98
+Trading comps,SPY,train,12.6,10.6,1.12,-13.5,84,-0.3,-1.39
+Trading comps,SPY,test,17.2,16.4,0.89,-23.9,93,-0.1,-0.34
+Trading comps,SPY,full,15.0,13.9,0.96,-23.9,177,-0.2,-0.92

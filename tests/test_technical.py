@@ -238,3 +238,52 @@ def test_get_technicals_is_cached_on_the_context():
     assert a.mom is a.mom                                           # lazy property computed once
     assert a.rsi14.shape == ctx.close.shape
     assert a.vol126().shape == ctx.close.shape
+
+
+# --------------------------------------------------------------------------------------------------
+# residual momentum (Blitz, Huij & Martens 2011)
+# --------------------------------------------------------------------------------------------------
+def _residual_world(seed=0, n_months=60):
+    rng = np.random.default_rng(seed)
+    days = pd.bdate_range("2015-01-01", periods=n_months * 21 + 5)
+    months = days.to_period("M")
+    mend = pd.Series(days, index=days).groupby(months).max()
+    f = pd.DataFrame({"Mkt-RF": rng.normal(0.008, 0.04, len(mend)), "SMB": rng.normal(0, 0.02, len(mend)),
+                      "HML": rng.normal(0, 0.02, len(mend)), "RF": 0.001}, index=mend.to_numpy())
+    rets = {}
+    recent = np.arange(len(mend)) >= len(mend) - 12        # the last 12 months (formation period)
+    for tk, beta, drift in (("HI_BETA", 2.0, 0.0), ("ALPHA", 1.0, 0.02), ("PLAIN", 1.0, 0.0)):
+        # ALPHA outperforms what the factors explain only recently: residual momentum should rank it first
+        # (a constant all-window drift would be absorbed by the regression intercept, as in the paper)
+        rets[tk] = 0.001 + beta * f["Mkt-RF"].to_numpy() + drift * recent + rng.normal(0, 0.01, len(mend))
+    m = pd.DataFrame(rets, index=mend.to_numpy())
+    # daily prices that hit the monthly returns exactly at month-ends (flat within the month)
+    px = (1 + m).cumprod()
+    adj = px.reindex(days).bfill().ffill()
+    return adj, f
+
+
+def test_residual_momentum_ranks_idiosyncratic_drift_not_market_beta():
+    adj, f = _residual_world()
+    rm = T.residual_momentum(adj, f)
+    last = rm.iloc[-1]
+    # ALPHA earns 2%/month the factors cannot explain -> top score; HI_BETA only has market exposure
+    assert last["ALPHA"] > last["PLAIN"] and last["ALPHA"] > last["HI_BETA"]
+    assert abs(last["HI_BETA"]) < last["ALPHA"]
+
+
+def test_residual_momentum_uses_only_past_data():
+    adj, f = _residual_world(seed=1)
+    full = T.residual_momentum(adj, f)
+    me = adj.groupby(adj.index.to_period("M")).tail(1).index
+    t = me[45]
+    cut = T.residual_momentum(adj.loc[:t], f)            # no prices after t
+    pd.testing.assert_series_equal(full.loc[t], cut.loc[t])
+    shocked = adj.copy()
+    shocked.loc[shocked.index > t] *= 3.0                   # future prices change, past signal must not
+    pd.testing.assert_series_equal(T.residual_momentum(shocked, f).loc[t], full.loc[t])
+
+
+def test_residual_momentum_needs_a_full_window():
+    adj, f = _residual_world(n_months=30)                   # shorter than the 36-month regression window
+    assert T.residual_momentum(adj, f).isna().all().all()

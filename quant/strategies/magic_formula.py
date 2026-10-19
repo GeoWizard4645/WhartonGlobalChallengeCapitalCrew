@@ -100,7 +100,7 @@ EBIT_MODES = ("opinc", "pretax_interest")
 # Exclusion reasons, in the priority order used for the mutually exclusive ``first_reason``.
 REASONS = ("sector", "no_snapshot", "stale", "no_classified_bs", "mcap_missing", "price_lt_floor",
            "mcap_lt_min", "ebit_missing", "ebit_nonpos", "debt_unmapped", "ev_nonpos", "capital_nonpos",
-           "gp_missing", "other")
+           "gp_missing", "mom_low", "other")
 _STRUCTURAL = ("sector", "no_snapshot", "stale", "no_classified_bs", "mcap_missing", "price_lt_floor",
                "ebit_missing", "ebit_nonpos", "debt_unmapped", "ev_nonpos", "capital_nonpos")
 
@@ -115,22 +115,28 @@ UNIVERSE_NOTES = {
 # --------------------------------------------------------------------------------------------------
 # pre-registered design
 # --------------------------------------------------------------------------------------------------
+# v1 (doc) grid, run 2026-10-19: n {20,25,30} x min cap {$50M,$1B,$5B} x holding {staggered, annual};
+# selected n=25, min cap $5B, staggered (the plateau was stable; the settings barely mattered).
+# v2 grid (below): keeps the v1 choice and adds the value-trap momentum filter (Asness, Moskowitz & Pedersen 2013)
+# and gross profit/assets as the quality rank (Novy-Marx 2013). Default = the v1 choice.
 DEFAULT: dict = {
     "ranking": "MF",               # combined ROC + EY rank
-    "n": 30,
-    "min_cap": 1e9,                # USD
+    "n": 25,
+    "min_cap": 5e9,                # USD
     "holding": "staggered",
     "universe": "SP900",
     "cost_bps": 10.0,              # one-way
     "excess_cash": "min_ca_cl",
     "ebit": "opinc",
+    "mom_filter": 0.0,             # drop names in the bottom X of 12-1 momentum (value-trap guard); 0 = off
 }
 
-AXES: dict = {"n": [20, 25, 30], "min_cap": [50e6, 1e9, 5e9]}      # ordinal
-CATEGORICAL: dict = {"holding": ["staggered", "annual"]}
+DOC_DEFAULT: dict = dict(DEFAULT, n=30, min_cap=1e9)
+AXES: dict = {"n": [20, 25, 30], "mom_filter": [0.0, 0.3, 0.5]}      # ordinal
+CATEGORICAL: dict = {"ranking": ["MF", "GPA"]}
 
-GRID: list[dict] = [dict(DEFAULT, n=n, min_cap=mc, holding=h)
-                    for h in CATEGORICAL["holding"] for n in AXES["n"] for mc in AXES["min_cap"]]
+GRID: list[dict] = [dict(DEFAULT, n=n, mom_filter=m, ranking=r)
+                    for r in CATEGORICAL["ranking"] for n in AXES["n"] for m in AXES["mom_filter"]]
 
 # One-at-a-time robustness around the SELECTED cell.  Name -> overrides; use ``ablation_params(base)``.
 # Each one the lead runs is a trial in the ledger.
@@ -190,6 +196,9 @@ def _params(params: dict | None) -> dict:
         raise ValueError("n must be >= 1")
     p["min_cap"] = float(p["min_cap"])
     p["cost_bps"] = float(p["cost_bps"])
+    p["mom_filter"] = float(p["mom_filter"])
+    if not 0.0 <= p["mom_filter"] < 1.0:
+        raise ValueError("mom_filter must be in [0, 1)")
     return p
 
 
@@ -470,11 +479,21 @@ def _build_base(ctx, date: pd.Timestamp, univ: pd.DataFrame, p: dict) -> pd.Data
         "minority_interest_raw": nci_raw,
         "ev": ev,
         "ey": ey,
+        "mom_12_1": _momentum(ctx, date, tick),
     }, index=idx)
     for k in _STRUCTURAL:
         out[f"fail_{k}"] = fail[k].astype(bool).to_numpy()
     out["ok_struct"] = ok_struct.to_numpy()
     return out
+
+
+def _momentum(ctx, date: pd.Timestamp, tickers) -> np.ndarray:
+    """12-1 total-return momentum P[t-21]/P[t-252]-1 on ``date`` (same signal as the momentum strategy)."""
+    from quant.signals import technical as tech
+    mom = tech.get_technicals(ctx).mom
+    if date not in mom.index:
+        return np.full(len(tickers), np.nan)
+    return mom.loc[date].reindex(pd.Index(tickers)).to_numpy(dtype="float64")
 
 
 def _rank_desc(s: pd.Series, mask: pd.Series) -> pd.Series:
@@ -491,7 +510,15 @@ def _finish(base: pd.DataFrame, p: dict) -> pd.DataFrame:
         t["fail_gp_missing"] = (~np.isfinite(t["gpa"])).to_numpy()
     else:
         t["fail_gp_missing"] = False
-    t["eligible"] = t["ok_struct"] & ~t["fail_mcap_lt_min"] & ~t["fail_gp_missing"]
+    # Value-trap guard (Asness, Moskowitz & Pedersen 2013: value and momentum are negatively correlated, and
+    # cheap stocks that are still falling keep falling): drop names in the bottom `mom_filter` fraction of 12-1
+    # momentum, ranked across the whole universe on that date. Off when mom_filter == 0.
+    if p["mom_filter"] > 0:
+        pct = t["mom_12_1"].rank(pct=True)
+        t["fail_mom_low"] = (~(pct >= p["mom_filter"])).to_numpy()      # NaN momentum fails
+    else:
+        t["fail_mom_low"] = False
+    t["eligible"] = t["ok_struct"] & ~t["fail_mcap_lt_min"] & ~t["fail_gp_missing"] & ~t["fail_mom_low"]
     named = np.column_stack([t[f"fail_{r}"].to_numpy(bool) for r in REASONS if r != "other"]).any(axis=1)
     t["fail_other"] = (~t["eligible"].to_numpy(bool)) & ~named          # ineligible without a named reason
 
@@ -596,7 +623,7 @@ def _cap_label(mc: float) -> str:
     return f"{mc:g}"
 
 
-def coverage_counts(ctx, universe: str = "SP900", caps=tuple(AXES["min_cap"]), start=COVERAGE_SEARCH_FROM,
+def coverage_counts(ctx, universe: str = "SP900", caps=(50e6, 1e9, 5e9), start=COVERAGE_SEARCH_FROM,
                     end=COVERAGE_PLATEAU[1], params: dict | None = None) -> pd.DataFrame:
     """Per month-end data-coverage statistics for each market-cap tier (no returns involved).
 

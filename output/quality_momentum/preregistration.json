@@ -1,6 +1,6 @@
 {
   "strategy": "quality_momentum",
-  "timestamp": "2026-10-19T02:57:36+00:00",
+  "timestamp": "2026-10-19T21:58:38+00:00",
   "primary_metric": "net_sharpe",
   "selection_rule": "plateau_v1",
   "lam": 1.0,
@@ -16,2208 +16,305 @@
     "test_start": "2019-01-01"
   },
   "test_window_policy": "single_look",
-  "n_cells": 216,
-  "grid_hash": "2228d52bea269027",
-  "content_hash": "a9d60cdad40ecf45",
+  "n_cells": 24,
+  "grid_hash": "3c3fa322f828eec0",
+  "content_hash": "e86a28576fdbbf5c",
   "axes": {
     "N": [
-      5,
       10,
-      20
-    ],
-    "stop_loss": [
-      "none",
-      0.15,
-      0.1
+      20,
+      30
     ]
   },
   "categorical": {
-    "technical": [
-      "none",
-      "sma",
-      "sma_rsi"
-    ],
-    "vol_target": [
-      "none",
-      0.2
+    "mom_type": [
+      "raw",
+      "residual"
     ],
     "quality": [
-      "Q0",
       "Q3a",
-      "Q1-50",
-      "Q2-Q50"
+      "Q1-50"
+    ],
+    "technical": [
+      "none",
+      "sma"
     ]
   },
   "default": {
     "order": "MF",
     "shortlist": 0.2,
     "x_debt": 1.0,
+    "stop_loss": "none",
+    "vol_target": "none",
     "N": 10,
     "quality": "Q3a",
-    "technical": "sma_rsi",
-    "stop_loss": "none",
-    "vol_target": "none"
+    "technical": "sma",
+    "mom_type": "raw"
   },
   "grid": [
     {
       "order": "MF",
       "shortlist": 0.2,
       "x_debt": 1.0,
-      "N": 5,
-      "quality": "Q0",
-      "technical": "none",
       "stop_loss": "none",
-      "vol_target": "none"
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 10,
-      "quality": "Q0",
-      "technical": "none",
-      "stop_loss": "none",
-      "vol_target": "none"
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 20,
-      "quality": "Q0",
-      "technical": "none",
-      "stop_loss": "none",
-      "vol_target": "none"
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 5,
-      "quality": "Q0",
-      "technical": "none",
-      "stop_loss": 0.15,
-      "vol_target": "none"
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 10,
-      "quality": "Q0",
-      "technical": "none",
-      "stop_loss": 0.15,
-      "vol_target": "none"
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 20,
-      "quality": "Q0",
-      "technical": "none",
-      "stop_loss": 0.15,
-      "vol_target": "none"
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 5,
-      "quality": "Q0",
-      "technical": "none",
-      "stop_loss": 0.1,
-      "vol_target": "none"
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 10,
-      "quality": "Q0",
-      "technical": "none",
-      "stop_loss": 0.1,
-      "vol_target": "none"
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 20,
-      "quality": "Q0",
-      "technical": "none",
-      "stop_loss": 0.1,
-      "vol_target": "none"
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 5,
-      "quality": "Q0",
-      "technical": "none",
-      "stop_loss": "none",
-      "vol_target": 0.2
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 10,
-      "quality": "Q0",
-      "technical": "none",
-      "stop_loss": "none",
-      "vol_target": 0.2
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 20,
-      "quality": "Q0",
-      "technical": "none",
-      "stop_loss": "none",
-      "vol_target": 0.2
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 5,
-      "quality": "Q0",
-      "technical": "none",
-      "stop_loss": 0.15,
-      "vol_target": 0.2
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 10,
-      "quality": "Q0",
-      "technical": "none",
-      "stop_loss": 0.15,
-      "vol_target": 0.2
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 20,
-      "quality": "Q0",
-      "technical": "none",
-      "stop_loss": 0.15,
-      "vol_target": 0.2
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 5,
-      "quality": "Q0",
-      "technical": "none",
-      "stop_loss": 0.1,
-      "vol_target": 0.2
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 10,
-      "quality": "Q0",
-      "technical": "none",
-      "stop_loss": 0.1,
-      "vol_target": 0.2
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 20,
-      "quality": "Q0",
-      "technical": "none",
-      "stop_loss": 0.1,
-      "vol_target": 0.2
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 5,
-      "quality": "Q0",
-      "technical": "sma",
-      "stop_loss": "none",
-      "vol_target": "none"
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 10,
-      "quality": "Q0",
-      "technical": "sma",
-      "stop_loss": "none",
-      "vol_target": "none"
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 20,
-      "quality": "Q0",
-      "technical": "sma",
-      "stop_loss": "none",
-      "vol_target": "none"
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 5,
-      "quality": "Q0",
-      "technical": "sma",
-      "stop_loss": 0.15,
-      "vol_target": "none"
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 10,
-      "quality": "Q0",
-      "technical": "sma",
-      "stop_loss": 0.15,
-      "vol_target": "none"
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 20,
-      "quality": "Q0",
-      "technical": "sma",
-      "stop_loss": 0.15,
-      "vol_target": "none"
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 5,
-      "quality": "Q0",
-      "technical": "sma",
-      "stop_loss": 0.1,
-      "vol_target": "none"
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 10,
-      "quality": "Q0",
-      "technical": "sma",
-      "stop_loss": 0.1,
-      "vol_target": "none"
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 20,
-      "quality": "Q0",
-      "technical": "sma",
-      "stop_loss": 0.1,
-      "vol_target": "none"
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 5,
-      "quality": "Q0",
-      "technical": "sma",
-      "stop_loss": "none",
-      "vol_target": 0.2
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 10,
-      "quality": "Q0",
-      "technical": "sma",
-      "stop_loss": "none",
-      "vol_target": 0.2
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 20,
-      "quality": "Q0",
-      "technical": "sma",
-      "stop_loss": "none",
-      "vol_target": 0.2
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 5,
-      "quality": "Q0",
-      "technical": "sma",
-      "stop_loss": 0.15,
-      "vol_target": 0.2
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 10,
-      "quality": "Q0",
-      "technical": "sma",
-      "stop_loss": 0.15,
-      "vol_target": 0.2
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 20,
-      "quality": "Q0",
-      "technical": "sma",
-      "stop_loss": 0.15,
-      "vol_target": 0.2
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 5,
-      "quality": "Q0",
-      "technical": "sma",
-      "stop_loss": 0.1,
-      "vol_target": 0.2
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 10,
-      "quality": "Q0",
-      "technical": "sma",
-      "stop_loss": 0.1,
-      "vol_target": 0.2
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 20,
-      "quality": "Q0",
-      "technical": "sma",
-      "stop_loss": 0.1,
-      "vol_target": 0.2
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 5,
-      "quality": "Q0",
-      "technical": "sma_rsi",
-      "stop_loss": "none",
-      "vol_target": "none"
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 10,
-      "quality": "Q0",
-      "technical": "sma_rsi",
-      "stop_loss": "none",
-      "vol_target": "none"
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 20,
-      "quality": "Q0",
-      "technical": "sma_rsi",
-      "stop_loss": "none",
-      "vol_target": "none"
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 5,
-      "quality": "Q0",
-      "technical": "sma_rsi",
-      "stop_loss": 0.15,
-      "vol_target": "none"
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 10,
-      "quality": "Q0",
-      "technical": "sma_rsi",
-      "stop_loss": 0.15,
-      "vol_target": "none"
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 20,
-      "quality": "Q0",
-      "technical": "sma_rsi",
-      "stop_loss": 0.15,
-      "vol_target": "none"
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 5,
-      "quality": "Q0",
-      "technical": "sma_rsi",
-      "stop_loss": 0.1,
-      "vol_target": "none"
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 10,
-      "quality": "Q0",
-      "technical": "sma_rsi",
-      "stop_loss": 0.1,
-      "vol_target": "none"
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 20,
-      "quality": "Q0",
-      "technical": "sma_rsi",
-      "stop_loss": 0.1,
-      "vol_target": "none"
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 5,
-      "quality": "Q0",
-      "technical": "sma_rsi",
-      "stop_loss": "none",
-      "vol_target": 0.2
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 10,
-      "quality": "Q0",
-      "technical": "sma_rsi",
-      "stop_loss": "none",
-      "vol_target": 0.2
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 20,
-      "quality": "Q0",
-      "technical": "sma_rsi",
-      "stop_loss": "none",
-      "vol_target": 0.2
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 5,
-      "quality": "Q0",
-      "technical": "sma_rsi",
-      "stop_loss": 0.15,
-      "vol_target": 0.2
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 10,
-      "quality": "Q0",
-      "technical": "sma_rsi",
-      "stop_loss": 0.15,
-      "vol_target": 0.2
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 20,
-      "quality": "Q0",
-      "technical": "sma_rsi",
-      "stop_loss": 0.15,
-      "vol_target": 0.2
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 5,
-      "quality": "Q0",
-      "technical": "sma_rsi",
-      "stop_loss": 0.1,
-      "vol_target": 0.2
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 10,
-      "quality": "Q0",
-      "technical": "sma_rsi",
-      "stop_loss": 0.1,
-      "vol_target": 0.2
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 20,
-      "quality": "Q0",
-      "technical": "sma_rsi",
-      "stop_loss": 0.1,
-      "vol_target": 0.2
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 5,
-      "quality": "Q3a",
-      "technical": "none",
-      "stop_loss": "none",
-      "vol_target": "none"
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
+      "vol_target": "none",
       "N": 10,
       "quality": "Q3a",
       "technical": "none",
-      "stop_loss": "none",
-      "vol_target": "none"
+      "mom_type": "raw"
     },
     {
       "order": "MF",
       "shortlist": 0.2,
       "x_debt": 1.0,
+      "stop_loss": "none",
+      "vol_target": "none",
       "N": 20,
       "quality": "Q3a",
       "technical": "none",
+      "mom_type": "raw"
+    },
+    {
+      "order": "MF",
+      "shortlist": 0.2,
+      "x_debt": 1.0,
       "stop_loss": "none",
-      "vol_target": "none"
+      "vol_target": "none",
+      "N": 30,
+      "quality": "Q3a",
+      "technical": "none",
+      "mom_type": "raw"
     },
     {
       "order": "MF",
       "shortlist": 0.2,
       "x_debt": 1.0,
-      "N": 5,
-      "quality": "Q3a",
-      "technical": "none",
-      "stop_loss": 0.15,
-      "vol_target": "none"
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 10,
-      "quality": "Q3a",
-      "technical": "none",
-      "stop_loss": 0.15,
-      "vol_target": "none"
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 20,
-      "quality": "Q3a",
-      "technical": "none",
-      "stop_loss": 0.15,
-      "vol_target": "none"
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 5,
-      "quality": "Q3a",
-      "technical": "none",
-      "stop_loss": 0.1,
-      "vol_target": "none"
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 10,
-      "quality": "Q3a",
-      "technical": "none",
-      "stop_loss": 0.1,
-      "vol_target": "none"
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 20,
-      "quality": "Q3a",
-      "technical": "none",
-      "stop_loss": 0.1,
-      "vol_target": "none"
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 5,
-      "quality": "Q3a",
-      "technical": "none",
       "stop_loss": "none",
-      "vol_target": 0.2
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 10,
-      "quality": "Q3a",
-      "technical": "none",
-      "stop_loss": "none",
-      "vol_target": 0.2
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 20,
-      "quality": "Q3a",
-      "technical": "none",
-      "stop_loss": "none",
-      "vol_target": 0.2
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 5,
-      "quality": "Q3a",
-      "technical": "none",
-      "stop_loss": 0.15,
-      "vol_target": 0.2
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 10,
-      "quality": "Q3a",
-      "technical": "none",
-      "stop_loss": 0.15,
-      "vol_target": 0.2
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 20,
-      "quality": "Q3a",
-      "technical": "none",
-      "stop_loss": 0.15,
-      "vol_target": 0.2
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 5,
-      "quality": "Q3a",
-      "technical": "none",
-      "stop_loss": 0.1,
-      "vol_target": 0.2
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 10,
-      "quality": "Q3a",
-      "technical": "none",
-      "stop_loss": 0.1,
-      "vol_target": 0.2
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 20,
-      "quality": "Q3a",
-      "technical": "none",
-      "stop_loss": 0.1,
-      "vol_target": 0.2
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 5,
-      "quality": "Q3a",
-      "technical": "sma",
-      "stop_loss": "none",
-      "vol_target": "none"
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
+      "vol_target": "none",
       "N": 10,
       "quality": "Q3a",
       "technical": "sma",
-      "stop_loss": "none",
-      "vol_target": "none"
+      "mom_type": "raw"
     },
     {
       "order": "MF",
       "shortlist": 0.2,
       "x_debt": 1.0,
+      "stop_loss": "none",
+      "vol_target": "none",
       "N": 20,
       "quality": "Q3a",
       "technical": "sma",
-      "stop_loss": "none",
-      "vol_target": "none"
+      "mom_type": "raw"
     },
     {
       "order": "MF",
       "shortlist": 0.2,
       "x_debt": 1.0,
-      "N": 5,
+      "stop_loss": "none",
+      "vol_target": "none",
+      "N": 30,
       "quality": "Q3a",
       "technical": "sma",
-      "stop_loss": 0.15,
-      "vol_target": "none"
+      "mom_type": "raw"
     },
     {
       "order": "MF",
       "shortlist": 0.2,
       "x_debt": 1.0,
+      "stop_loss": "none",
+      "vol_target": "none",
+      "N": 10,
+      "quality": "Q1-50",
+      "technical": "none",
+      "mom_type": "raw"
+    },
+    {
+      "order": "MF",
+      "shortlist": 0.2,
+      "x_debt": 1.0,
+      "stop_loss": "none",
+      "vol_target": "none",
+      "N": 20,
+      "quality": "Q1-50",
+      "technical": "none",
+      "mom_type": "raw"
+    },
+    {
+      "order": "MF",
+      "shortlist": 0.2,
+      "x_debt": 1.0,
+      "stop_loss": "none",
+      "vol_target": "none",
+      "N": 30,
+      "quality": "Q1-50",
+      "technical": "none",
+      "mom_type": "raw"
+    },
+    {
+      "order": "MF",
+      "shortlist": 0.2,
+      "x_debt": 1.0,
+      "stop_loss": "none",
+      "vol_target": "none",
+      "N": 10,
+      "quality": "Q1-50",
+      "technical": "sma",
+      "mom_type": "raw"
+    },
+    {
+      "order": "MF",
+      "shortlist": 0.2,
+      "x_debt": 1.0,
+      "stop_loss": "none",
+      "vol_target": "none",
+      "N": 20,
+      "quality": "Q1-50",
+      "technical": "sma",
+      "mom_type": "raw"
+    },
+    {
+      "order": "MF",
+      "shortlist": 0.2,
+      "x_debt": 1.0,
+      "stop_loss": "none",
+      "vol_target": "none",
+      "N": 30,
+      "quality": "Q1-50",
+      "technical": "sma",
+      "mom_type": "raw"
+    },
+    {
+      "order": "MF",
+      "shortlist": 0.2,
+      "x_debt": 1.0,
+      "stop_loss": "none",
+      "vol_target": "none",
       "N": 10,
       "quality": "Q3a",
-      "technical": "sma",
-      "stop_loss": 0.15,
-      "vol_target": "none"
+      "technical": "none",
+      "mom_type": "residual"
     },
     {
       "order": "MF",
       "shortlist": 0.2,
       "x_debt": 1.0,
-      "N": 20,
-      "quality": "Q3a",
-      "technical": "sma",
-      "stop_loss": 0.15,
-      "vol_target": "none"
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 5,
-      "quality": "Q3a",
-      "technical": "sma",
-      "stop_loss": 0.1,
-      "vol_target": "none"
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 10,
-      "quality": "Q3a",
-      "technical": "sma",
-      "stop_loss": 0.1,
-      "vol_target": "none"
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 20,
-      "quality": "Q3a",
-      "technical": "sma",
-      "stop_loss": 0.1,
-      "vol_target": "none"
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 5,
-      "quality": "Q3a",
-      "technical": "sma",
       "stop_loss": "none",
-      "vol_target": 0.2
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 10,
-      "quality": "Q3a",
-      "technical": "sma",
-      "stop_loss": "none",
-      "vol_target": 0.2
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
+      "vol_target": "none",
       "N": 20,
       "quality": "Q3a",
-      "technical": "sma",
+      "technical": "none",
+      "mom_type": "residual"
+    },
+    {
+      "order": "MF",
+      "shortlist": 0.2,
+      "x_debt": 1.0,
       "stop_loss": "none",
-      "vol_target": 0.2
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 5,
+      "vol_target": "none",
+      "N": 30,
       "quality": "Q3a",
-      "technical": "sma",
-      "stop_loss": 0.15,
-      "vol_target": 0.2
+      "technical": "none",
+      "mom_type": "residual"
     },
     {
       "order": "MF",
       "shortlist": 0.2,
       "x_debt": 1.0,
-      "N": 10,
-      "quality": "Q3a",
-      "technical": "sma",
-      "stop_loss": 0.15,
-      "vol_target": 0.2
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 20,
-      "quality": "Q3a",
-      "technical": "sma",
-      "stop_loss": 0.15,
-      "vol_target": 0.2
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 5,
-      "quality": "Q3a",
-      "technical": "sma",
-      "stop_loss": 0.1,
-      "vol_target": 0.2
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
+      "stop_loss": "none",
+      "vol_target": "none",
       "N": 10,
       "quality": "Q3a",
       "technical": "sma",
-      "stop_loss": 0.1,
-      "vol_target": 0.2
+      "mom_type": "residual"
     },
     {
       "order": "MF",
       "shortlist": 0.2,
       "x_debt": 1.0,
+      "stop_loss": "none",
+      "vol_target": "none",
       "N": 20,
       "quality": "Q3a",
       "technical": "sma",
-      "stop_loss": 0.1,
-      "vol_target": 0.2
+      "mom_type": "residual"
     },
     {
       "order": "MF",
       "shortlist": 0.2,
       "x_debt": 1.0,
-      "N": 5,
+      "stop_loss": "none",
+      "vol_target": "none",
+      "N": 30,
       "quality": "Q3a",
-      "technical": "sma_rsi",
+      "technical": "sma",
+      "mom_type": "residual"
+    },
+    {
+      "order": "MF",
+      "shortlist": 0.2,
+      "x_debt": 1.0,
       "stop_loss": "none",
-      "vol_target": "none"
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 10,
-      "quality": "Q3a",
-      "technical": "sma_rsi",
-      "stop_loss": "none",
-      "vol_target": "none"
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 20,
-      "quality": "Q3a",
-      "technical": "sma_rsi",
-      "stop_loss": "none",
-      "vol_target": "none"
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 5,
-      "quality": "Q3a",
-      "technical": "sma_rsi",
-      "stop_loss": 0.15,
-      "vol_target": "none"
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 10,
-      "quality": "Q3a",
-      "technical": "sma_rsi",
-      "stop_loss": 0.15,
-      "vol_target": "none"
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 20,
-      "quality": "Q3a",
-      "technical": "sma_rsi",
-      "stop_loss": 0.15,
-      "vol_target": "none"
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 5,
-      "quality": "Q3a",
-      "technical": "sma_rsi",
-      "stop_loss": 0.1,
-      "vol_target": "none"
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 10,
-      "quality": "Q3a",
-      "technical": "sma_rsi",
-      "stop_loss": 0.1,
-      "vol_target": "none"
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 20,
-      "quality": "Q3a",
-      "technical": "sma_rsi",
-      "stop_loss": 0.1,
-      "vol_target": "none"
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 5,
-      "quality": "Q3a",
-      "technical": "sma_rsi",
-      "stop_loss": "none",
-      "vol_target": 0.2
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 10,
-      "quality": "Q3a",
-      "technical": "sma_rsi",
-      "stop_loss": "none",
-      "vol_target": 0.2
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 20,
-      "quality": "Q3a",
-      "technical": "sma_rsi",
-      "stop_loss": "none",
-      "vol_target": 0.2
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 5,
-      "quality": "Q3a",
-      "technical": "sma_rsi",
-      "stop_loss": 0.15,
-      "vol_target": 0.2
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 10,
-      "quality": "Q3a",
-      "technical": "sma_rsi",
-      "stop_loss": 0.15,
-      "vol_target": 0.2
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 20,
-      "quality": "Q3a",
-      "technical": "sma_rsi",
-      "stop_loss": 0.15,
-      "vol_target": 0.2
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 5,
-      "quality": "Q3a",
-      "technical": "sma_rsi",
-      "stop_loss": 0.1,
-      "vol_target": 0.2
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 10,
-      "quality": "Q3a",
-      "technical": "sma_rsi",
-      "stop_loss": 0.1,
-      "vol_target": 0.2
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 20,
-      "quality": "Q3a",
-      "technical": "sma_rsi",
-      "stop_loss": 0.1,
-      "vol_target": 0.2
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 5,
-      "quality": "Q1-50",
-      "technical": "none",
-      "stop_loss": "none",
-      "vol_target": "none"
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
+      "vol_target": "none",
       "N": 10,
       "quality": "Q1-50",
       "technical": "none",
-      "stop_loss": "none",
-      "vol_target": "none"
+      "mom_type": "residual"
     },
     {
       "order": "MF",
       "shortlist": 0.2,
       "x_debt": 1.0,
+      "stop_loss": "none",
+      "vol_target": "none",
       "N": 20,
       "quality": "Q1-50",
       "technical": "none",
-      "stop_loss": "none",
-      "vol_target": "none"
+      "mom_type": "residual"
     },
     {
       "order": "MF",
       "shortlist": 0.2,
       "x_debt": 1.0,
-      "N": 5,
+      "stop_loss": "none",
+      "vol_target": "none",
+      "N": 30,
       "quality": "Q1-50",
       "technical": "none",
-      "stop_loss": 0.15,
-      "vol_target": "none"
+      "mom_type": "residual"
     },
     {
       "order": "MF",
       "shortlist": 0.2,
       "x_debt": 1.0,
-      "N": 10,
-      "quality": "Q1-50",
-      "technical": "none",
-      "stop_loss": 0.15,
-      "vol_target": "none"
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 20,
-      "quality": "Q1-50",
-      "technical": "none",
-      "stop_loss": 0.15,
-      "vol_target": "none"
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 5,
-      "quality": "Q1-50",
-      "technical": "none",
-      "stop_loss": 0.1,
-      "vol_target": "none"
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 10,
-      "quality": "Q1-50",
-      "technical": "none",
-      "stop_loss": 0.1,
-      "vol_target": "none"
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 20,
-      "quality": "Q1-50",
-      "technical": "none",
-      "stop_loss": 0.1,
-      "vol_target": "none"
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 5,
-      "quality": "Q1-50",
-      "technical": "none",
       "stop_loss": "none",
-      "vol_target": 0.2
+      "vol_target": "none",
+      "N": 10,
+      "quality": "Q1-50",
+      "technical": "sma",
+      "mom_type": "residual"
     },
     {
       "order": "MF",
       "shortlist": 0.2,
       "x_debt": 1.0,
-      "N": 10,
-      "quality": "Q1-50",
-      "technical": "none",
       "stop_loss": "none",
-      "vol_target": 0.2
+      "vol_target": "none",
+      "N": 20,
+      "quality": "Q1-50",
+      "technical": "sma",
+      "mom_type": "residual"
     },
     {
       "order": "MF",
       "shortlist": 0.2,
       "x_debt": 1.0,
-      "N": 20,
-      "quality": "Q1-50",
-      "technical": "none",
       "stop_loss": "none",
-      "vol_target": 0.2
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 5,
-      "quality": "Q1-50",
-      "technical": "none",
-      "stop_loss": 0.15,
-      "vol_target": 0.2
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 10,
-      "quality": "Q1-50",
-      "technical": "none",
-      "stop_loss": 0.15,
-      "vol_target": 0.2
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 20,
-      "quality": "Q1-50",
-      "technical": "none",
-      "stop_loss": 0.15,
-      "vol_target": 0.2
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 5,
-      "quality": "Q1-50",
-      "technical": "none",
-      "stop_loss": 0.1,
-      "vol_target": 0.2
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 10,
-      "quality": "Q1-50",
-      "technical": "none",
-      "stop_loss": 0.1,
-      "vol_target": 0.2
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 20,
-      "quality": "Q1-50",
-      "technical": "none",
-      "stop_loss": 0.1,
-      "vol_target": 0.2
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 5,
+      "vol_target": "none",
+      "N": 30,
       "quality": "Q1-50",
       "technical": "sma",
-      "stop_loss": "none",
-      "vol_target": "none"
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 10,
-      "quality": "Q1-50",
-      "technical": "sma",
-      "stop_loss": "none",
-      "vol_target": "none"
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 20,
-      "quality": "Q1-50",
-      "technical": "sma",
-      "stop_loss": "none",
-      "vol_target": "none"
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 5,
-      "quality": "Q1-50",
-      "technical": "sma",
-      "stop_loss": 0.15,
-      "vol_target": "none"
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 10,
-      "quality": "Q1-50",
-      "technical": "sma",
-      "stop_loss": 0.15,
-      "vol_target": "none"
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 20,
-      "quality": "Q1-50",
-      "technical": "sma",
-      "stop_loss": 0.15,
-      "vol_target": "none"
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 5,
-      "quality": "Q1-50",
-      "technical": "sma",
-      "stop_loss": 0.1,
-      "vol_target": "none"
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 10,
-      "quality": "Q1-50",
-      "technical": "sma",
-      "stop_loss": 0.1,
-      "vol_target": "none"
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 20,
-      "quality": "Q1-50",
-      "technical": "sma",
-      "stop_loss": 0.1,
-      "vol_target": "none"
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 5,
-      "quality": "Q1-50",
-      "technical": "sma",
-      "stop_loss": "none",
-      "vol_target": 0.2
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 10,
-      "quality": "Q1-50",
-      "technical": "sma",
-      "stop_loss": "none",
-      "vol_target": 0.2
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 20,
-      "quality": "Q1-50",
-      "technical": "sma",
-      "stop_loss": "none",
-      "vol_target": 0.2
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 5,
-      "quality": "Q1-50",
-      "technical": "sma",
-      "stop_loss": 0.15,
-      "vol_target": 0.2
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 10,
-      "quality": "Q1-50",
-      "technical": "sma",
-      "stop_loss": 0.15,
-      "vol_target": 0.2
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 20,
-      "quality": "Q1-50",
-      "technical": "sma",
-      "stop_loss": 0.15,
-      "vol_target": 0.2
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 5,
-      "quality": "Q1-50",
-      "technical": "sma",
-      "stop_loss": 0.1,
-      "vol_target": 0.2
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 10,
-      "quality": "Q1-50",
-      "technical": "sma",
-      "stop_loss": 0.1,
-      "vol_target": 0.2
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 20,
-      "quality": "Q1-50",
-      "technical": "sma",
-      "stop_loss": 0.1,
-      "vol_target": 0.2
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 5,
-      "quality": "Q1-50",
-      "technical": "sma_rsi",
-      "stop_loss": "none",
-      "vol_target": "none"
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 10,
-      "quality": "Q1-50",
-      "technical": "sma_rsi",
-      "stop_loss": "none",
-      "vol_target": "none"
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 20,
-      "quality": "Q1-50",
-      "technical": "sma_rsi",
-      "stop_loss": "none",
-      "vol_target": "none"
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 5,
-      "quality": "Q1-50",
-      "technical": "sma_rsi",
-      "stop_loss": 0.15,
-      "vol_target": "none"
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 10,
-      "quality": "Q1-50",
-      "technical": "sma_rsi",
-      "stop_loss": 0.15,
-      "vol_target": "none"
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 20,
-      "quality": "Q1-50",
-      "technical": "sma_rsi",
-      "stop_loss": 0.15,
-      "vol_target": "none"
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 5,
-      "quality": "Q1-50",
-      "technical": "sma_rsi",
-      "stop_loss": 0.1,
-      "vol_target": "none"
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 10,
-      "quality": "Q1-50",
-      "technical": "sma_rsi",
-      "stop_loss": 0.1,
-      "vol_target": "none"
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 20,
-      "quality": "Q1-50",
-      "technical": "sma_rsi",
-      "stop_loss": 0.1,
-      "vol_target": "none"
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 5,
-      "quality": "Q1-50",
-      "technical": "sma_rsi",
-      "stop_loss": "none",
-      "vol_target": 0.2
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 10,
-      "quality": "Q1-50",
-      "technical": "sma_rsi",
-      "stop_loss": "none",
-      "vol_target": 0.2
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 20,
-      "quality": "Q1-50",
-      "technical": "sma_rsi",
-      "stop_loss": "none",
-      "vol_target": 0.2
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 5,
-      "quality": "Q1-50",
-      "technical": "sma_rsi",
-      "stop_loss": 0.15,
-      "vol_target": 0.2
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 10,
-      "quality": "Q1-50",
-      "technical": "sma_rsi",
-      "stop_loss": 0.15,
-      "vol_target": 0.2
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 20,
-      "quality": "Q1-50",
-      "technical": "sma_rsi",
-      "stop_loss": 0.15,
-      "vol_target": 0.2
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 5,
-      "quality": "Q1-50",
-      "technical": "sma_rsi",
-      "stop_loss": 0.1,
-      "vol_target": 0.2
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 10,
-      "quality": "Q1-50",
-      "technical": "sma_rsi",
-      "stop_loss": 0.1,
-      "vol_target": 0.2
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 20,
-      "quality": "Q1-50",
-      "technical": "sma_rsi",
-      "stop_loss": 0.1,
-      "vol_target": 0.2
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 5,
-      "quality": "Q2-Q50",
-      "technical": "none",
-      "stop_loss": "none",
-      "vol_target": "none"
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 10,
-      "quality": "Q2-Q50",
-      "technical": "none",
-      "stop_loss": "none",
-      "vol_target": "none"
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 20,
-      "quality": "Q2-Q50",
-      "technical": "none",
-      "stop_loss": "none",
-      "vol_target": "none"
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 5,
-      "quality": "Q2-Q50",
-      "technical": "none",
-      "stop_loss": 0.15,
-      "vol_target": "none"
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 10,
-      "quality": "Q2-Q50",
-      "technical": "none",
-      "stop_loss": 0.15,
-      "vol_target": "none"
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 20,
-      "quality": "Q2-Q50",
-      "technical": "none",
-      "stop_loss": 0.15,
-      "vol_target": "none"
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 5,
-      "quality": "Q2-Q50",
-      "technical": "none",
-      "stop_loss": 0.1,
-      "vol_target": "none"
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 10,
-      "quality": "Q2-Q50",
-      "technical": "none",
-      "stop_loss": 0.1,
-      "vol_target": "none"
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 20,
-      "quality": "Q2-Q50",
-      "technical": "none",
-      "stop_loss": 0.1,
-      "vol_target": "none"
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 5,
-      "quality": "Q2-Q50",
-      "technical": "none",
-      "stop_loss": "none",
-      "vol_target": 0.2
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 10,
-      "quality": "Q2-Q50",
-      "technical": "none",
-      "stop_loss": "none",
-      "vol_target": 0.2
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 20,
-      "quality": "Q2-Q50",
-      "technical": "none",
-      "stop_loss": "none",
-      "vol_target": 0.2
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 5,
-      "quality": "Q2-Q50",
-      "technical": "none",
-      "stop_loss": 0.15,
-      "vol_target": 0.2
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 10,
-      "quality": "Q2-Q50",
-      "technical": "none",
-      "stop_loss": 0.15,
-      "vol_target": 0.2
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 20,
-      "quality": "Q2-Q50",
-      "technical": "none",
-      "stop_loss": 0.15,
-      "vol_target": 0.2
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 5,
-      "quality": "Q2-Q50",
-      "technical": "none",
-      "stop_loss": 0.1,
-      "vol_target": 0.2
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 10,
-      "quality": "Q2-Q50",
-      "technical": "none",
-      "stop_loss": 0.1,
-      "vol_target": 0.2
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 20,
-      "quality": "Q2-Q50",
-      "technical": "none",
-      "stop_loss": 0.1,
-      "vol_target": 0.2
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 5,
-      "quality": "Q2-Q50",
-      "technical": "sma",
-      "stop_loss": "none",
-      "vol_target": "none"
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 10,
-      "quality": "Q2-Q50",
-      "technical": "sma",
-      "stop_loss": "none",
-      "vol_target": "none"
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 20,
-      "quality": "Q2-Q50",
-      "technical": "sma",
-      "stop_loss": "none",
-      "vol_target": "none"
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 5,
-      "quality": "Q2-Q50",
-      "technical": "sma",
-      "stop_loss": 0.15,
-      "vol_target": "none"
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 10,
-      "quality": "Q2-Q50",
-      "technical": "sma",
-      "stop_loss": 0.15,
-      "vol_target": "none"
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 20,
-      "quality": "Q2-Q50",
-      "technical": "sma",
-      "stop_loss": 0.15,
-      "vol_target": "none"
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 5,
-      "quality": "Q2-Q50",
-      "technical": "sma",
-      "stop_loss": 0.1,
-      "vol_target": "none"
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 10,
-      "quality": "Q2-Q50",
-      "technical": "sma",
-      "stop_loss": 0.1,
-      "vol_target": "none"
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 20,
-      "quality": "Q2-Q50",
-      "technical": "sma",
-      "stop_loss": 0.1,
-      "vol_target": "none"
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 5,
-      "quality": "Q2-Q50",
-      "technical": "sma",
-      "stop_loss": "none",
-      "vol_target": 0.2
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 10,
-      "quality": "Q2-Q50",
-      "technical": "sma",
-      "stop_loss": "none",
-      "vol_target": 0.2
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 20,
-      "quality": "Q2-Q50",
-      "technical": "sma",
-      "stop_loss": "none",
-      "vol_target": 0.2
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 5,
-      "quality": "Q2-Q50",
-      "technical": "sma",
-      "stop_loss": 0.15,
-      "vol_target": 0.2
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 10,
-      "quality": "Q2-Q50",
-      "technical": "sma",
-      "stop_loss": 0.15,
-      "vol_target": 0.2
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 20,
-      "quality": "Q2-Q50",
-      "technical": "sma",
-      "stop_loss": 0.15,
-      "vol_target": 0.2
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 5,
-      "quality": "Q2-Q50",
-      "technical": "sma",
-      "stop_loss": 0.1,
-      "vol_target": 0.2
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 10,
-      "quality": "Q2-Q50",
-      "technical": "sma",
-      "stop_loss": 0.1,
-      "vol_target": 0.2
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 20,
-      "quality": "Q2-Q50",
-      "technical": "sma",
-      "stop_loss": 0.1,
-      "vol_target": 0.2
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 5,
-      "quality": "Q2-Q50",
-      "technical": "sma_rsi",
-      "stop_loss": "none",
-      "vol_target": "none"
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 10,
-      "quality": "Q2-Q50",
-      "technical": "sma_rsi",
-      "stop_loss": "none",
-      "vol_target": "none"
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 20,
-      "quality": "Q2-Q50",
-      "technical": "sma_rsi",
-      "stop_loss": "none",
-      "vol_target": "none"
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 5,
-      "quality": "Q2-Q50",
-      "technical": "sma_rsi",
-      "stop_loss": 0.15,
-      "vol_target": "none"
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 10,
-      "quality": "Q2-Q50",
-      "technical": "sma_rsi",
-      "stop_loss": 0.15,
-      "vol_target": "none"
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 20,
-      "quality": "Q2-Q50",
-      "technical": "sma_rsi",
-      "stop_loss": 0.15,
-      "vol_target": "none"
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 5,
-      "quality": "Q2-Q50",
-      "technical": "sma_rsi",
-      "stop_loss": 0.1,
-      "vol_target": "none"
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 10,
-      "quality": "Q2-Q50",
-      "technical": "sma_rsi",
-      "stop_loss": 0.1,
-      "vol_target": "none"
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 20,
-      "quality": "Q2-Q50",
-      "technical": "sma_rsi",
-      "stop_loss": 0.1,
-      "vol_target": "none"
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 5,
-      "quality": "Q2-Q50",
-      "technical": "sma_rsi",
-      "stop_loss": "none",
-      "vol_target": 0.2
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 10,
-      "quality": "Q2-Q50",
-      "technical": "sma_rsi",
-      "stop_loss": "none",
-      "vol_target": 0.2
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 20,
-      "quality": "Q2-Q50",
-      "technical": "sma_rsi",
-      "stop_loss": "none",
-      "vol_target": 0.2
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 5,
-      "quality": "Q2-Q50",
-      "technical": "sma_rsi",
-      "stop_loss": 0.15,
-      "vol_target": 0.2
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 10,
-      "quality": "Q2-Q50",
-      "technical": "sma_rsi",
-      "stop_loss": 0.15,
-      "vol_target": 0.2
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 20,
-      "quality": "Q2-Q50",
-      "technical": "sma_rsi",
-      "stop_loss": 0.15,
-      "vol_target": 0.2
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 5,
-      "quality": "Q2-Q50",
-      "technical": "sma_rsi",
-      "stop_loss": 0.1,
-      "vol_target": 0.2
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 10,
-      "quality": "Q2-Q50",
-      "technical": "sma_rsi",
-      "stop_loss": 0.1,
-      "vol_target": 0.2
-    },
-    {
-      "order": "MF",
-      "shortlist": 0.2,
-      "x_debt": 1.0,
-      "N": 20,
-      "quality": "Q2-Q50",
-      "technical": "sma_rsi",
-      "stop_loss": 0.1,
-      "vol_target": 0.2
+      "mom_type": "residual"
     }
   ],
   "extra": {
@@ -2225,11 +322,14 @@
     "fixed": {
       "order": "MF",
       "shortlist": 0.2,
-      "x_debt": 1.0
+      "x_debt": 1.0,
+      "stop_loss": "none",
+      "vol_target": "none"
     },
     "optional_defaults": {
       "y_nde": 3.0,
-      "trend_exit_daily": false
+      "trend_exit_daily": false,
+      "mom_type": "raw"
     },
     "constants": {
       "min_price": 5.0,
@@ -2248,7 +348,9 @@
       "universe": "SP900 point-in-time (S&P 500 + MidCap 400; S&P 600 history only exists from 2018-09)",
       "start_rule": "first month-end >= 2011-01-01 where >= 70% of the eligible universe has a fundamentals snapshot (common to all cells)"
     },
-    "note": "Cell-level stop_loss / vol_target use the string 'none' for off. technical in {none, sma, sma_rsi}."
+    "note": "Cell-level stop_loss / vol_target use the string 'none' for off. technical in {none, sma, sma_rsi}.",
+    "version": "v2",
+    "v2_rationale": "v2 (registered before any v2 run): RSI band and stop-loss dropped (they lowered train-window Sharpe in v1 and have no primary-paper support); residual momentum (Blitz, Huij & Martens 2011) tested against raw 12-1; Novy-Marx GP/A quality (Q1-50) tested against the doc's Q3a; N 10/20/30. Default = doc rules minus RSI."
   },
   "history": [
     {
@@ -2257,8 +359,12 @@
       "grid_hash": "2228d52bea269027",
       "reason": "Lead re-stamp 2026-10-19, before any grid run or any 2019+ result was seen: universe changed from point-in-time S&P 1500 to S&P 900 (S&P 500 + MidCap 400) because Wikipedia has no S&P 600 history before 2018-09, so SP1500 would add ~600 small caps exactly at the 2019 train/test boundary; QM also excludes GICS Real Estate (REITs were inside Financials until 2016-08-31) for a consistent universe.",
       "superseded_extra_universe": "SP1500 point-in-time"
+    },
+    {
+      "timestamp": "2026-10-19T02:57:36+00:00",
+      "content_hash": "a9d60cdad40ecf45",
+      "n_cells": 216,
+      "grid_hash": "2228d52bea269027"
     }
-  ],
-  "restamp_reason": "Lead re-stamp 2026-10-19, before any grid run or any 2019+ result was seen: universe changed from point-in-time S&P 1500 to S&P 900 (S&P 500 + MidCap 400) because Wikipedia has no S&P 600 history before 2018-09, so SP1500 would add ~600 small caps exactly at the 2019 train/test boundary; QM also excludes GICS Real Estate (REITs were inside Financials until 2016-08-31) for a consistent universe.",
-  "notes_on_timeline": "Grid content (cells/axes/default) never changed after the first registration (grid_hash unchanged). Descriptive 'extra' text was re-stamped at 02:57 UTC after two provisional pipeline runs (02:43/02:46 UTC) that were voided because of data-layer bug fixes; the selection rule was never changed. See changelog.md."
+  ]
 }

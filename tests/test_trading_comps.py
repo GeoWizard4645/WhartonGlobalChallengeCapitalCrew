@@ -64,17 +64,19 @@ def km_calls(monkeypatch):
 # --------------------------------------------------------------------------------------------------
 # grid / pre-registration
 # --------------------------------------------------------------------------------------------------
-def test_grid_has_54_unique_cells_with_the_documented_levels_and_default_inside():
-    assert len(TC.GRID) == 54
-    assert len({grid_mod.cell_id(c) for c in TC.GRID}) == 54
+def test_grid_v2_has_9_unique_cells_around_the_v1_choice():
+    # v1 (54 cells: theta x P/E cap x EV/EBITDA cap x size filter) chose theta 10%, caps 40/35, no size filter;
+    # v2 keeps that choice and adds the value-trap momentum filter.
+    assert len(TC.GRID) == 9
+    assert len({grid_mod.cell_id(c) for c in TC.GRID}) == 9
     assert {c["theta"] for c in TC.GRID} == {0.10, 0.15, 0.20}
-    assert {c["pe_cap"] for c in TC.GRID} == {30, 40, 50}
-    assert {c["ev_cap"] for c in TC.GRID} == {25, 35, 45}
-    assert {c["size_filter"] for c in TC.GRID} == {True, False}
-    assert {c["basis"] for c in TC.GRID} == {"TTM"}                       # forward cannot be backtested; LFY is a follow-up
-    assert TC.DEFAULT == dict(theta=0.15, pe_cap=40, ev_cap=35, size_filter=True, basis="TTM")
+    assert {c["mom_filter"] for c in TC.GRID} == {0.0, 0.3, 0.5}
+    assert {(c["pe_cap"], c["ev_cap"], c["size_filter"], c["basis"]) for c in TC.GRID} == {(40, 35, False, "TTM")}
+    assert TC.DEFAULT == TC.V1_CHOSEN == dict(theta=0.10, pe_cap=40, ev_cap=35, size_filter=False, basis="TTM",
+                                              mom_filter=0.0)
+    assert TC.DOC_DEFAULT["theta"] == 0.15 and TC.DOC_DEFAULT["size_filter"] is True
     assert TC.DEFAULT in TC.GRID
-    assert list(TC.AXES) == ["theta", "pe_cap", "ev_cap"] and list(TC.CATEGORICAL) == ["size_filter"]
+    assert list(TC.AXES) == ["theta", "mom_filter"] and TC.CATEGORICAL == {}
     for c in TC.GRID:
         assert set(c) == set(TC.DEFAULT)
 
@@ -82,7 +84,7 @@ def test_grid_has_54_unique_cells_with_the_documented_levels_and_default_inside(
 def test_preregistration_roundtrip_idempotent_and_locked(tmp_path):
     path = TC.preregister_grid(out_dir=tmp_path)
     doc = json.loads(path.read_text())
-    assert doc["strategy"] == "trading_comps" and doc["n_cells"] == 54 and doc["default"] == TC.DEFAULT
+    assert doc["strategy"] == "trading_comps" and doc["n_cells"] == 9 and doc["default"] == TC.DEFAULT
     notes = doc["extra"]["notes"].lower()
     assert "forward" in notes and "not backtestable" in notes and "lfy" in notes
     assert "universe changed to sp900 before any grid run because s&p 600 history starts 2018-09" in notes
@@ -92,9 +94,9 @@ def test_preregistration_roundtrip_idempotent_and_locked(tmp_path):
     stamp = doc["timestamp"]
     TC.preregister_grid(out_dir=tmp_path)                                    # unchanged -> untouched
     assert json.loads(path.read_text())["timestamp"] == stamp
-    changed = [dict(c, pe_cap=60) if c["pe_cap"] == 50 else c for c in TC.GRID]
+    changed = [dict(c, mom_filter=0.6) if c["mom_filter"] == 0.5 else c for c in TC.GRID]
     with pytest.raises(Exception):
-        grid_mod.preregister("trading_comps", changed, axes={**TC.AXES, "pe_cap": [30, 40, 60]},
+        grid_mod.preregister("trading_comps", changed, axes={**TC.AXES, "mom_filter": [0.0, 0.3, 0.6]},
                              categorical=TC.CATEGORICAL, default=TC.DEFAULT, out_dir=tmp_path)
 
 
@@ -109,7 +111,7 @@ def test_forced_reregistration_updates_notes_keeps_history(tmp_path, monkeypatch
     doc = json.loads(path.read_text())
     assert doc["extra"]["notes"] == "amended notes" and doc["grid_hash"] == first["grid_hash"]
     assert len(doc["history"]) == 1 and doc["history"][0]["timestamp"] == first["timestamp"]
-    assert doc["n_cells"] == 54 and doc["default"] == TC.DEFAULT
+    assert doc["n_cells"] == 9 and doc["default"] == TC.DEFAULT
     TC.preregister_grid(out_dir=tmp_path, force=True)                        # identical again: no new history entry
     assert len(json.loads(path.read_text())["history"]) == 1
 
@@ -124,7 +126,7 @@ def test_grid_is_compatible_with_run_grid_and_plateau_selection(tmp_path):
         return pd.Series(rng.normal(0.008 + shift, 0.03, len(idx)), index=idx)
 
     res = grid_mod.run_grid("trading_comps", TC.GRID, fn, ledger=False, out_dir=tmp_path)
-    assert res.M.shape == (72, 54)
+    assert res.M.shape == (72, 9)
     sel = res.select(train=("2013-01", "2018-12"))
     assert "chosen" in sel and set(TC.AXES) <= set(sel["chosen"])
     # cells with the LFY basis are NOT part of the pre-registered grid
@@ -135,7 +137,7 @@ def test_grid_is_compatible_with_run_grid_and_plateau_selection(tmp_path):
 
 def test_resolve_params_layers_defaults_fixed_and_overrides():
     p = TC.resolve_params()
-    assert (p["theta"], p["pe_cap"], p["ev_cap"], p["size_filter"], p["basis"]) == (0.15, 40, 35, True, "TTM")
+    assert (p["theta"], p["pe_cap"], p["ev_cap"], p["size_filter"], p["basis"]) == (0.10, 40, 35, False, "TTM")
     assert (p["top_n"], p["min_hold"], p["min_mcap"], p["min_price"]) == (20, 5, 3.0e8, 5.0)
     assert p["k_min"] == 4 and p["k_max"] == 5 and p["trim_lo"] == 0.5 and p["trim_hi"] == 2.0
     q = TC.resolve_params({"theta": 0.2, "basis": "lfy", "top_n": 10})
@@ -318,7 +320,7 @@ def test_monthly_returns_for_run_grid_drops_incomplete_last_month(km_calls):
     assert s.dtype == float and len(s) >= 6
 
 
-def test_54_cells_share_the_expensive_work(km_calls, monkeypatch):
+def test_grid_cells_share_the_expensive_work(km_calls, monkeypatch):
     ctx = strat_ctx()
     n_bench = []
     orig = C.peer_benchmark
@@ -331,15 +333,16 @@ def test_54_cells_share_the_expensive_work(km_calls, monkeypatch):
     dates = ctx.month_ends("2020-05-01", "2020-06-30")
     assert len(dates) == 2
     weights = {}
-    for cell in TC.GRID:
+    cells = [c for c in TC.GRID if c["mom_filter"] == 0.0]          # the momentum filter needs real prices
+    for cell in cells:
         weights[grid_mod.cell_id(cell)] = TC.target_weights(ctx, cell, dates)
     assert len(km_calls) == 2                                                  # key metrics once per date
     assert ctx.fund_calls == 2                                                 # fundamentals/multiples once per date
     n_before_fresh = len(km_calls)
-    # 2 size settings x (3 P/E caps + 3 EV caps) = 12 benchmark computations per date, not 54 x 2
-    assert len(n_bench) == 12 * 2
+    # one size setting x (1 P/E cap + 1 EV cap) = 2 benchmark computations per date, shared by every theta
+    assert len(n_bench) == 2 * 2
     # all cells together must be identical to fresh single-cell computations
-    for cell in (TC.GRID[0], TC.GRID[17], TC.GRID[-1]):
+    for cell in (cells[0], cells[-1]):
         fresh = TC.target_weights(strat_ctx(), cell, dates)
         pd.testing.assert_frame_equal(fresh, weights[grid_mod.cell_id(cell)])
     # LFY re-uses the key metrics but builds its own multiples table

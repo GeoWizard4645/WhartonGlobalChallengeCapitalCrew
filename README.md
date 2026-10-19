@@ -52,38 +52,21 @@ python3 buckets.py                           # risk/reward map of every split
 python3 dcf.py                               # DCF + margin of safety for stock picks
 ```
 
-## Stock strategies: research, backtests and live picks (`quant/`)
+## Stock strategies (`quant/`)
 
-The three stock strategies from the team doc (quality-filtered momentum, Magic Formula, GICS trading comps) are
-implemented and backtested point-in-time in `quant/` (needs the packages in `requirements.txt`, unlike the
-stdlib-only planning scripts above). Start with **`output/REPORT.md`** (results, verdicts, limitations) and
-**`output/TRADE_PLAN.md`** (what each strategy buys now). Research notes with the math and sources are in `research/`.
+Quality momentum, Magic Formula and trading comps, backtested on the point-in-time S&P 500 + MidCap 400 (2011-2026)
+with SEC filing data. Results are in `output/results.csv` and `output/performance.png`; today's picks in
+`output/<strategy>/picks.csv`; the order list in `output/orders.csv`.
 
-Setup (once):
 ```
-python3 -m venv .venv
-.venv/bin/pip install -r requirements.txt
+python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
+.venv/bin/python -m quant.data.build       # one-time data download (~15 min, ~5 GB, into cache/)
+.venv/bin/python -m quant.run              # backtest everything and list today's picks (~5 min)
+.venv/bin/python -m quant.trade_plan       # turn the picks into WInS orders
 ```
-Rebuild the data (downloads SEC XBRL bulk files ~3 GB, Ken French/AQR factors, Wikipedia index history, Yahoo prices; ~15 min):
-```
-mkdir -p cache/sec && cd cache/sec
-curl -H "User-Agent: CapitalCrew Student Research Project research@capitalcrew-project.org" -O https://www.sec.gov/Archives/edgar/daily-index/xbrl/companyfacts.zip
-curl -H "User-Agent: CapitalCrew Student Research Project research@capitalcrew-project.org" -O https://www.sec.gov/Archives/edgar/daily-index/bulkdata/submissions.zip
-cd ../..
-.venv/bin/python -m quant.data.sec all
-.venv/bin/python -m quant.data.universe build
-.venv/bin/python -m quant.data.prices download
-.venv/bin/python -c "from quant.data import sec, fundamentals as F; sec.build_fsds_patch(); F.build_snapshots()"
-```
-Run everything (pre-registered grids, train/test selection, tear sheets, live picks; ~6 min):
-```
-.venv/bin/python -m quant.run_backtests
-.venv/bin/python -m quant.validation.factor_checks      # long-history academic evidence
-.venv/bin/python -m pytest tests -q                       # 548 tests
-```
-Before trading (after the 4 pm close): refresh prices, recompute the live picks, size the orders:
+Before trading, refresh prices after the close, then re-list the picks and orders:
 ```
 .venv/bin/python -m quant.data.prices update
-.venv/bin/python -m quant.run_backtests --strategy all --live-only
-.venv/bin/python -m quant.trade_plan --qm 25000 --mf 25000 --tc 25000
+.venv/bin/python -m quant.run --live-only
+.venv/bin/python -m quant.trade_plan
 ```

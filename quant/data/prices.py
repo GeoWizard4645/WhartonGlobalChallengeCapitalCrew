@@ -112,7 +112,7 @@ log = logging.getLogger(__name__)
 PRICE_DIR: Path = settings.PRICE_DIR           # module attribute so tests can monkeypatch it
 START_DEFAULT = "2007-01-01"
 TICKER_FILE = settings.UNIV_DIR / "price_tickers.txt"
-AUDIT_PATH = settings.OUTPUT / "data_audit" / "price_coverage.md"
+AUDIT_PATH = settings.CACHE / "reports" / "price_coverage.md"
 
 BATCH_SIZE = 150
 SLEEP_BETWEEN = 1.0                 # seconds between batches
