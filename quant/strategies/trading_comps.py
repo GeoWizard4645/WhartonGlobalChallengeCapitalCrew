@@ -229,6 +229,44 @@ def clear_cache(ctx) -> None:
             pass
 
 
+# --------------------------------------------------------------------------------------------------
+# comps as a second check on other strategies' picks
+# --------------------------------------------------------------------------------------------------
+# Same peer method (GICS sub-industry -> industry fallback, >= 4 peers, 0.5x-2x trim, median), but no P/E or
+# EV/EBITDA cap on the stock being checked: a momentum stock at 60x earnings must get a valuation, not be skipped.
+CHECK_PARAMS: dict = dict(V1_CHOSEN, pe_cap=float("inf"), ev_cap=float("inf"))
+
+
+def valuation_check(ctx, date) -> pd.DataFrame:
+    """Peer-relative valuation of every stock in the comps universe on ``date`` (index = cik).
+
+    comps_premium = average over P/E and EV/EBITDA of (multiple / peer median - 1), using whichever of the two has
+    a peer benchmark (NaN when neither does: no peers, negative earnings, recent IPO/merger, stale data).
+    comps_km_pass = the doc's key metrics all pass (net debt/EBITDA <= 3, free cash flow + stable margins,
+    ROIC > WACC).
+    """
+    d = _trading_day(ctx, date)
+    cache = _ctx_cache(ctx, "_tc_valuation_check")
+    if d not in cache:
+        st, sig = _signals(ctx, d, resolve_params(CHECK_PARAMS))
+        prem = pd.concat([-sig["pe_disc"], -sig["ev_disc"]], axis=1).astype(float).mean(axis=1, skipna=True)
+        km = (sig["pass_leverage"].fillna(False).astype(bool) & sig["quality_ok"].fillna(False).astype(bool)
+              & sig["pass_roic"].fillna(False).astype(bool))
+        cache[d] = pd.DataFrame({"comps_premium": prem, "comps_km_pass": km})
+    return cache[d]
+
+
+def check_mask(ctx, date, ciks, max_premium, key_metrics: bool) -> pd.Series:
+    """True = the stock passes the comps check (or cannot be checked: not in the comps universe / no peers)."""
+    v = valuation_check(ctx, date).reindex(pd.Index(ciks))
+    ok = pd.Series(True, index=v.index)
+    if max_premium is not None:
+        ok &= ~(v["comps_premium"] > float(max_premium))              # NaN premium -> cannot verify -> pass
+    if key_metrics:
+        ok &= v["comps_km_pass"].fillna(True).astype(bool)
+    return ok
+
+
 def _signals(ctx, date, p: dict, return_peers: bool = False):
     st = _state(ctx, date, p)
     sig = C.comps_signals(ctx, st.date, st.univ, p, st.km, mt=st.mt, cache=st.cache, return_peers=return_peers)

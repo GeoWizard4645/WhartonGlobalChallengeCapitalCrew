@@ -100,7 +100,7 @@ EBIT_MODES = ("opinc", "pretax_interest")
 # Exclusion reasons, in the priority order used for the mutually exclusive ``first_reason``.
 REASONS = ("sector", "no_snapshot", "stale", "no_classified_bs", "mcap_missing", "price_lt_floor",
            "mcap_lt_min", "ebit_missing", "ebit_nonpos", "debt_unmapped", "ev_nonpos", "capital_nonpos",
-           "gp_missing", "mom_low", "other")
+           "gp_missing", "mom_low", "comps", "other")
 _STRUCTURAL = ("sector", "no_snapshot", "stale", "no_classified_bs", "mcap_missing", "price_lt_floor",
                "ebit_missing", "ebit_nonpos", "debt_unmapped", "ev_nonpos", "capital_nonpos")
 
@@ -518,7 +518,10 @@ def _finish(base: pd.DataFrame, p: dict) -> pd.DataFrame:
         t["fail_mom_low"] = (~(pct >= p["mom_filter"])).to_numpy()      # NaN momentum fails
     else:
         t["fail_mom_low"] = False
-    t["eligible"] = t["ok_struct"] & ~t["fail_mcap_lt_min"] & ~t["fail_gp_missing"] & ~t["fail_mom_low"]
+    # optional second check with trading comps (too expensive vs GICS peers / fails the doc's key metrics)
+    t["fail_comps"] = (~t["comps_ok"].astype(bool)).to_numpy() if "comps_ok" in t.columns else False
+    t["eligible"] = (t["ok_struct"] & ~t["fail_mcap_lt_min"] & ~t["fail_gp_missing"] & ~t["fail_mom_low"]
+                     & ~t["fail_comps"])
     named = np.column_stack([t[f"fail_{r}"].to_numpy(bool) for r in REASONS if r != "other"]).any(axis=1)
     t["fail_other"] = (~t["eligible"].to_numpy(bool)) & ~named          # ineligible without a named reason
 
@@ -568,9 +571,20 @@ def _base_cached(ctx, date: pd.Timestamp, p: dict) -> pd.DataFrame:
     return b
 
 
+def _comps_on(p: dict) -> bool:
+    return str(p.get("comps_max_premium", "none")).lower() != "none" or bool(p.get("comps_km", False))
+
+
 def _table(ctx, date, p: dict) -> pd.DataFrame:
     d = ctx.trading_day_on_or_before(date)
-    return _finish(_base_cached(ctx, d, p), p)
+    base = _base_cached(ctx, d, p)
+    if _comps_on(p):
+        from quant.strategies import trading_comps as tc
+        mp = p.get("comps_max_premium", "none")
+        ok = tc.check_mask(ctx, d, base.index, None if str(mp).lower() == "none" else float(mp),
+                           bool(p.get("comps_km", False)))
+        base = base.assign(comps_ok=ok.to_numpy(bool))
+    return _finish(base, p)
 
 
 def mf_table(ctx, date, univ, params: dict | None = None) -> pd.DataFrame:

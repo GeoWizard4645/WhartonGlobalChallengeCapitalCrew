@@ -96,7 +96,8 @@ GRID: list[dict] = [
                                           CATEGORICAL["technical"], AXES["N"])
 ]
 
-_OPTIONAL = dict(y_nde=3.0, trend_exit_daily=False, mom_type="raw")   # accepted when not part of the cells
+_OPTIONAL = dict(y_nde=3.0, trend_exit_daily=False, mom_type="raw",    # accepted when not part of the cells
+                 comps_max_premium="none", comps_km=False)            # trading comps as a second check
 _ALLOWED = set(DEFAULT) | set(_OPTIONAL)
 _TECHNICALS = ("none", "sma", "sma_rsi")
 _ORDERS = ("MF", "QF")
@@ -150,6 +151,8 @@ def _params(params: dict | None) -> dict:
     p["x_debt"] = float(p["x_debt"])
     p["y_nde"] = float(p["y_nde"])
     p["trend_exit_daily"] = bool(p["trend_exit_daily"])
+    p["comps_max_premium"] = None if _off(p["comps_max_premium"]) else float(p["comps_max_premium"])
+    p["comps_km"] = bool(p["comps_km"])
     if p["quality"] not in quality_mod.ARMS:
         raise ValueError(f"unknown quality arm {p['quality']!r}; choose from {sorted(quality_mod.ARMS)}")
     return p
@@ -373,7 +376,7 @@ def _masks(ctx, t, F: pd.DataFrame, p: dict) -> dict:
 def _signal(ctx, t: pd.Timestamp, p: dict) -> dict:
     """Ranked list of ALL names passing every stage at ``t`` (top N is a slice) plus the funnel counts."""
     key = (t, p["quality"], p["technical"], p["order"], round(p["shortlist"], 9), p["x_debt"], p["y_nde"],
-           p["mom_type"])
+           p["mom_type"], p["comps_max_premium"], p["comps_km"])
     cache = _cache(ctx)["sig"]
     if key in cache:
         return cache[key]
@@ -383,6 +386,10 @@ def _signal(ctx, t: pd.Timestamp, p: dict) -> dict:
     s1 = m["short"]
     s2 = s1 & m["quality"]
     s3 = s2 & m["sma"] & m["rsi"]
+    if p["comps_max_premium"] is not None or p["comps_km"]:
+        from quant.strategies import trading_comps as tc
+        ciks = pd.to_numeric(F["cik"], errors="coerce").to_numpy()
+        s3 = s3 & tc.check_mask(ctx, t, ciks, p["comps_max_premium"], p["comps_km"]).to_numpy(bool)
     idx = np.flatnonzero(s3)
     if p["quality"].startswith("Q4-") and len(idx):
         score = _blend(ctx, t, F, p["quality"])[idx]
