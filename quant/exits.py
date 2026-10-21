@@ -14,7 +14,8 @@ Exit rules: exactly what the backtests did (nothing here was tuned).
 Expected returns (output/holding_stats.csv): for every month-end signal in the backtest, each pick's total return
 from the trade (the next close) over its first month and to its exit under the rules above (until it drops out of
 the top N for momentum, 12 months for the Magic Formula), next to the average stock the strategy could have
-bought over the same days. Summarized for the 5 best-ranked picks and for all picks, over 2011-2026 and 2019-2026.
+bought over the same days. Summarized for the 5 and 10 best-ranked picks and for all picks, over 2011-2026 and
+2019-2026.
 Before 2019 the price data misses many companies that were later delisted, so 2019-2026 is the cleaner window.
 """
 from __future__ import annotations
@@ -38,7 +39,7 @@ STATS_FILE = settings.OUTPUT / "holding_stats.csv"
 ORDERS_FILE = settings.OUTPUT / "orders.csv"
 PARAMS_FILE = settings.OUTPUT / "chosen_params.json"
 MF_HOLD_MONTHS = 12
-TOP = 5                      # the "top5" rows of the stats: picks ranked 1-5 at the signal
+TOPS = (5, 10)               # the "top5" / "top10" rows of the stats: picks ranked 1-5 / 1-10 at the signal
 CLEAN_WINDOW = "2019-2026"   # the window trade_plan quotes expected returns from
 
 RULES = {
@@ -188,7 +189,7 @@ def summarize(rows: pd.DataFrame) -> pd.DataFrame:
     out = []
     rows = rows.dropna(subset=["ret"])
     for (strategy, horizon), g in rows.groupby(["strategy", "horizon"], sort=False):
-        for picks, gg in ((f"top{TOP}", g[g["rank"] <= TOP]), ("all", g)):
+        for picks, gg in [(f"top{k}", g[g["rank"] <= k]) for k in TOPS] + [("all", g)]:
             for window, w in (("2011-2026", gg), (CLEAN_WINDOW, gg[gg["entry"] >= pd.Timestamp(settings.TEST_START)])):
                 x = w["ret"]
                 out.append(dict(strategy=strategy, horizon=horizon, picks=picks, window=window, n=len(w),
@@ -211,7 +212,7 @@ def load_stats() -> pd.DataFrame | None:
     return pd.read_csv(STATS_FILE) if STATS_FILE.exists() else None
 
 
-def expected(stats: pd.DataFrame | None, strategy: str, horizon: str, picks: str = f"top{TOP}",
+def expected(stats: pd.DataFrame | None, strategy: str, horizon: str, picks: str = "all",
              window: str = CLEAN_WINDOW) -> dict:
     """The stats row for a pick like this one ({} if the stats have not been computed)."""
     if stats is None:

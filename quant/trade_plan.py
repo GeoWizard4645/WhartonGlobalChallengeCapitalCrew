@@ -145,7 +145,7 @@ def build_orders(budgets: dict, exclude: dict, top: int = 0, entry=None) -> pd.D
     entry = pd.Timestamp(entry) if entry is not None else exits.next_trading_day(close.index[-1])
     o["entry_date"] = entry.date()
     stats = exits.load_stats()
-    picks = f"top{exits.TOP}" if top and top <= exits.TOP else "all"
+    picks = f"top{top}" if top in exits.TOPS else "all"           # backtest stats for picks ranked like these
     ex = pd.DataFrame([exit_columns(s, entry, stats, picks) for s in o["strategies"]], index=o.index)
     o = pd.concat([o, ex], axis=1)
     return o.sort_values(["strategies", "rank"]).reset_index(drop=True)

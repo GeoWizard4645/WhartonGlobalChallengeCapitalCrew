@@ -55,7 +55,7 @@ def test_summarize_splits_top_picks_and_windows():
         "entry": [T("2015-01-02"), T("2015-01-02"), T("2015-01-02"), T("2020-01-02")],
         "months": 12, "ret": [0.10, -0.05, 0.30, 0.20], "universe": [0.05, 0.05, 0.05, 0.10]})
     s = exits.summarize(rows).set_index(["picks", "window"])
-    assert s.loc[("top5", "2011-2026"), "n"] == 3
+    assert s.loc[("top5", "2011-2026"), "n"] == 3 and s.loc[("top10", "2011-2026"), "n"] == 4
     assert s.loc[("top5", "2011-2026"), "mean"] == pytest.approx(0.25 / 3, abs=1e-4)
     assert s.loc[("all", "2019-2026"), "mean_vs_universe"] == pytest.approx(0.10)
     assert s.loc[("all", "2011-2026"), "pct_positive"] == pytest.approx(0.75)
