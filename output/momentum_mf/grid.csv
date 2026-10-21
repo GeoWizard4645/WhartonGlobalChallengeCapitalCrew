@@ -1,0 +1,13 @@
+order,shortlist,x_debt,stop_loss,vol_target,quality,technical,mom_type,mf_cut,N,train_sharpe,train_cagr,test_sharpe,test_cagr,chosen
+MF,0.2,1.0,none,none,Q1-50,none,residual,0.0,10,1.0947,0.1626,0.8298,0.2238,False
+MF,0.2,1.0,none,none,Q1-50,none,residual,0.0,20,1.0472,0.1467,0.9254,0.2343,False
+MF,0.2,1.0,none,none,Q1-50,none,residual,0.0,30,1.0156,0.135,0.7836,0.1919,False
+MF,0.2,1.0,none,none,Q1-50,none,residual,0.25,10,1.1548,0.1685,0.8106,0.2216,False
+MF,0.2,1.0,none,none,Q1-50,none,residual,0.25,20,1.138,0.1557,0.8412,0.2078,True
+MF,0.2,1.0,none,none,Q1-50,none,residual,0.25,30,1.0635,0.135,0.7249,0.1724,False
+MF,0.2,1.0,none,none,Q1-50,none,residual,0.5,10,0.9282,0.1337,0.8716,0.2161,False
+MF,0.2,1.0,none,none,Q1-50,none,residual,0.5,20,1.0358,0.1372,0.7617,0.1758,False
+MF,0.2,1.0,none,none,Q1-50,none,residual,0.5,30,0.8924,0.0912,0.6753,0.145,False
+MF,0.2,1.0,none,none,Q1-50,none,residual,0.75,10,1.0333,0.1445,0.6707,0.155,False
+MF,0.2,1.0,none,none,Q1-50,none,residual,0.75,20,0.9091,0.0748,0.4939,0.1024,False
+MF,0.2,1.0,none,none,Q1-50,none,residual,0.75,30,0.9049,0.0512,0.5085,0.0832,False

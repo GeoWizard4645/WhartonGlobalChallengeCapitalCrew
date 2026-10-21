@@ -1,7 +1,7 @@
 """Turn the strategies' picks into one order list for WInS.
 
     .venv/bin/python -m quant.trade_plan                       # default budgets below
-    .venv/bin/python -m quant.trade_plan --qm 37500 --mf 37500 --tc 0
+    .venv/bin/python -m quant.trade_plan --qm 37500 --mf 37500 --mm 0
 
 Reads output/<strategy>/picks.csv (written by `python -m quant.run`), skips the names in DO_NOT_BUY (replacing
 them with the strategy's next-ranked alternate, as the rules would), merges names held by more than one strategy,
@@ -31,8 +31,9 @@ DO_NOT_BUY = {
 }
 
 # Default budgets: the repo case keeps 25% of the $300,000 WInS account in stocks ($75,000). Split between the
-# two strategies that beat their benchmarks in BOTH the 2011-18 and 2019-26 backtests; trading comps did not.
-BUDGETS = {"quality_momentum": 37500, "magic_formula": 37500, "trading_comps": 0}
+# two strategies that beat their benchmarks in BOTH the 2011-18 and 2019-26 backtests (trading comps did not and is
+# shelved). The merged momentum + Magic Formula strategy can be given a budget with --mm.
+BUDGETS = {"quality_momentum": 37500, "magic_formula": 37500, "momentum_mf": 0}
 MIN_PRICE = 5.0
 
 
@@ -72,9 +73,9 @@ def main(argv=None) -> None:
     ap = argparse.ArgumentParser(description="Build the WInS order list from the strategies' picks.")
     ap.add_argument("--qm", type=float, default=BUDGETS["quality_momentum"], help="quality momentum budget ($)")
     ap.add_argument("--mf", type=float, default=BUDGETS["magic_formula"], help="Magic Formula budget ($)")
-    ap.add_argument("--tc", type=float, default=BUDGETS["trading_comps"], help="trading comps budget ($)")
+    ap.add_argument("--mm", type=float, default=BUDGETS["momentum_mf"], help="momentum + Magic Formula budget ($)")
     a = ap.parse_args(argv)
-    o = build_orders({"quality_momentum": a.qm, "magic_formula": a.mf, "trading_comps": a.tc}, DO_NOT_BUY)
+    o = build_orders({"quality_momentum": a.qm, "magic_formula": a.mf, "momentum_mf": a.mm}, DO_NOT_BUY)
     o.to_csv(settings.OUTPUT / "orders.csv", index=False)
     pd.set_option("display.width", 160)
     print(o[["ticker", "name", "strategies", "shares", "price", "value"]].to_string(index=False))

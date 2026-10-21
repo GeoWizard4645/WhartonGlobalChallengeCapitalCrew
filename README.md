@@ -54,9 +54,10 @@ python3 dcf.py                               # DCF + margin of safety for stock 
 
 ## Stock strategies (`quant/`)
 
-Quality momentum, Magic Formula and trading comps, backtested on the point-in-time S&P 500 + MidCap 400 (2011-2026)
-with SEC filing data. Results are in `output/results.csv` and `output/performance.png`; today's picks in
-`output/<strategy>/picks.csv`; the order list in `output/orders.csv`.
+Quality momentum, Magic Formula and the two merged (momentum picks, Magic Formula vetoes), backtested on the
+point-in-time S&P 500 + MidCap 400 (2011-2026) with SEC filing data. Results are in `output/results.csv` and
+`output/performance.png`; today's picks in `output/<strategy>/picks.csv`; the order list in `output/orders.csv`.
+Trading comps did not beat its benchmarks and is set aside in `quant/shelved/`.
 
 ```
 python3 -m venv .venv && .venv/bin/pip install -r requirements.txt

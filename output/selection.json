@@ -11,10 +11,10 @@
     "pbo": 0.175,
     "dsr": 0.98
   },
-  "trading_comps": {
+  "momentum_mf": {
     "fallback": false,
     "fallback_reason": null,
-    "pbo": 0.43,
-    "dsr": 0.719
+    "pbo": 0.737,
+    "dsr": 0.997
   }
 }

@@ -33,7 +33,7 @@ from quant import settings  # noqa: E402
 from quant.backtest import grid, metrics, stats  # noqa: E402
 from quant.strategies import magic_formula as mf  # noqa: E402
 from quant.strategies import quality_momentum as qm  # noqa: E402
-from quant.strategies import trading_comps as tc  # noqa: E402
+from quant.strategies import momentum_mf as mm  # noqa: E402
 
 log = logging.getLogger("quant.run")
 
@@ -51,11 +51,12 @@ STRATEGIES = {
         label="Magic Formula", mod=mf, excluded=("Financials", "Real Estate", "Utilities"),
         start=lambda ctx: mf.common_start(ctx),
         fn=lambda ctx, st, end: mf.make_grid_fn(ctx, start=st, end=end)),
-    "trading_comps": dict(
-        label="Trading comps", mod=tc, excluded=("Financials", "Real Estate"),
-        start=lambda ctx: pd.Timestamp(tc.TRAIN_START),
-        fn=lambda ctx, st, end: (lambda cell: tc.monthly_returns(cell, ctx=ctx, start=st, end=end))),
+    "momentum_mf": dict(
+        label="Momentum + Magic Formula", mod=mm, excluded=("Financials", "Real Estate"),
+        start=lambda ctx: mm.first_signal_date(ctx),
+        fn=lambda ctx, st, end: (lambda cell: mm.monthly_returns(cell, ctx=ctx, start=st, end=end))),
 }
+# Trading comps was researched and backtested but did not beat its benchmarks; its code is in quant/shelved/.
 
 
 # --------------------------------------------------------------------------------------------------
@@ -131,13 +132,28 @@ def run_strategy(ctx, name: str, end: pd.Timestamp, rf: pd.Series, factors: pd.D
     g.round(4).to_csv(settings.OUTPUT / name / "grid.csv", index=False)
 
     # returns of the improved (chosen) version and of the team doc's original rules, same start date
-    improved = gr.M[sel["cell_id"]].dropna()
-    doc = fn(dict(mod.DOC_DEFAULT)).dropna()
-    ew = ew_benchmark(ctx, start, end, spec["excluded"])
+    series = {"improved": gr.M[sel["cell_id"]].dropna()}
+    if hasattr(mod, "DOC_DEFAULT"):
+        series["doc rules"] = fn(dict(mod.DOC_DEFAULT)).dropna()
+    series["equal-weight universe"] = ew_benchmark(ctx, start, end, spec["excluded"])
     log.info("%s: chosen %s (fallback=%s) in %.0fs", name, chosen, sel["fallback"], time.time() - t0)
     return dict(name=name, label=spec["label"], chosen=chosen, fallback=bool(sel["fallback"]),
-                fallback_reason=sel.get("fallback_reason"), pbo=pbo, dsr=dsr,
-                series={"improved": improved, "doc rules": doc, "equal-weight universe": ew}, start=start)
+                fallback_reason=sel.get("fallback_reason"), pbo=pbo, dsr=dsr, series=series, start=start)
+
+
+def add_comparison(runs: list[dict]) -> None:
+    """Put momentum alone, Magic Formula alone and a 50/50 split of the two next to the merged strategy,
+    on the months all of them cover (the Magic Formula starts last)."""
+    by = {r["name"]: r for r in runs}
+    if not {"quality_momentum", "magic_formula", "momentum_mf"} <= set(by):
+        return
+    q, m = by["quality_momentum"]["series"]["improved"], by["magic_formula"]["series"]["improved"]
+    both = pd.concat([q, m], axis=1).dropna()
+    merged = by["momentum_mf"]
+    merged["start"] = max(merged["start"], both.index[0])
+    merged["series"] = {"merged": merged["series"]["improved"], "momentum alone": q, "Magic Formula alone": m,
+                        "50/50 split": both.mean(axis=1),          # two half-portfolios, rebalanced monthly
+                        "equal-weight universe": merged["series"]["equal-weight universe"]}
 
 
 def results_table(runs: list[dict], spy: pd.Series, end, rf, factors) -> pd.DataFrame:
@@ -165,6 +181,8 @@ def chart(runs: list[dict], spy: pd.Series, path) -> None:
         start = run["start"]
         series = dict(run["series"], SPY=spy)
         style = {"improved": dict(lw=2.2, color="#1f6f8b"), "doc rules": dict(lw=1.4, color="#e07b39", ls="--"),
+                 "merged": dict(lw=2.2, color="#6a3d9a"), "momentum alone": dict(lw=1.4, color="#1f6f8b"),
+                 "Magic Formula alone": dict(lw=1.4, color="#2f7d4f"), "50/50 split": dict(lw=1.4, color="#c9a227", ls="--"),
                  "equal-weight universe": dict(lw=1.2, color="#7a7a7a"), "SPY": dict(lw=1.2, color="#222222", ls=":")}
         for k, r in series.items():
             x = r.loc[start:].dropna()
@@ -175,8 +193,8 @@ def chart(runs: list[dict], spy: pd.Series, path) -> None:
                 color="#666666", va="top")
         ax.set_title(run["label"], fontsize=11)
         ax.grid(alpha=0.25)
+        ax.legend(fontsize=7.5, loc="upper left")
     np.atleast_1d(axes)[0].set_ylabel("growth of $1, net of costs (log)")
-    np.atleast_1d(axes)[0].legend(fontsize=8, loc="upper left")
     fig.tight_layout()
     fig.savefig(path, dpi=130)
     plt.close(fig)
@@ -188,13 +206,13 @@ def chart(runs: list[dict], spy: pd.Series, path) -> None:
 def picks(ctx, name: str, params: dict) -> pd.DataFrame:
     """What the strategy holds today (weight > 0) plus next-ranked alternates (weight 0, alternate=True)."""
     asof = ctx.dates[-1]
-    if name == "quality_momentum":
-        t = qm.live_picks(ctx, params, asof)
+    if name in ("quality_momentum", "momentum_mf"):
+        t = (qm if name == "quality_momentum" else mm).live_picks(ctx, params, asof)
         t.attrs = {}
         held = t[t["selected"]]
         alt = t[t["dropped_by"] == "beyond_N"].head(5)
         cols = ["ticker", "name", "gics_sector", "price", "mom_12_1", "mom_score", "sma200_gap", "gpoa", "roe",
-                "debt_to_equity"]
+                "debt_to_equity", "mf_pct"]
         out = pd.concat([held.assign(alternate=False), alt.assign(alternate=True, weight=0.0)])
         out = out[["rank", "weight", "alternate"] + [c for c in cols if c in out.columns]]
     elif name == "magic_formula":
@@ -205,14 +223,6 @@ def picks(ctx, name: str, params: dict) -> pd.DataFrame:
         t["weight"] = np.where(t["pick"] == "PICK", 1.0 / max(n, 1), 0.0)
         t["alternate"] = t["pick"] == "ALT"
         cols = ["ticker", "name", "gics_sector", "price_raw", "ey", "roc", "mcap", "mom_12_1"]
-        out = t[["rank", "weight", "alternate"] + [c for c in cols if c in t.columns]]
-    else:
-        t = tc.live_picks(ctx, params, asof, near_miss=False, forward_check=False)
-        t.attrs = {}
-        t = t[t["selected"]].rename(columns={"sector": "gics_sector"})
-        t["alternate"] = False
-        cols = ["ticker", "name", "gics_sector", "sub_industry", "price", "pe", "pe_bench", "ev_ebitda", "ev_bench",
-                "nd_ebitda", "roic", "wacc"]
         out = t[["rank", "weight", "alternate"] + [c for c in cols if c in t.columns]]
     out = out.reset_index(drop=True)
     out.insert(0, "asof", asof.date())
@@ -246,6 +256,7 @@ def main(argv=None) -> None:
     rf = monthly_rf(ctx)
     factors = factors_mod.ff_factors_for_regression("M")
     runs = [run_strategy(ctx, name, end, rf, factors) for name in STRATEGIES]
+    add_comparison(runs)
     spy = spy_monthly(ctx)
 
     res = results_table(runs, spy, end, rf, factors)

@@ -13,7 +13,7 @@ import pandas as pd
 import pytest
 
 from quant.data import rates
-from quant.signals import key_metrics as km
+from quant.shelved import key_metrics as km
 
 DATE = pd.Timestamp("2016-06-30")          # a Thursday
 

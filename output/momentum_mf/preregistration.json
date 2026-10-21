@@ -1,0 +1,199 @@
+{
+  "strategy": "momentum_mf",
+  "timestamp": "2026-10-21T01:24:53+00:00",
+  "primary_metric": "net_sharpe",
+  "selection_rule": "plateau_v1",
+  "lam": 1.0,
+  "peak_ratio_max": 1.25,
+  "tie_tol": 0.02,
+  "cat_margin": 0.1,
+  "stability": {
+    "B": 500,
+    "min_share_within_one_step": 0.5
+  },
+  "split": {
+    "train_end": "2018-12-31",
+    "test_start": "2019-01-01"
+  },
+  "test_window_policy": "single_look",
+  "n_cells": 12,
+  "grid_hash": "1799285ca959e8e9",
+  "content_hash": "c73e59b5b56a5d3f",
+  "axes": {
+    "mf_cut": [
+      0.0,
+      0.25,
+      0.5,
+      0.75
+    ],
+    "N": [
+      10,
+      20,
+      30
+    ]
+  },
+  "categorical": {},
+  "default": {
+    "order": "MF",
+    "shortlist": 0.2,
+    "x_debt": 1.0,
+    "stop_loss": "none",
+    "vol_target": "none",
+    "quality": "Q1-50",
+    "technical": "none",
+    "mom_type": "residual",
+    "mf_cut": 0.5,
+    "N": 20
+  },
+  "grid": [
+    {
+      "order": "MF",
+      "shortlist": 0.2,
+      "x_debt": 1.0,
+      "stop_loss": "none",
+      "vol_target": "none",
+      "quality": "Q1-50",
+      "technical": "none",
+      "mom_type": "residual",
+      "mf_cut": 0.0,
+      "N": 10
+    },
+    {
+      "order": "MF",
+      "shortlist": 0.2,
+      "x_debt": 1.0,
+      "stop_loss": "none",
+      "vol_target": "none",
+      "quality": "Q1-50",
+      "technical": "none",
+      "mom_type": "residual",
+      "mf_cut": 0.0,
+      "N": 20
+    },
+    {
+      "order": "MF",
+      "shortlist": 0.2,
+      "x_debt": 1.0,
+      "stop_loss": "none",
+      "vol_target": "none",
+      "quality": "Q1-50",
+      "technical": "none",
+      "mom_type": "residual",
+      "mf_cut": 0.0,
+      "N": 30
+    },
+    {
+      "order": "MF",
+      "shortlist": 0.2,
+      "x_debt": 1.0,
+      "stop_loss": "none",
+      "vol_target": "none",
+      "quality": "Q1-50",
+      "technical": "none",
+      "mom_type": "residual",
+      "mf_cut": 0.25,
+      "N": 10
+    },
+    {
+      "order": "MF",
+      "shortlist": 0.2,
+      "x_debt": 1.0,
+      "stop_loss": "none",
+      "vol_target": "none",
+      "quality": "Q1-50",
+      "technical": "none",
+      "mom_type": "residual",
+      "mf_cut": 0.25,
+      "N": 20
+    },
+    {
+      "order": "MF",
+      "shortlist": 0.2,
+      "x_debt": 1.0,
+      "stop_loss": "none",
+      "vol_target": "none",
+      "quality": "Q1-50",
+      "technical": "none",
+      "mom_type": "residual",
+      "mf_cut": 0.25,
+      "N": 30
+    },
+    {
+      "order": "MF",
+      "shortlist": 0.2,
+      "x_debt": 1.0,
+      "stop_loss": "none",
+      "vol_target": "none",
+      "quality": "Q1-50",
+      "technical": "none",
+      "mom_type": "residual",
+      "mf_cut": 0.5,
+      "N": 10
+    },
+    {
+      "order": "MF",
+      "shortlist": 0.2,
+      "x_debt": 1.0,
+      "stop_loss": "none",
+      "vol_target": "none",
+      "quality": "Q1-50",
+      "technical": "none",
+      "mom_type": "residual",
+      "mf_cut": 0.5,
+      "N": 20
+    },
+    {
+      "order": "MF",
+      "shortlist": 0.2,
+      "x_debt": 1.0,
+      "stop_loss": "none",
+      "vol_target": "none",
+      "quality": "Q1-50",
+      "technical": "none",
+      "mom_type": "residual",
+      "mf_cut": 0.5,
+      "N": 30
+    },
+    {
+      "order": "MF",
+      "shortlist": 0.2,
+      "x_debt": 1.0,
+      "stop_loss": "none",
+      "vol_target": "none",
+      "quality": "Q1-50",
+      "technical": "none",
+      "mom_type": "residual",
+      "mf_cut": 0.75,
+      "N": 10
+    },
+    {
+      "order": "MF",
+      "shortlist": 0.2,
+      "x_debt": 1.0,
+      "stop_loss": "none",
+      "vol_target": "none",
+      "quality": "Q1-50",
+      "technical": "none",
+      "mom_type": "residual",
+      "mf_cut": 0.75,
+      "N": 20
+    },
+    {
+      "order": "MF",
+      "shortlist": 0.2,
+      "x_debt": 1.0,
+      "stop_loss": "none",
+      "vol_target": "none",
+      "quality": "Q1-50",
+      "technical": "none",
+      "mom_type": "residual",
+      "mf_cut": 0.75,
+      "N": 30
+    }
+  ],
+  "extra": {
+    "description": "momentum leads (quality-momentum v2 candidates), Magic Formula vetoes; monthly, top-N equal weight, point-in-time S&P 900",
+    "veto": "EBIT/EV/capital <= 0, or combined ROC+EY rank in the worst mf_cut of the universe (min cap $50M, no momentum filter); stocks MF cannot rank are not vetoed"
+  },
+  "history": []
+}

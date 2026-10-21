@@ -579,12 +579,53 @@ def _table(ctx, date, p: dict) -> pd.DataFrame:
     d = ctx.trading_day_on_or_before(date)
     base = _base_cached(ctx, d, p)
     if _comps_on(p):
-        from quant.strategies import trading_comps as tc
+        from quant.shelved import trading_comps as tc
         mp = p.get("comps_max_premium", "none")
         ok = tc.check_mask(ctx, d, base.index, None if str(mp).lower() == "none" else float(mp),
                            bool(p.get("comps_km", False)))
         base = base.assign(comps_ok=ok.to_numpy(bool))
     return _finish(base, p)
+
+
+# --------------------------------------------------------------------------------------------------
+# Magic Formula as a veto on another strategy's picks (used by the merged momentum + MF strategy)
+# --------------------------------------------------------------------------------------------------
+# Score every business above the doc's $50M floor, with no momentum filter (momentum is the other strategy's job).
+SCREEN_PARAMS: dict = dict(DEFAULT, min_cap=50e6, mom_filter=0.0, ranking="MF")
+
+
+def screen(ctx, date) -> pd.DataFrame:
+    """Magic Formula verdict on every universe stock on ``date`` (index = cik).
+
+    mf_pct: percentile of the combined ROC + earnings-yield rank among the stocks MF can rank (0 = best,
+    1 = worst; NaN when MF cannot rank it: excluded sector or missing data).
+    mf_bad: EBIT, enterprise value or invested capital not positive, i.e. not a good business at any price.
+    """
+    d = ctx.trading_day_on_or_before(date)
+    st = _store(ctx)
+    key = ("screen", d)
+    if key not in st:
+        t = _table(ctx, d, _params(SCREEN_PARAMS))
+        el = t["eligible"].astype(bool)
+        pct = t.loc[el, "score"].rank(pct=True, method="average")      # lower score = better business + price
+        st[key] = pd.DataFrame({
+            "mf_pct": pct.reindex(t.index),
+            "mf_bad": (t["fail_ebit_nonpos"].astype(bool) | t["fail_ev_nonpos"].astype(bool)
+                       | t["fail_capital_nonpos"].astype(bool)),
+        }, index=t.index)
+    return st[key]
+
+
+def keep_mask(scr: pd.DataFrame, ciks, cut: float) -> pd.Series:
+    """True = the Magic Formula does not veto the stock.
+
+    Vetoed: mf_bad, or a combined rank in the worst ``cut`` fraction (cut=0.5 drops the bottom half). Stocks MF
+    cannot rank (excluded sector, missing data) are kept, since there is nothing to judge them on.
+    """
+    s = scr.reindex(pd.Index(ciks))
+    keep = ~s["mf_bad"].fillna(False).astype(bool)
+    keep &= ~(s["mf_pct"] > 1.0 - float(cut))                         # NaN percentile -> kept
+    return keep
 
 
 def mf_table(ctx, date, univ, params: dict | None = None) -> pd.DataFrame:

@@ -97,7 +97,8 @@ GRID: list[dict] = [
 ]
 
 _OPTIONAL = dict(y_nde=3.0, trend_exit_daily=False, mom_type="raw",    # accepted when not part of the cells
-                 comps_max_premium="none", comps_km=False)            # trading comps as a second check
+                 comps_max_premium="none", comps_km=False,            # shelved trading comps as a second check
+                 mf_cut="none")                                       # Magic Formula veto (merged strategy)
 _ALLOWED = set(DEFAULT) | set(_OPTIONAL)
 _TECHNICALS = ("none", "sma", "sma_rsi")
 _ORDERS = ("MF", "QF")
@@ -153,6 +154,9 @@ def _params(params: dict | None) -> dict:
     p["trend_exit_daily"] = bool(p["trend_exit_daily"])
     p["comps_max_premium"] = None if _off(p["comps_max_premium"]) else float(p["comps_max_premium"])
     p["comps_km"] = bool(p["comps_km"])
+    p["mf_cut"] = None if _off(p["mf_cut"]) else float(p["mf_cut"])
+    if p["mf_cut"] is not None and not 0.0 <= p["mf_cut"] < 1.0:
+        raise ValueError("mf_cut must be in [0, 1)")
     if p["quality"] not in quality_mod.ARMS:
         raise ValueError(f"unknown quality arm {p['quality']!r}; choose from {sorted(quality_mod.ARMS)}")
     return p
@@ -370,13 +374,22 @@ def _masks(ctx, t, F: pd.DataFrame, p: dict) -> dict:
     else:
         q = _quality_flags(ctx, t, F, p)
     sma_ok, rsi_ok = _tech_mask(F, p["technical"])
-    return dict(short=short, quality=q, sma=sma_ok, rsi=rsi_ok)
+    ciks = pd.to_numeric(F["cik"], errors="coerce").to_numpy()
+    comps_ok = np.ones(n, dtype=bool)
+    if p["comps_max_premium"] is not None or p["comps_km"]:
+        from quant.shelved import trading_comps as tc
+        comps_ok = tc.check_mask(ctx, t, ciks, p["comps_max_premium"], p["comps_km"]).to_numpy(bool)
+    mf_ok = np.ones(n, dtype=bool)
+    if p["mf_cut"] is not None:                       # momentum leads, the Magic Formula vetoes
+        from quant.strategies import magic_formula as mf
+        mf_ok = mf.keep_mask(mf.screen(ctx, t), ciks, p["mf_cut"]).to_numpy(bool)
+    return dict(short=short, quality=q, sma=sma_ok, rsi=rsi_ok, comps=comps_ok, mf=mf_ok)
 
 
 def _signal(ctx, t: pd.Timestamp, p: dict) -> dict:
     """Ranked list of ALL names passing every stage at ``t`` (top N is a slice) plus the funnel counts."""
     key = (t, p["quality"], p["technical"], p["order"], round(p["shortlist"], 9), p["x_debt"], p["y_nde"],
-           p["mom_type"], p["comps_max_premium"], p["comps_km"])
+           p["mom_type"], p["comps_max_premium"], p["comps_km"], p["mf_cut"])
     cache = _cache(ctx)["sig"]
     if key in cache:
         return cache[key]
@@ -385,11 +398,7 @@ def _signal(ctx, t: pd.Timestamp, p: dict) -> dict:
     m = _masks(ctx, t, F, p)
     s1 = m["short"]
     s2 = s1 & m["quality"]
-    s3 = s2 & m["sma"] & m["rsi"]
-    if p["comps_max_premium"] is not None or p["comps_km"]:
-        from quant.strategies import trading_comps as tc
-        ciks = pd.to_numeric(F["cik"], errors="coerce").to_numpy()
-        s3 = s3 & tc.check_mask(ctx, t, ciks, p["comps_max_premium"], p["comps_km"]).to_numpy(bool)
+    s3 = s2 & m["sma"] & m["rsi"] & m["comps"] & m["mf"]
     idx = np.flatnonzero(s3)
     if p["quality"].startswith("Q4-") and len(idx):
         score = _blend(ctx, t, F, p["quality"])[idx]
@@ -584,8 +593,11 @@ def live_picks(ctx, params: dict, asof=None) -> pd.DataFrame:
     d["sma200_gap"] = d["close"] / d["sma200"] - 1.0
     d["mom_12_1"] = d["mom_raw"]
     d["mom_score"] = d["mom"]
+    d["pass_comps"] = m["comps"]
+    d["pass_magic_formula"] = m["mf"]
     stage = np.where(~d["pass_shortlist"], "shortlist", np.where(~d["pass_quality"], "quality",
-             np.where(~d["pass_sma200"], "sma200", np.where(~d["pass_rsi"], "rsi", ""))))
+             np.where(~d["pass_sma200"], "sma200", np.where(~d["pass_rsi"], "rsi",
+             np.where(~d["pass_comps"], "comps", np.where(~d["pass_magic_formula"], "magic_formula", ""))))))
     d["dropped_by"] = stage
     d["rank"] = d["yf_ticker"].map({tk: i + 1 for i, tk in enumerate(sg["tickers"])})
     d["selected"] = (d["rank"] <= p["N"]).fillna(False).astype(bool)

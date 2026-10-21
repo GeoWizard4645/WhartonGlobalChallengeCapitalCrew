@@ -8,9 +8,9 @@ import pandas as pd
 import pytest
 
 from quant.backtest import grid as grid_mod
-from quant.signals import comps as C
-from quant.strategies import trading_comps as TC
-from tests.test_comps import D0, FakeCtx, comp, km_frame, make_ctx
+from quant.shelved import comps as C
+from quant.shelved import trading_comps as TC
+from tests.shelved.test_comps import D0, FakeCtx, comp, km_frame, make_ctx
 
 
 # --------------------------------------------------------------------------------------------------

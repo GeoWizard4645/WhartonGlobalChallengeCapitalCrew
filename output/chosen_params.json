@@ -21,12 +21,16 @@
     "ebit": "opinc",
     "mom_filter": 0.5
   },
-  "trading_comps": {
-    "theta": 0.1,
-    "pe_cap": 40,
-    "ev_cap": 35,
-    "size_filter": false,
-    "basis": "TTM",
-    "mom_filter": 0.0
+  "momentum_mf": {
+    "order": "MF",
+    "shortlist": 0.2,
+    "x_debt": 1.0,
+    "stop_loss": "none",
+    "vol_target": "none",
+    "quality": "Q1-50",
+    "technical": "none",
+    "mom_type": "residual",
+    "mf_cut": 0.25,
+    "N": 20
   }
 }

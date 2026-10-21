@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from quant.signals import comps as C
+from quant.shelved import comps as C
 
 D0 = pd.Timestamp("2020-06-30")
 

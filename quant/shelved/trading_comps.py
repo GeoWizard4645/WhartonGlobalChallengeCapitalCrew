@@ -12,7 +12,7 @@ Monthly rebalance.  At each month-end ``t`` (a trading day close):
    fresh filings, trim to 0.5x-2x of the peer median, benchmark = median of the kept     (``comps.py``)
 3. BUY candidate if BOTH multiples are < (1 - theta) x benchmark; score = average discount
 4. key-metric gates on the target (ND/EBITDA <= 3, FCF + margin stability, ROIC > WACC) from
-   ``quant.signals.key_metrics.key_metrics_table``
+   ``quant.shelved.key_metrics.key_metrics_table``
 5. top 20 by score (ties: lower ND/EBITDA), equal weight 1/max(k, 5), the remainder is cash.  Trade at
    the close of t+1, 10 bps one way (engine).
 
@@ -41,7 +41,7 @@ import pandas as pd
 from quant import settings
 from quant.backtest import engine
 from quant.backtest import grid as grid_mod
-from quant.signals import comps as C
+from quant.shelved import comps as C
 
 log = logging.getLogger(__name__)
 
@@ -160,7 +160,7 @@ def resolve_params(params: dict | None = None) -> dict:
 # --------------------------------------------------------------------------------------------------
 def _key_metrics(ctx, date, univ: pd.DataFrame, km_params=None) -> pd.DataFrame:
     """Key-metric gates for the universe (imported lazily; the module is written by another agent)."""
-    from quant.signals.key_metrics import key_metrics_table
+    from quant.shelved.key_metrics import key_metrics_table
     return key_metrics_table(ctx, date, univ, km_params)
 
 
