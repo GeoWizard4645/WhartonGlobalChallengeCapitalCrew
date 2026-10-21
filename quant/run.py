@@ -267,11 +267,14 @@ def main(argv=None) -> None:
     meta = {r["name"]: dict(fallback=r["fallback"], fallback_reason=r["fallback_reason"],
                             pbo=round(float(r["pbo"]), 3), dsr=round(float(r["dsr"]), 3)) for r in runs}
     (settings.OUTPUT / "selection.json").write_text(json.dumps(meta, indent=2) + "\n")
+    from quant import exits
+    hs = exits.write_stats(ctx, chosen, end)            # what picks returned under the exit rules
 
     show = res[res["window"].isin(["train", "test"])].pivot_table(
         index=["strategy", "version"], columns="window", values=["sharpe", "cagr_%"], sort=False)
     print(show.round(2).to_string())
     print(json.dumps(meta, indent=1))
+    print(hs[hs["window"] == exits.CLEAN_WINDOW].drop(columns="window").to_string(index=False))
     write_picks(ctx, chosen)
 
 

@@ -69,5 +69,10 @@ Before trading, refresh prices after the close, then re-list the picks and order
 ```
 .venv/bin/python -m quant.data.prices update
 .venv/bin/python -m quant.run --live-only
-.venv/bin/python -m quant.trade_plan
+.venv/bin/python -m quant.trade_plan                       # add --qm 25000 --mf 25000 --top 5 for 5 names each
+```
+Every order carries its exit plan (`quant/exits.py`): momentum holdings are re-ranked at each month-end and sold
+once out of the top 20; Magic Formula holdings are sold after 12 months. To see what to hold or sell:
+```
+.venv/bin/python -m quant.exits check
 ```
