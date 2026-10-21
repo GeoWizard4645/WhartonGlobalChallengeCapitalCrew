@@ -1,43 +1,43 @@
 ticker,name,sector,strategies,dollars,replacement,price,shares,value,price_ok,volume_ok,price_date
-DVA,DaVita,Health Care,magic_formula,1500.0,True,187.30999755859375,8,1498.48,True,True,2026-10-16
-GEN,Gen Digital,Information Technology,magic_formula,1500.0,False,24.15999984741211,62,1497.92,True,True,2026-10-16
-DBX,Dropbox,Information Technology,magic_formula,1500.0,False,35.56999969482422,42,1493.94,True,True,2026-10-16
-TTEK,Tetra Tech,Industrials,magic_formula,1500.0,False,34.720001220703125,43,1492.96,True,True,2026-10-16
-NBIX,Neurocrine Biosciences,Health Care,magic_formula,1500.0,False,135.7100067138672,11,1492.81,True,True,2026-10-16
-SIRI,SiriusXM,Communication Services,magic_formula,1500.0,False,26.969999313354492,55,1483.35,True,True,2026-10-16
-BBY,Best Buy,Consumer Discretionary,magic_formula,1500.0,False,92.62999725341797,16,1482.08,True,True,2026-10-16
-HAS,Hasbro,Consumer Discretionary,magic_formula,1500.0,False,98.76000213623047,15,1481.4,True,True,2026-10-16
-FOXA,Fox Corporation (Class A),Communication Services,magic_formula,1500.0,False,64.1500015258789,23,1475.45,True,True,2026-10-16
-HPQ,HP Inc.,Information Technology,magic_formula,1500.0,False,30.010000228881836,49,1470.49,True,True,2026-10-16
-INCY,Incyte,Health Care,magic_formula,1500.0,False,113.06999969482422,13,1469.91,True,True,2026-10-16
-SAIC,Science Applications Intl Corp,Industrials,magic_formula,1500.0,False,133.07000732421875,11,1463.77,True,True,2026-10-16
-EXPE,Expedia Group,Consumer Discretionary,magic_formula,1500.0,False,288.95001220703125,5,1444.75,True,True,2026-10-16
-MLI,Mueller Industries,Industrials,magic_formula,1500.0,False,60.06999969482422,24,1441.68,True,True,2026-10-16
-R,Ryder,Industrials,magic_formula,1500.0,True,238.38999938964844,6,1430.34,True,True,2026-10-16
-MO,Altria,Consumer Staples,magic_formula,1500.0,False,75.11000061035156,19,1427.09,True,True,2026-10-16
-ANF,Abercrombie & Fitch,Consumer Discretionary,magic_formula,1500.0,False,153.25999450683594,9,1379.34,True,True,2026-10-16
-ITW,Illinois Tool Works,Industrials,magic_formula,1500.0,False,272.2799987792969,5,1361.4,True,True,2026-10-16
-THC,Tenet Health,Health Care,magic_formula,1500.0,False,267.25,5,1336.25,True,True,2026-10-16
-SNDK,Sandisk,Information Technology,magic_formula,1500.0,False,1299.300048828125,1,1299.3,True,True,2026-10-16
-CHE,Chemed Corp.,Health Care,magic_formula,1500.0,False,512.3800048828125,2,1024.76,True,True,2026-10-16
-MCK,McKesson,Health Care,magic_formula,1500.0,False,1004.8400268554688,1,1004.84,True,True,2026-10-16
-BMY,Bristol Myers Squibb,Health Care,magic_formula+quality_momentum,3375.0,False,59.75,56,3346.0,True,True,2026-10-16
-CROX,Crocs,Consumer Discretionary,magic_formula+quality_momentum,3375.0,False,123.13999938964844,27,3324.78,True,True,2026-10-16
-MU,Micron Technology,Information Technology,magic_formula+quality_momentum,3375.0,False,878.8400268554688,3,2636.52,True,True,2026-10-16
-TGT,Target Corporation,Consumer Staples,quality_momentum,1875.0,False,154.25999450683594,12,1851.12,True,True,2026-10-16
-ILMN,"Illumina, Inc.",Health Care,quality_momentum,1875.0,False,262.5400085449219,7,1837.78,True,True,2026-10-16
-MTSI,MACOM Technology Solutions,Information Technology,quality_momentum,1875.0,False,262.239990234375,7,1835.68,True,True,2026-10-16
-CSCO,Cisco,Information Technology,quality_momentum,1875.0,False,107.38999938964844,17,1825.63,True,True,2026-10-16
-PII,Polaris,Consumer Discretionary,quality_momentum,1875.0,False,52.150001525878906,35,1825.25,True,True,2026-10-16
-KO,Coca-Cola Company (The),Consumer Staples,quality_momentum,1875.0,False,93.9000015258789,19,1784.1,True,True,2026-10-16
-HAE,Haemonetics,Health Care,quality_momentum,1875.0,True,118.27999877929688,15,1774.2,True,True,2026-10-16
-ALGN,Align Technology,Health Care,quality_momentum,1875.0,False,147.30999755859375,12,1767.72,True,True,2026-10-16
-MRK,Merck & Co.,Health Care,quality_momentum,1875.0,False,145.9499969482422,12,1751.4,True,True,2026-10-16
-ABNB,Airbnb,Consumer Discretionary,quality_momentum,1875.0,False,173.6999969482422,10,1737.0,True,True,2026-10-16
-VICR,Vicor Corporation,Industrials,quality_momentum,1875.0,False,191.5,9,1723.5,True,True,2026-10-16
-ELV,Elevance Health,Health Care,quality_momentum,1875.0,False,428.260009765625,4,1713.04,True,True,2026-10-16
-WDC,Western Digital,Information Technology,quality_momentum,1875.0,False,332.0,5,1660.0,True,True,2026-10-16
-RS,"Reliance, Inc.",Materials,quality_momentum,1875.0,False,411.1700134277344,4,1644.68,True,True,2026-10-16
-TER,Teradyne,Information Technology,quality_momentum,1875.0,False,325.0,5,1625.0,True,True,2026-10-16
-WST,West Pharmaceutical Services,Health Care,quality_momentum,1875.0,False,384.0199890136719,4,1536.08,True,True,2026-10-16
-STX,Seagate Technology,Information Technology,quality_momentum,1875.0,False,639.010009765625,2,1278.02,True,True,2026-10-16
+HPQ,HP Inc.,Information Technology,magic_formula,1500.0,False,31.209999084472656,48,1498.08,True,True,2026-10-20
+SIRI,SiriusXM,Communication Services,magic_formula,1500.0,False,27.15999984741211,55,1493.8,True,True,2026-10-20
+GEN,Gen Digital,Information Technology,magic_formula,1500.0,False,24.079999923706055,62,1492.96,True,True,2026-10-20
+MO,Altria,Consumer Staples,magic_formula,1500.0,False,74.63999938964844,20,1492.8,True,True,2026-10-20
+DBX,Dropbox,Information Technology,magic_formula,1500.0,False,36.36000061035156,41,1490.76,True,True,2026-10-20
+SAIC,Science Applications Intl Corp,Industrials,magic_formula,1500.0,False,135.10000610351562,11,1486.1,True,True,2026-10-20
+MLI,Mueller Industries,Industrials,magic_formula,1500.0,False,56.810001373291016,26,1477.06,True,True,2026-10-20
+FOXA,Fox Corporation (Class A),Communication Services,magic_formula,1500.0,False,67.0,22,1474.0,True,True,2026-10-20
+TTEK,Tetra Tech,Industrials,magic_formula,1500.0,False,34.959999084472656,42,1468.32,True,True,2026-10-20
+ANF,Abercrombie & Fitch,Consumer Discretionary,magic_formula,1500.0,False,161.72999572753906,9,1455.57,True,True,2026-10-20
+HAS,Hasbro,Consumer Discretionary,magic_formula,1500.0,False,109.5199966430664,13,1423.76,True,True,2026-10-20
+CF,CF Industries,Materials,magic_formula,1500.0,True,117.93000030517578,12,1415.16,True,True,2026-10-20
+BBY,Best Buy,Consumer Discretionary,magic_formula,1500.0,False,93.88999938964844,15,1408.35,True,True,2026-10-20
+DVA,DaVita,Health Care,magic_formula,1500.0,True,175.35000610351562,8,1402.8,True,True,2026-10-20
+INCY,Incyte,Health Care,magic_formula,1500.0,False,116.62000274658203,12,1399.44,True,True,2026-10-20
+ITW,Illinois Tool Works,Industrials,magic_formula,1500.0,False,274.9700012207031,5,1374.85,True,True,2026-10-20
+SNDK,Sandisk,Information Technology,magic_formula,1500.0,False,1365.3800048828125,1,1365.38,True,True,2026-10-20
+THC,Tenet Health,Health Care,magic_formula,1500.0,False,272.32000732421875,5,1361.6,True,True,2026-10-20
+UNH,UnitedHealth Group,Health Care,magic_formula,1500.0,True,419.260009765625,3,1257.78,True,True,2026-10-20
+EXPE,Expedia Group,Consumer Discretionary,magic_formula,1500.0,False,300.760009765625,4,1203.04,True,True,2026-10-20
+CHE,Chemed Corp.,Health Care,magic_formula,1500.0,True,516.0700073242188,2,1032.14,True,True,2026-10-20
+MCK,McKesson,Health Care,magic_formula,1500.0,False,1030.1199951171875,1,1030.12,True,True,2026-10-20
+BMY,Bristol Myers Squibb,Health Care,magic_formula+quality_momentum,3375.0,False,61.68000030517578,54,3330.72,True,True,2026-10-20
+CROX,Crocs,Consumer Discretionary,magic_formula+quality_momentum,3375.0,False,121.37000274658203,27,3276.99,True,True,2026-10-20
+MU,Micron Technology,Information Technology,magic_formula+quality_momentum,3375.0,False,896.0700073242188,3,2688.21,True,True,2026-10-20
+KO,Coca-Cola Company (The),Consumer Staples,quality_momentum,1875.0,False,93.48999786376953,20,1869.8,True,True,2026-10-20
+TGT,Target Corporation,Consumer Staples,quality_momentum,1875.0,False,154.0,12,1848.0,True,True,2026-10-20
+MTSI,MACOM Technology Solutions,Information Technology,quality_momentum,1875.0,True,262.92999267578125,7,1840.51,True,True,2026-10-20
+VICR,Vicor Corporation,Industrials,quality_momentum,1875.0,False,204.13999938964844,9,1837.26,True,True,2026-10-20
+FORM,"FormFactor, Inc.",Information Technology,quality_momentum,1875.0,False,107.69999694824219,17,1830.9,True,True,2026-10-20
+PII,Polaris,Consumer Discretionary,quality_momentum,1875.0,False,53.7400016784668,34,1827.16,True,True,2026-10-20
+WDC,Western Digital,Information Technology,quality_momentum,1875.0,False,364.32000732421875,5,1821.6,True,True,2026-10-20
+CSCO,Cisco,Information Technology,quality_momentum,1875.0,False,106.70999908447266,17,1814.07,True,True,2026-10-20
+ALGN,Align Technology,Health Care,quality_momentum,1875.0,False,150.5,12,1806.0,True,True,2026-10-20
+MRK,Merck & Co.,Health Care,quality_momentum,1875.0,False,148.3000030517578,12,1779.6,True,True,2026-10-20
+ABNB,Airbnb,Consumer Discretionary,quality_momentum,1875.0,False,176.94000244140625,10,1769.4,True,True,2026-10-20
+ELV,Elevance Health,Health Care,quality_momentum,1875.0,False,440.17999267578125,4,1760.72,True,True,2026-10-20
+TER,Teradyne,Information Technology,quality_momentum,1875.0,False,336.5899963378906,5,1682.95,True,True,2026-10-20
+RS,"Reliance, Inc.",Materials,quality_momentum,1875.0,False,417.2699890136719,4,1669.08,True,True,2026-10-20
+ILMN,"Illumina, Inc.",Health Care,quality_momentum,1875.0,False,267.92999267578125,6,1607.58,True,True,2026-10-20
+WST,West Pharmaceutical Services,Health Care,quality_momentum,1875.0,False,388.7799987792969,4,1555.12,True,True,2026-10-20
+STX,Seagate Technology,Information Technology,quality_momentum,1875.0,False,675.1300048828125,2,1350.26,True,True,2026-10-20

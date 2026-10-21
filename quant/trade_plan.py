@@ -28,6 +28,8 @@ DO_NOT_BUY = {
     "LNTH": "being acquired by Curium for $102.50 cash + CVR; price pinned to the deal",
     "KVUE": "being acquired by Kimberly-Clark (stock + $3.50 cash); price tracks KMB",
     "ROKU": "being acquired by Fox (cash + FOXA stock); price tracks the deal",
+    "NXPI": "trailing EBIT includes a $627M one-off gain on the MEMS sale (Q1 2026)",
+    "R": "capital leaves out the ~$10B leased-truck fleet, so return on capital is overstated ~9x",
 }
 
 # Default budgets: the repo case keeps 25% of the $300,000 WInS account in stocks ($75,000). Split between the
