@@ -381,9 +381,12 @@ def _cut_splices(returns: pd.DataFrame, close: pd.DataFrame, adjclose: pd.DataFr
     old Oasis equity at $0.12 joined to the post-bankruptcy shares at $31, +25,733%). Treat the series as a
     new security from that day: drop the jump and all earlier prices."""
     hits = np.argwhere(returns.to_numpy() > limit)
+    if len(hits):
+        log.info("cut %d spliced price histories (one-day returns above +%.0f%%, almost all microcaps)",
+                 len(hits), 100 * limit)
     for i, j in hits:
         tk, d = returns.columns[j], returns.index[i]
-        log.info("splice cut: %s %s return %.0f%%", tk, d.date(), 100 * returns.iat[i, j])
+        log.debug("splice cut: %s %s return %.0f%%", tk, d.date(), 100 * returns.iat[i, j])
         returns.iloc[: i + 1, j] = np.nan
         close.loc[:returns.index[i - 1] if i else d, tk] = np.nan
         adjclose.loc[:returns.index[i - 1] if i else d, tk] = np.nan
