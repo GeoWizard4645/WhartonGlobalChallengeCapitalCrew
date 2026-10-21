@@ -1,12 +1,12 @@
 """Turn the strategies' picks into one order list for WInS, with the exit plan of every position.
 
     .venv/bin/python -m quant.trade_plan                                  # every pick, default budgets below
-    .venv/bin/python -m quant.trade_plan --qm 25000 --mf 25000 --top 5    # the 5 best-ranked names per strategy
+    .venv/bin/python -m quant.trade_plan --top 5                          # the 5 best-ranked names per strategy
     .venv/bin/python -m quant.exits check                                 # later: hold or sell each position
 
 Reads output/<strategy>/picks.csv (written by `python -m quant.run`), skips the names in DO_NOT_BUY (replacing
-them with the strategy's next-ranked alternate, as the rules would), sizes whole shares at the latest close, checks
-price >= $5 and order <= 2x daily volume, and writes output/orders.csv. Without --top, names held by more than one
+them with the strategy's next-ranked alternate, as the rules would), sizes whole shares at the latest close (nearest
+share, then trimmed so the total stays within the budget), checks price >= $5 and order <= 2x daily volume, and writes output/orders.csv. Without --top, names held by more than one
 strategy are merged into one order; with --top every strategy gets K different names (a name both rank goes to the
 one that ranks it higher; at equal rank they take turns). Each order carries its exit plan (quant/exits.py): the
 first month-end review, the planned sale, the rule, and what picks like it returned in the 2019-2026 backtest.
@@ -14,7 +14,6 @@ first month-end review, the planned sale, the rule, and what picks like it retur
 from __future__ import annotations
 
 import argparse
-import math
 
 import numpy as np
 import pandas as pd
@@ -36,10 +35,10 @@ DO_NOT_BUY = {
     "R": "capital leaves out the ~$10B leased-truck fleet, so return on capital is overstated ~9x",
 }
 
-# Default budgets: the repo case keeps 25% of the $300,000 WInS account in stocks ($75,000). Split between the
-# two strategies that beat their benchmarks in BOTH the 2011-18 and 2019-26 backtests (trading comps did not and is
-# shelved). The merged momentum + Magic Formula strategy can be given a budget with --mm.
-BUDGETS = {"quality_momentum": 37500, "magic_formula": 37500, "momentum_mf": 0}
+# Default budgets: $100,000 of the $300,000 WInS account in stocks, split between the two strategies that beat
+# their benchmarks in BOTH the 2011-18 and 2019-26 backtests (trading comps did not and is shelved). The merged
+# momentum + Magic Formula strategy can be given a budget with --mm.
+BUDGETS = {"quality_momentum": 50000, "magic_formula": 50000, "momentum_mf": 0}
 MIN_PRICE = 5.0
 
 
@@ -89,6 +88,16 @@ def strategy_orders(name: str, budget: float, exclude: dict, tickers: list[str] 
                          "replacement": chosen["alternate"].to_numpy()})
 
 
+def whole_shares(dollars: pd.Series, price: pd.Series, budget: float) -> pd.Series:
+    """Each order at the nearest whole share of its dollar target; while the total is over ``budget``, take one
+    share off the order furthest above its target."""
+    shares = (dollars / price).round().astype(int)
+    while (shares * price).sum() > budget + 1e-9 and shares.sum() > 0:
+        over = (shares * price - dollars).where(shares > 0)
+        shares[over.idxmax()] -= 1
+    return shares
+
+
 def exit_columns(strategies: str, entry: pd.Timestamp, stats, picks: str) -> dict:
     """Exit plan and backtest expectation for one order (several strategies: each one's, joined by ' | ')."""
     parts = []
@@ -128,7 +137,7 @@ def build_orders(budgets: dict, exclude: dict, top: int = 0, entry=None) -> pd.D
                                     replacement=("replacement", "any")).reset_index()
     close, vol = prices.load_close(), prices.load_volume()
     o["price"] = close.loc[close.index[-1], o["ticker"]].to_numpy().round(2)
-    o["shares"] = [math.floor(d / px) for d, px in zip(o["dollars"], o["price"])]
+    o["shares"] = whole_shares(o["dollars"], o["price"], sum(active.values()))
     o["value"] = (o["shares"] * o["price"]).round(2)
     o["price_ok"] = o["price"] >= MIN_PRICE
     o["volume_ok"] = o["shares"] <= 2 * vol[o["ticker"]].iloc[-20:].mean().to_numpy()

@@ -6,7 +6,7 @@ import pandas as pd
 import pytest
 
 from quant import exits
-from quant.trade_plan import top_k
+from quant.trade_plan import top_k, whole_shares
 
 T = pd.Timestamp
 
@@ -75,3 +75,13 @@ def test_top_k_higher_rank_wins_a_shared_name():
     assert out == {"a": ["X", "Y"], "b": ["S", "Z"]}
     out = top_k({"a": ["S", "Y", "V"], "b": ["Z", "W", "S"]}, 3)
     assert out == {"a": ["S", "Y", "V"], "b": ["Z", "W"]}                # b ran out of names: fewer than k
+
+
+def test_whole_shares_rounds_to_nearest_and_stays_within_budget():
+    dollars = pd.Series([2000.0, 2000.0, 4500.0, 2000.0])
+    price = pd.Series([1365.0, 1030.0, 896.0, 61.0])
+    s = whole_shares(dollars, price, 10500.0)
+    assert s.tolist() == [1, 2, 5, 33]                   # 1.47 -> 1, 1.94 -> 2, 5.02 -> 5, 32.8 -> 33
+    assert (s * price).sum() <= 10500.0
+    s = whole_shares(dollars, price, 9000.0)              # over budget: trim the order furthest above target first
+    assert (s * price).sum() <= 9000.0 and s.tolist()[1] == 1
