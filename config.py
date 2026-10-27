@@ -66,7 +66,7 @@ PLANNING_YIELD = 0.035       # conservative Treasury yield we assume the reserve
 INFLATION = 0.025            # only used to show contribution in today's dollars
 
 # Reserve (the 10 payments)
-RESERVE_CONFIDENCE = 0.99    # our definition of "high degree of certainty"
+RESERVE_CONFIDENCE = 0.95    # our definition of "high degree of certainty"
 RESERVE_MIX = {"Bonds": 0.8, "Funds": 0.2, "Stocks": 0.0}   # what the risky sleeve of the reserve holds
 RESERVE_RISKY_START = 0.0    # share of reserve in RESERVE_MIX in 2033, fading to 0 by the last payment. 0 = pure Treasury ladder
 
@@ -76,7 +76,7 @@ TARGET_FACILITY = 100000     # the contribution we would like to be able to make
 TARGET_SWEEP = [50000, 100000, 150000, 200000, 250000, 300000, 350000]   # targets.py tests all of these
 # Cautious return view for targets.py to run next to the data-driven one (annual averages, our judgement):
 CAUTIOUS_RETURNS = {"Bonds": 0.045, "Funds": 0.070, "Stocks": 0.070}
-SAFETY_PROB = 0.99           # chance the portfolio covers the reserve in 2033
+SAFETY_PROB = 0.95           # chance the portfolio covers the reserve in 2033
 GOAL_PROB = 0.65             # chance we want of reaching TARGET_FACILITY
 MAX_VOL = 0.10               # never recommend a split riskier than this (annual volatility), even to chase the target
 RANGE_LOW_PCT = 0.10         # co-sponsor range: low end = 10th percentile (90% chance we beat it)
@@ -104,7 +104,8 @@ MAX_SHORTFALL = 0.05         # the "risk-limited" pick must leave at most this c
 CPPI_MULTIPLIERS = [1, 2, 3, 4, 5, 6]
 RISKY_STOCK_STEP = 0.1       # growth sleeve is funds/stocks; try every stock share in steps of this
 MAX_STOCK_SHARE_OF_GROWTH = 0.5   # diversification rule: the stock strategy is at most half the growth sleeve, index funds the rest
-MIN_X_90 = 50000             # we want to be 90% sure x (surplus above the reserve, before the flexibility hold-back) is at least this
+RANGE_CONFIDENCE = 0.80      # the projected range of x we quote is the central interval with this confidence (10th to 90th percentile at 80%)
+MIN_X_LOW = 50000            # the low end of that range (x = surplus above the reserve, before the flexibility hold-back) should be at least this
 # Futures the Monte Carlo draws from: (S&P 500 compound return, bond-sleeve compound return, volatility multiplier, probability).
 # Funds and Stocks follow the S&P 500 through their historical betas (Stocks also get a share of the strategy's alpha).
 # The mix is meant to span the real 6-year range (S&P 0% to 21%/yr at the 5th-95th percentile) and go a bit worse on the downside.

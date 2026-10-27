@@ -31,6 +31,8 @@ for _y, _a in config.CONTRIBUTIONS.items():
 TOTAL_IN = DEPOSITS.sum()
 RESERVE = riskfree_reserve(config.PLANNING_YIELD)
 RF_M = config.RISK_FREE / 12
+RC = config.RANGE_CONFIDENCE
+RLO, RHI = (1 - RC) / 2 * 100, (1 + RC) / 2 * 100      # percentiles of the quoted range of x
 BOUNDS = np.array(config.BOUNDS)
 
 # chart colors (dataviz reference palette: blue sequential ramp, neutral ink)
@@ -193,7 +195,8 @@ def x_stats(v, flex=False):
     """Statistics of x = what is left above the reserve in 2033 (0 if the portfolio can't cover the reserve)."""
     x = np.maximum(v - RESERVE, 0.0) * ((1 - config.FLEX_PCT) if flex else 1.0)
     q = np.percentile(x, [2.5, 25, 50, 75, 97.5])
-    return {"x_mean": x.mean(), "x_median": q[2], "x_p2_5": q[0], "x_p25": q[1], "x_p75": q[3], "x_p97_5": q[4],
+    lo, hi = np.percentile(x, [RLO, RHI])
+    return {"x_mean": x.mean(), "x_median": q[2], "x_range_lo": lo, "x_range_hi": hi, "x_p2_5": q[0], "x_p25": q[1], "x_p75": q[3], "x_p97_5": q[4],
             "p_shortfall": float((v < RESERVE).mean()), "value_median": float(np.median(v)),
             "surplus_p2_5": float(np.percentile(v - RESERVE, 2.5))}
 
@@ -341,10 +344,10 @@ def main():
     for sp, i in splits.items():
         r = xp[(xp["split"] == sp) & (xp["scenario"] == "All futures (Monte Carlo)")].iloc[0]
         print(f"{sp:34}{label(w[i]):>12}{r.x_mean:10,.0f}{r.x_median:10,.0f}{r.x_p2_5:10,.0f}{r.x_p25:10,.0f}{r.x_p75:10,.0f}{r.x_p97_5:10,.0f}  {r.p_shortfall:6.1%}  {r.surplus_p2_5:>10,.0f}")
-    print(f"\nx for the recommended split {label(w[rec])} by future (95% interval, IQR, median, mean)")
+    print(f"\nx for the recommended split {label(w[rec])} by future ({RC:.0%} interval, IQR, median, mean)")
     sub = xp[(xp["split"] == "Recommended (best avg rank)") & (xp["n"] > 1)]
     for _, r in sub.iterrows():
-        print(f"  {r.scenario:34} 95% [{r.x_p2_5:>9,.0f}, {r.x_p97_5:>9,.0f}]  IQR [{r.x_p25:>9,.0f}, {r.x_p75:>9,.0f}]  median {r.x_median:>9,.0f}  mean {r.x_mean:>9,.0f}  P(short) {r.p_shortfall:5.1%}  (2.5th pct of value minus reserve {r.surplus_p2_5:>+10,.0f})")
+        print(f"  {r.scenario:34} {RC:.0%} [{r.x_range_lo:>9,.0f}, {r.x_range_hi:>9,.0f}]  IQR [{r.x_p25:>9,.0f}, {r.x_p75:>9,.0f}]  median {r.x_median:>9,.0f}  mean {r.x_mean:>9,.0f}  P(short) {r.p_shortfall:5.1%}  (2.5th pct of value minus reserve {r.surplus_p2_5:>+10,.0f})")
 
     # reserve cost sensitivity
     print(f"\nIf the {config.TARGET_YEAR} Treasury yield differs from the {config.PLANNING_YIELD:.1%} planning rate (recommended split, all futures):")
@@ -404,9 +407,9 @@ def reserve_first(h, X, slices, xp):
             e = port.astype(np.float64) - RF_M
             r = ratios(e.size, e.sum(), (e ** 2).sum(), (np.minimum(e, 0) ** 2).sum(), (e * em).sum(), em.sum(dtype=np.float64), (em.astype(np.float64) ** 2).sum())
             x = np.maximum(v - RESERVE, 0)
-            q = np.percentile(x, [2.5, 10, 25, 50, 75, 97.5])
-            rows.append({"multiplier": m, "stock_share_of_growth": s, "x_mean": x.mean(), "x_p2_5": q[0], "x_p10": q[1],
-                         "x_p25": q[2], "x_median": q[3], "x_p75": q[4], "x_p97_5": q[5], "p_shortfall": float((v < RESERVE - 1).mean()),
+            q = np.percentile(x, [2.5, 25, 50, 75, 97.5, RLO, RHI])
+            rows.append({"multiplier": m, "stock_share_of_growth": s, "x_mean": x.mean(), "x_range_lo": q[5], "x_range_hi": q[6], "x_p2_5": q[0],
+                         "x_p25": q[1], "x_median": q[2], "x_p75": q[3], "x_p97_5": q[4], "p_shortfall": float((v < RESERVE - 1).mean()),
                          "avg_growth_share": float(share.mean()), **{k: float(r[k]) for k in ("vol", "beta", "sharpe", "sortino", "treynor")}})
             store[(m, s)] = v
     c = pd.DataFrame(rows)
@@ -416,7 +419,7 @@ def reserve_first(h, X, slices, xp):
     c.round(5).to_csv(os.path.join(OUT_DIR, "cppi_grid.csv"), index=False)
 
     ok = c[c["safe"]]
-    rules = ok[(ok["x_p10"] >= config.MIN_X_90) & (ok["stock_share_of_growth"] <= config.MAX_STOCK_SHARE_OF_GROWTH + 1e-9)]
+    rules = ok[(ok["x_range_lo"] >= config.MIN_X_LOW) & (ok["stock_share_of_growth"] <= config.MAX_STOCK_SHARE_OF_GROWTH + 1e-9)]
     pick = int((rules if len(rules) else ok)["rank_score"].idxmin())
     top_x = int(ok["x_median"].idxmax())
     ladder_best = int(c[c["multiplier"] == 1]["rank_score"].idxmin())
@@ -428,9 +431,9 @@ def reserve_first(h, X, slices, xp):
     def line(i):
         r = c.loc[i]
         return (f"{mname(r.multiplier):12} growth sleeve {1 - r.stock_share_of_growth:.0%} funds/{r.stock_share_of_growth:.0%} stocks | x median {r.x_median:>8,.0f}  "
-                f"90% beat {r.x_p10:>8,.0f}  95% [{r.x_p2_5:>8,.0f}, {r.x_p97_5:>9,.0f}]  P(short) {r.p_shortfall:5.2%} | Sharpe {r.sharpe:5.2f} Sortino {r.sortino:5.2f} "
+                f"{RC:.0%} range [{r.x_range_lo:>8,.0f}, {r.x_range_hi:>9,.0f}]  P(short) {r.p_shortfall:5.2%} | Sharpe {r.sharpe:5.2f} Sortino {r.sortino:5.2f} "
                 f"Treynor {r.treynor:6.3f}  avg growth share {r.avg_growth_share:4.0%}")
-    print(f"  CHOSEN = best average rank (x median, Sharpe, Sortino, Treynor) among safe strategies with x 90%-floor >= {dollars(config.MIN_X_90)} "
+    print(f"  CHOSEN = best average rank (x median, Sharpe, Sortino, Treynor) among safe strategies whose {RC:.0%} range starts at {dollars(config.MIN_X_LOW)} or more "
           f"and stocks <= {config.MAX_STOCK_SHARE_OF_GROWTH:.0%} of the growth sleeve:\n    ", line(pick))
     print("  highest median x, safe only, no other rules:\n    ", line(top_x))
     print("  plain ladder (m=1), best mix:\n    ", line(ladder_best))
@@ -449,17 +452,17 @@ def reserve_first(h, X, slices, xp):
     print(f"  x by future (surplus above the reserve):")
     for k, (name, (a, b)) in enumerate(zip(config.SCENARIOS, slices)):
         st = x_stats(v_mc_slice(v_pick, a, b))
-        print(f"    {name:14} median {st['x_median']:>9,.0f}  95% [{st['x_p2_5']:>8,.0f}, {st['x_p97_5']:>9,.0f}]  IQR [{st['x_p25']:>8,.0f}, {st['x_p75']:>9,.0f}]  P(short) {st['p_shortfall']:5.1%}")
+        print(f"    {name:14} median {st['x_median']:>9,.0f}  {RC:.0%} [{st['x_range_lo']:>8,.0f}, {st['x_range_hi']:>9,.0f}]  IQR [{st['x_p25']:>8,.0f}, {st['x_p75']:>9,.0f}]  P(short) {st['p_shortfall']:5.1%}")
     st = x_stats(v_pick)
-    print(f"    {'All futures':14} median {st['x_median']:>9,.0f}  mean {st['x_mean']:>9,.0f}  95% [{st['x_p2_5']:>8,.0f}, {st['x_p97_5']:>9,.0f}]  IQR [{st['x_p25']:>8,.0f}, {st['x_p75']:>9,.0f}]  P(short) {st['p_shortfall']:5.2%}")
+    print(f"    {'All futures':14} median {st['x_median']:>9,.0f}  mean {st['x_mean']:>9,.0f}  {RC:.0%} [{st['x_range_lo']:>8,.0f}, {st['x_range_hi']:>9,.0f}]  95% [{st['x_p2_5']:>8,.0f}, {st['x_p97_5']:>9,.0f}]  IQR [{st['x_p25']:>8,.0f}, {st['x_p75']:>9,.0f}]  P(short) {st['p_shortfall']:5.2%}")
     fac = np.maximum(v_pick - RESERVE, 0) * flex
-    qf = np.percentile(fac, [2.5, 5, 10, 25, 50, 75, 90, 95, 97.5])
+    qf = np.percentile(fac, [2.5, 5, RLO, 25, 50, 75, RHI, 95, 97.5])
     print(f"\n  FACILITY CONTRIBUTION after holding back {config.FLEX_PCT:.0%} for flexibility (what to tell co-sponsors in 2031):")
-    print(f"    90% confident she can contribute at least {dollars(qf[2])};  95% confident at least {dollars(qf[1])};  50% (median) {dollars(qf[4])}")
-    print(f"    80% interval  {dollars(qf[2])} to {dollars(qf[6])}   |   90% interval  {dollars(qf[1])} to {dollars(qf[7])}   |   95% interval  {dollars(qf[0])} to {dollars(qf[8])}")
+    print(f"    RANGE TO QUOTE: {dollars(qf[2])} to {dollars(qf[6])}  ({RC:.0%} confident the contribution lands inside; {1 - RLO / 100:.0%} confident she can give at least {dollars(qf[2])})")
+    print(f"    for reference: 95% confident she can contribute at least {dollars(qf[1])};  95% interval {dollars(qf[0])} to {dollars(qf[8])};  median {dollars(qf[4])}")
     print(f"    middle 50% (IQR)  {dollars(qf[3])} to {dollars(qf[5])}   |   mean {dollars(fac.mean())}")
     infl = (1 + config.INFLATION) ** (config.TARGET_YEAR - 2026)
-    print(f"    in today's dollars (deflated {config.INFLATION:.1%}/yr to 2026): 90% confident at least {dollars(qf[2] / infl)}, median {dollars(qf[4] / infl)}")
+    print(f"    in today's dollars (deflated {config.INFLATION:.1%}/yr to 2026): {1 - RLO / 100:.0%} confident at least {dollars(qf[2] / infl)}, median {dollars(qf[4] / infl)}")
 
     # real-history replay of the chosen strategy (stocks before 2011 are modeled)
     sleeves = h[NAMES + ["Mkt"]].to_numpy()
@@ -572,9 +575,9 @@ def charts(g, w, in_bounds, picks, rec, base, xp, X, slices):
         path[:, t + 1] = v
     path[:, 0] = DEPOSITS[0]
     yrs = FIRST_YEAR + np.arange(MONTHS + 1) / 12
-    pc = np.percentile(path, [2.5, 25, 50, 75, 97.5], axis=0)
+    pc = np.percentile(path, [RLO, 25, 50, 75, RHI], axis=0)
     fig, (a1, a2) = plt.subplots(1, 2, figsize=(13, 5.4), facecolor=SURFACE, gridspec_kw={"width_ratios": [1, 1.15]})
-    a1.fill_between(yrs, pc[0] / 1e3, pc[4] / 1e3, color="#cde2fb", label="95% of futures", lw=0)
+    a1.fill_between(yrs, pc[0] / 1e3, pc[4] / 1e3, color="#cde2fb", label=f"{RC:.0%} of futures", lw=0)
     a1.fill_between(yrs, pc[1] / 1e3, pc[3] / 1e3, color="#6da7ec", label="middle 50%", lw=0)
     a1.plot(yrs, pc[2] / 1e3, color="#184f95", lw=2, label="median")
     a1.axhline(RESERVE / 1e3, color=INK, lw=1, ls="--")
@@ -588,13 +591,13 @@ def charts(g, w, in_bounds, picks, rec, base, xp, X, slices):
     sub = xp[(xp["split"] == "Recommended (best avg rank)") & (xp["n"] > 1) & ~xp["scenario"].str.startswith("Real-history")]
     sub = sub.iloc[::-1]
     y = np.arange(len(sub))
-    a2.hlines(y, sub.x_p2_5 / 1e3, sub.x_p97_5 / 1e3, color="#86b6ef", lw=1.6)
+    a2.hlines(y, sub.x_range_lo / 1e3, sub.x_range_hi / 1e3, color="#86b6ef", lw=1.6)
     a2.hlines(y, sub.x_p25 / 1e3, sub.x_p75 / 1e3, color="#2a78d6", lw=7)
     a2.scatter(sub.x_median / 1e3, y, color="white", edgecolors=INK, s=36, zorder=4)
     for yi, (_, r) in zip(y, sub.iterrows()):
-        a2.text(r.x_p97_5 / 1e3 + 6, yi, f"median ${r.x_median / 1e3:,.0f}k", va="center", fontsize=8, color=INK2)
+        a2.text(r.x_range_hi / 1e3 + 6, yi, f"median ${r.x_median / 1e3:,.0f}k", va="center", fontsize=8, color=INK2)
     a2.set_yticks(y, [f"{s} (n={n:,})" if s.startswith("All") else s for s, n in zip(sub.scenario, sub.n)], fontsize=8.5, color=INK2)
-    a2.set_xlabel("x = extra contribution available in 2033, $ thousands (95% range, middle 50%, median)", color=INK2, fontsize=9)
+    a2.set_xlabel(f"x = extra contribution available in 2033, $ thousands ({RC:.0%} range, middle 50%, median)", color=INK2, fontsize=9)
     a2.set_title("How much x depends on the market we get", color=INK, fontsize=11.5, loc="left", fontweight="bold")
     a2.set_xlim(left=-10)
     a2.grid(axis="x", color=GRID, lw=0.6)
@@ -606,7 +609,7 @@ def charts(g, w, in_bounds, picks, rec, base, xp, X, slices):
 
 def cppi_charts(c, pick, share_p, path, slices):
     orange = LinearSegmentedColormap.from_list("orange", ["#fbe3d6", "#f4a37c", "#eb6834", "#b84a1f", "#7a2e10"])
-    panels = [("x_median", "Median x ($k)", RAMP, 1e-3, "{:.0f}"), ("x_p10", "x beaten in 90% of futures ($k)", RAMP, 1e-3, "{:.0f}"),
+    panels = [("x_median", "Median x ($k)", RAMP, 1e-3, "{:.0f}"), ("x_range_lo", f"Low end of the {RC:.0%} range of x ($k)", RAMP, 1e-3, "{:.0f}"),
               ("p_shortfall", "Chance the reserve is short (%)", orange, 100, "{:.1f}"),
               ("sharpe", "Sharpe ratio", RAMP, 1, "{:.2f}"), ("sortino", "Sortino ratio", RAMP, 1, "{:.2f}"), ("treynor", "Treynor ratio", RAMP, 1, "{:.3f}")]
     cols = [float(m) for m in config.CPPI_MULTIPLIERS]
@@ -644,10 +647,10 @@ def cppi_charts(c, pick, share_p, path, slices):
     # chosen strategy: value fan with the floor, growth share over time, x by future
     yrs = FIRST_YEAR + np.arange(MONTHS + 1) / 12
     floor = RESERVE / (1 + config.PLANNING_YIELD) ** ((MONTHS - np.arange(MONTHS + 1)) / 12)
-    pc = np.percentile(path, [2.5, 25, 50, 75, 97.5], axis=0)
+    pc = np.percentile(path, [RLO, 25, 50, 75, RHI], axis=0)
     sp = np.percentile(share_p, [25, 50, 75], axis=0) * 100
     fig, (a1, a2, a3) = plt.subplots(1, 3, figsize=(17, 5.4), facecolor=SURFACE, gridspec_kw={"width_ratios": [1, 1, 1.15]})
-    a1.fill_between(yrs, pc[0] / 1e3, pc[4] / 1e3, color="#cde2fb", label="95% of futures", lw=0)
+    a1.fill_between(yrs, pc[0] / 1e3, pc[4] / 1e3, color="#cde2fb", label=f"{RC:.0%} of futures", lw=0)
     a1.fill_between(yrs, pc[1] / 1e3, pc[3] / 1e3, color="#6da7ec", label="middle 50%", lw=0)
     a1.plot(yrs, pc[2] / 1e3, color="#184f95", lw=2, label="median")
     a1.plot(yrs, floor / 1e3, color=INK, lw=1.2, ls="--", label="floor = PV of the reserve")
@@ -669,7 +672,7 @@ def cppi_charts(c, pick, share_p, path, slices):
     xv = np.maximum(path[:, -1] - RESERVE, 0)
     names = ["All futures (n=30,000)"] + list(config.SCENARIOS)
     parts = [xv] + [xv[a:b] for a, b in slices]
-    qs = [np.percentile(x, [2.5, 25, 50, 75, 97.5]) for x in parts][::-1]
+    qs = [np.percentile(x, [RLO, 25, 50, 75, RHI]) for x in parts][::-1]
     names = names[::-1]
     y = np.arange(len(qs))
     a3.hlines(y, [q[0] / 1e3 for q in qs], [q[4] / 1e3 for q in qs], color="#86b6ef", lw=1.6)
@@ -678,7 +681,7 @@ def cppi_charts(c, pick, share_p, path, slices):
     for yi, q in zip(y, qs):
         a3.text(q[4] / 1e3 + 8, yi, f"median ${q[2] / 1e3:,.0f}k", va="center", fontsize=8, color=INK2)
     a3.set_yticks(y, names, fontsize=8.5, color=INK2)
-    a3.set_xlabel("x = surplus above the reserve in 2033, $ thousands (95% range, middle 50%, median)", color=INK2, fontsize=9)
+    a3.set_xlabel(f"x = surplus above the reserve in 2033, $ thousands ({RC:.0%} range, middle 50%, median)", color=INK2, fontsize=9)
     a3.set_title(f"x for {mname(pr.multiplier)}, {pr.stock_share_of_growth:.0%} stocks in growth", color=INK, fontsize=11.5, loc="left", fontweight="bold")
     a3.set_xlim(left=-10)
     a3.grid(axis="x", color=GRID, lw=0.6)
