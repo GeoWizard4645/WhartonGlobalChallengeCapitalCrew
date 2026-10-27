@@ -6,8 +6,8 @@
 # Bonds and Funds = the long-history fund proxies in config.BUCKETS. Settings: the ALLOCATION OPTIMIZER block of config.py.
 #
 # Run: .venv/bin/python optimize.py        (needs numpy, pandas, matplotlib; ~2 minutes)
-# Writes output/allocation/: grid.csv, scenarios.csv, x_projection.csv, heatmaps_montecarlo.png,
-#                            heatmaps_backtest.png, x_projection.png
+# Writes output/allocation/: grid.csv, scenarios.csv, x_projection.csv, cppi_grid.csv, heatmaps_montecarlo.png,
+#                            heatmaps_backtest.png, x_projection.png, heatmaps_cppi.png, cppi_projection.png
 import os
 
 import matplotlib
@@ -353,8 +353,160 @@ def main():
         x = np.maximum(v_mc[:, rec] - res, 0)
         print(f"  yield {y:.1%}: reserve {res:>9,.0f}   x median {np.median(x):>9,.0f}   95% [{np.percentile(x, 2.5):>9,.0f}, {np.percentile(x, 97.5):>9,.0f}]   P(short) {(v_mc[:, rec] < res).mean():5.1%}")
 
+    xp, cgrid, pick, share_p, path = reserve_first(h, X, slices, xp)
     charts(g, w, in_bounds, picks, rec, base, xp, X, slices)
+    cppi_charts(cgrid, pick, share_p, path, slices)
     print(f"\nWrote {OUT_DIR}")
+
+
+# ---------- reserve-first: Treasury ladder + growth sleeve, with CPPI ----------
+
+def run_reserve_first(rr, m, path=None):
+    """CPPI with a Treasury-ladder floor. rr (paths, months): monthly return of the growth sleeve.
+    The safe sleeve is a Treasury ladder earning the planning yield, so it is worth exactly the reserve in 2033 if it holds the
+    present value of the reserve (the floor). Each month: growth = clip(m x (portfolio - floor), 0, portfolio), the rest is safe.
+    m = 1 is the plain 'fund the reserve first, grow only the surplus' ladder.
+    Returns (value in 2033, portfolio monthly returns, growth share of the portfolio); path (paths, months+1), if given, is filled with the value."""
+    n = rr.shape[0]
+    g = (1 + config.PLANNING_YIELD) ** (1 / 12) - 1
+    safe, risk = np.zeros(n), np.zeros(n)
+    port = np.empty(rr.shape, np.float32)
+    share = np.empty(rr.shape, np.float32)
+    for t in range(MONTHS):
+        floor = RESERVE / (1 + config.PLANNING_YIELD) ** ((MONTHS - t) / 12)
+        tot = safe + risk + DEPOSITS[t]
+        risk = np.clip(m * (tot - floor), 0, tot)
+        safe = tot - risk
+        share[:, t] = risk / tot
+        if path is not None:
+            path[:, t] = tot
+        safe = safe * (1 + g)
+        risk = risk * (1 + rr[:, t])
+        port[:, t] = (safe + risk) / tot - 1
+    if path is not None:
+        path[:, MONTHS] = safe + risk
+    return safe + risk, port, share
+
+
+def grow_returns(sleeves, s):
+    """Growth sleeve = (1-s) Funds + s Stocks. sleeves: (..., 4) [Bonds, Funds, Stocks, Mkt]."""
+    return sleeves[..., 1] * (1 - s) + sleeves[..., 2] * s
+
+
+def reserve_first(h, X, slices, xp):
+    """Grid of CPPI strategies (multiplier x growth-sleeve mix); picks one; replays it on real history."""
+    em = X[:, :, 3] - RF_M
+    shares = np.round(np.arange(0, 1 + 1e-9, config.RISKY_STOCK_STEP), 4)
+    rows, store = [], {}
+    for m in config.CPPI_MULTIPLIERS:
+        for s in shares:
+            v, port, share = run_reserve_first(grow_returns(X, s), float(m))
+            e = port.astype(np.float64) - RF_M
+            r = ratios(e.size, e.sum(), (e ** 2).sum(), (np.minimum(e, 0) ** 2).sum(), (e * em).sum(), em.sum(dtype=np.float64), (em.astype(np.float64) ** 2).sum())
+            x = np.maximum(v - RESERVE, 0)
+            q = np.percentile(x, [2.5, 10, 25, 50, 75, 97.5])
+            rows.append({"multiplier": m, "stock_share_of_growth": s, "x_mean": x.mean(), "x_p2_5": q[0], "x_p10": q[1],
+                         "x_p25": q[2], "x_median": q[3], "x_p75": q[4], "x_p97_5": q[5], "p_shortfall": float((v < RESERVE - 1).mean()),
+                         "avg_growth_share": float(share.mean()), **{k: float(r[k]) for k in ("vol", "beta", "sharpe", "sortino", "treynor")}})
+            store[(m, s)] = v
+    c = pd.DataFrame(rows)
+    c["safe"] = c["p_shortfall"] <= 1 - config.SAFETY_PROB
+    metrics = ["x_median", "sharpe", "sortino", "treynor"]
+    c["rank_score"] = np.mean([c[m].rank(ascending=False, na_option="bottom") for m in metrics], axis=0)
+    c.round(5).to_csv(os.path.join(OUT_DIR, "cppi_grid.csv"), index=False)
+
+    ok = c[c["safe"]]
+    rules = ok[(ok["x_p10"] >= config.MIN_X_90) & (ok["stock_share_of_growth"] <= config.MAX_STOCK_SHARE_OF_GROWTH + 1e-9)]
+    pick = int((rules if len(rules) else ok)["rank_score"].idxmin())
+    top_x = int(ok["x_median"].idxmax())
+    ladder_best = int(c[c["multiplier"] == 1]["rank_score"].idxmin())
+    print(f"\nRESERVE-FIRST STRATEGIES (safe sleeve = Treasury ladder worth the {dollars(RESERVE)} reserve in 2033; growth sleeve = Funds/Stocks)")
+    print(f"  floor today (PV of the reserve at {config.PLANNING_YIELD:.1%}) {dollars(RESERVE / (1 + config.PLANNING_YIELD) ** (MONTHS / 12))} vs PV of both deposits "
+          f"{dollars(sum(a / (1 + config.PLANNING_YIELD) ** ((y - FIRST_YEAR)) for y, a in config.CONTRIBUTIONS.items()))}")
+    print(f"  {len(c)} strategies; 'safe' = chance the reserve is short <= {1 - config.SAFETY_PROB:.0%} ({int(c['safe'].sum())} qualify)")
+
+    def line(i):
+        r = c.loc[i]
+        return (f"{mname(r.multiplier):12} growth sleeve {1 - r.stock_share_of_growth:.0%} funds/{r.stock_share_of_growth:.0%} stocks | x median {r.x_median:>8,.0f}  "
+                f"90% beat {r.x_p10:>8,.0f}  95% [{r.x_p2_5:>8,.0f}, {r.x_p97_5:>9,.0f}]  P(short) {r.p_shortfall:5.2%} | Sharpe {r.sharpe:5.2f} Sortino {r.sortino:5.2f} "
+                f"Treynor {r.treynor:6.3f}  avg growth share {r.avg_growth_share:4.0%}")
+    print(f"  CHOSEN = best average rank (x median, Sharpe, Sortino, Treynor) among safe strategies with x 90%-floor >= {dollars(config.MIN_X_90)} "
+          f"and stocks <= {config.MAX_STOCK_SHARE_OF_GROWTH:.0%} of the growth sleeve:\n    ", line(pick))
+    print("  highest median x, safe only, no other rules:\n    ", line(top_x))
+    print("  plain ladder (m=1), best mix:\n    ", line(ladder_best))
+    print("  each multiplier, mix with the highest median x (safe only) and the mix at the chosen stock share:")
+    for m in config.CPPI_MULTIPLIERS:
+        sub = c[c["multiplier"] == m]
+        sub_ok = sub[sub["safe"] & (sub["stock_share_of_growth"] <= config.MAX_STOCK_SHARE_OF_GROWTH + 1e-9)]
+        if len(sub_ok):
+            print("     ", line(int(sub_ok["x_median"].idxmax())))
+
+    # chosen strategy: by scenario, co-sponsor range, real-history replay
+    m, s = c.at[pick, "multiplier"], c.at[pick, "stock_share_of_growth"]
+    v_pick = store[(m, s)]
+    flex = 1 - config.FLEX_PCT
+    print(f"\nCHOSEN: {mname(m)}, growth sleeve {1 - s:.0%} Funds / {s:.0%} Stocks")
+    print(f"  x by future (surplus above the reserve):")
+    for k, (name, (a, b)) in enumerate(zip(config.SCENARIOS, slices)):
+        st = x_stats(v_mc_slice(v_pick, a, b))
+        print(f"    {name:14} median {st['x_median']:>9,.0f}  95% [{st['x_p2_5']:>8,.0f}, {st['x_p97_5']:>9,.0f}]  IQR [{st['x_p25']:>8,.0f}, {st['x_p75']:>9,.0f}]  P(short) {st['p_shortfall']:5.1%}")
+    st = x_stats(v_pick)
+    print(f"    {'All futures':14} median {st['x_median']:>9,.0f}  mean {st['x_mean']:>9,.0f}  95% [{st['x_p2_5']:>8,.0f}, {st['x_p97_5']:>9,.0f}]  IQR [{st['x_p25']:>8,.0f}, {st['x_p75']:>9,.0f}]  P(short) {st['p_shortfall']:5.2%}")
+    fac = np.maximum(v_pick - RESERVE, 0) * flex
+    qf = np.percentile(fac, [2.5, 5, 10, 25, 50, 75, 90, 95, 97.5])
+    print(f"\n  FACILITY CONTRIBUTION after holding back {config.FLEX_PCT:.0%} for flexibility (what to tell co-sponsors in 2031):")
+    print(f"    90% confident she can contribute at least {dollars(qf[2])};  95% confident at least {dollars(qf[1])};  50% (median) {dollars(qf[4])}")
+    print(f"    80% interval  {dollars(qf[2])} to {dollars(qf[6])}   |   90% interval  {dollars(qf[1])} to {dollars(qf[7])}   |   95% interval  {dollars(qf[0])} to {dollars(qf[8])}")
+    print(f"    middle 50% (IQR)  {dollars(qf[3])} to {dollars(qf[5])}   |   mean {dollars(fac.mean())}")
+    infl = (1 + config.INFLATION) ** (config.TARGET_YEAR - 2026)
+    print(f"    in today's dollars (deflated {config.INFLATION:.1%}/yr to 2026): 90% confident at least {dollars(qf[2] / infl)}, median {dollars(qf[4] / infl)}")
+
+    # real-history replay of the chosen strategy (stocks before 2011 are modeled)
+    sleeves = h[NAMES + ["Mkt"]].to_numpy()
+    rr_h = grow_returns(sleeves, s)
+    starts = np.arange(len(h) - MONTHS + 1)
+    v_h, _, _ = run_reserve_first(rr_h[starts[:, None] + np.arange(MONTHS)], m)
+    sh = x_stats(v_h)
+    print(f"\n  REAL-HISTORY REPLAY ({len(v_h)} six-year stretches): x median {sh['x_median']:,.0f}, 95% [{sh['x_p2_5']:,.0f}, {sh['x_p97_5']:,.0f}], "
+          f"P(short) {sh['p_shortfall']:.1%}, worst stretch x {max(v_h.min() - RESERVE, 0):,.0f} (value {v_h.min():,.0f})")
+    ends = h.index[MONTHS - 1:]
+    for lbl, end in {"dot-com bust": "2002-10", "financial crisis": "2009-02", "COVID crash": "2020-03", "2022 bear": "2022-09"}.items():
+        hit = np.where(ends.strftime("%Y-%m") == end)[0]
+        if len(hit):
+            j = int(hit[0])
+            print(f"    6y ending {end} ({lbl}): x {max(v_h[j] - RESERVE, 0):>9,.0f}   portfolio {v_h[j]:>9,.0f}")
+
+    # add to the x projection table
+    def add(label_, v_mc_, v_hist_):
+        out = []
+        for fut, sl in [("All futures (Monte Carlo)", None)] + list(zip(config.SCENARIOS, slices)):
+            v = v_mc_ if sl is None else v_mc_[sl[0]:sl[1]]
+            out.append({"split": label_, "scenario": fut, "n": len(v), **x_stats(v), "x_median_after_flex": x_stats(v, True)["x_median"]})
+        out.append({"split": label_, "scenario": "Real-history stretches (backtest)", "n": len(v_hist_), **x_stats(v_hist_),
+                    "x_median_after_flex": x_stats(v_hist_, True)["x_median"]})
+        return out
+    def tag(i):
+        r = c.loc[i]
+        return f"Reserve-first: {mname(r.multiplier)}, growth {1 - r.stock_share_of_growth:.0%}F/{r.stock_share_of_growth:.0%}S"
+    new = add(tag(pick) + " [chosen]", v_pick, v_h)
+    for i in {top_x, ladder_best} - {pick}:
+        sub_h, _, _ = run_reserve_first(grow_returns(sleeves, c.at[i, "stock_share_of_growth"])[starts[:, None] + np.arange(MONTHS)], c.at[i, "multiplier"])
+        new += add(tag(i), store[(c.at[i, "multiplier"], c.at[i, "stock_share_of_growth"])], sub_h)
+    xp = pd.concat([xp, pd.DataFrame(new)], ignore_index=True)
+    xp.round(4).to_csv(os.path.join(OUT_DIR, "x_projection.csv"), index=False)
+
+    # value and growth-share paths of the chosen strategy, for the chart
+    path = np.empty((len(X), MONTHS + 1))
+    _, _, share_p = run_reserve_first(grow_returns(X, s), m, path)
+    return xp, c, pick, share_p, path
+
+
+def mname(m):
+    return "ladder (m=1)" if m == 1 else f"CPPI m={m:g}"
+
+
+def v_mc_slice(v, a, b):
+    return v[a:b]
 
 
 # ---------- charts ----------
@@ -450,6 +602,91 @@ def charts(g, w, in_bounds, picks, rec, base, xp, X, slices):
     fig.tight_layout()
     fig.savefig(os.path.join(OUT_DIR, "x_projection.png"), dpi=140, facecolor=SURFACE)
     plt.close(fig)
+
+
+def cppi_charts(c, pick, share_p, path, slices):
+    orange = LinearSegmentedColormap.from_list("orange", ["#fbe3d6", "#f4a37c", "#eb6834", "#b84a1f", "#7a2e10"])
+    panels = [("x_median", "Median x ($k)", RAMP, 1e-3, "{:.0f}"), ("x_p10", "x beaten in 90% of futures ($k)", RAMP, 1e-3, "{:.0f}"),
+              ("p_shortfall", "Chance the reserve is short (%)", orange, 100, "{:.1f}"),
+              ("sharpe", "Sharpe ratio", RAMP, 1, "{:.2f}"), ("sortino", "Sortino ratio", RAMP, 1, "{:.2f}"), ("treynor", "Treynor ratio", RAMP, 1, "{:.3f}")]
+    cols = [float(m) for m in config.CPPI_MULTIPLIERS]
+    shares = sorted(c["stock_share_of_growth"].unique())
+    fig, axes = plt.subplots(2, 3, figsize=(15.5, 9.6), facecolor=SURFACE)
+    pr = c.loc[pick]
+    for ax, (m, ttl, cmap, scale, fmt) in zip(axes.flat, panels):
+        z = np.full((len(shares), len(cols)), np.nan)
+        for j, mm in enumerate(cols):
+            for i, s in enumerate(shares):
+                z[i, j] = c[(c.multiplier == mm) & (c.stock_share_of_growth == s)][m].iloc[0] * scale
+        lo, hi = np.nanpercentile(z, [5, 99]) if m != "p_shortfall" else (0, np.nanmax(z))
+        ax.imshow(z, origin="lower", cmap=cmap, vmin=lo, vmax=hi, aspect="auto", interpolation="nearest")
+        for i in range(len(shares)):
+            for j in range(len(cols)):
+                if np.isfinite(z[i, j]):
+                    dark = (z[i, j] - lo) / (hi - lo + 1e-12) > 0.55
+                    ax.text(j, i, fmt.format(z[i, j]), ha="center", va="center", fontsize=7.3, color="white" if dark else INK)
+        j0 = cols.index(float(pr.multiplier))
+        i0 = shares.index(pr.stock_share_of_growth)
+        ax.add_patch(plt.Rectangle((j0 - 0.5, i0 - 0.5), 1, 1, fill=False, ec=INK, lw=2.2))
+        ax.set_xticks(range(len(cols)), [("m=1 (ladder)" if mm == 1 else f"m={mm:g}") for mm in cols], fontsize=8.5, color=INK2)
+        ax.set_yticks(range(len(shares)), [f"{s:.0%}" for s in shares], fontsize=8.5, color=INK2)
+        ax.set_xlabel("Strategy (CPPI multiplier)", color=INK2, fontsize=9)
+        ax.set_ylabel("Stocks share of the growth sleeve (rest Funds)", color=INK2, fontsize=9)
+        ax.set_title(ttl, color=INK, fontsize=11.5, loc="left", fontweight="bold")
+        style(ax)
+    fig.suptitle("Reserve-first strategies: Treasury ladder plus a growth sleeve (30,000 futures, 2027-2033)", color=INK, fontsize=13.5, fontweight="bold", x=0.02, ha="left")
+    fig.text(0.02, 0.925, f"Black box = chosen ({mname(pr.multiplier)}, {pr.stock_share_of_growth:.0%} stocks in the growth sleeve): best average rank of median x, Sharpe, Sortino and Treynor "
+             f"among strategies with at most {1 - config.SAFETY_PROB:.0%} chance the reserve is short.", color=INK2, fontsize=8.5, ha="left")
+    fig.tight_layout(rect=(0, 0, 1, 0.93))
+    fig.savefig(os.path.join(OUT_DIR, "heatmaps_cppi.png"), dpi=140, facecolor=SURFACE)
+    plt.close(fig)
+
+    # chosen strategy: value fan with the floor, growth share over time, x by future
+    yrs = FIRST_YEAR + np.arange(MONTHS + 1) / 12
+    floor = RESERVE / (1 + config.PLANNING_YIELD) ** ((MONTHS - np.arange(MONTHS + 1)) / 12)
+    pc = np.percentile(path, [2.5, 25, 50, 75, 97.5], axis=0)
+    sp = np.percentile(share_p, [25, 50, 75], axis=0) * 100
+    fig, (a1, a2, a3) = plt.subplots(1, 3, figsize=(17, 5.4), facecolor=SURFACE, gridspec_kw={"width_ratios": [1, 1, 1.15]})
+    a1.fill_between(yrs, pc[0] / 1e3, pc[4] / 1e3, color="#cde2fb", label="95% of futures", lw=0)
+    a1.fill_between(yrs, pc[1] / 1e3, pc[3] / 1e3, color="#6da7ec", label="middle 50%", lw=0)
+    a1.plot(yrs, pc[2] / 1e3, color="#184f95", lw=2, label="median")
+    a1.plot(yrs, floor / 1e3, color=INK, lw=1.2, ls="--", label="floor = PV of the reserve")
+    a1.set_title("Portfolio value vs the floor", color=INK, fontsize=11.5, loc="left", fontweight="bold")
+    a1.set_ylabel("$ thousands", color=INK2, fontsize=9)
+    a1.legend(loc="upper left", fontsize=8.5, frameon=False, labelcolor=INK2)
+    a1.grid(color=GRID, lw=0.6)
+    style(a1)
+    xs = yrs[:-1]
+    a2.fill_between(xs, sp[0], sp[2], color="#6da7ec", lw=0, label="middle 50%")
+    a2.plot(xs, sp[1], color="#184f95", lw=2, label="median")
+    a2.set_title("Share of the portfolio in the growth sleeve", color=INK, fontsize=11.5, loc="left", fontweight="bold")
+    a2.set_ylabel("%", color=INK2, fontsize=9)
+    a2.set_ylim(0, 100)
+    a2.legend(loc="upper left", fontsize=8.5, frameon=False, labelcolor=INK2)
+    a2.grid(color=GRID, lw=0.6)
+    style(a2)
+
+    xv = np.maximum(path[:, -1] - RESERVE, 0)
+    names = ["All futures (n=30,000)"] + list(config.SCENARIOS)
+    parts = [xv] + [xv[a:b] for a, b in slices]
+    qs = [np.percentile(x, [2.5, 25, 50, 75, 97.5]) for x in parts][::-1]
+    names = names[::-1]
+    y = np.arange(len(qs))
+    a3.hlines(y, [q[0] / 1e3 for q in qs], [q[4] / 1e3 for q in qs], color="#86b6ef", lw=1.6)
+    a3.hlines(y, [q[1] / 1e3 for q in qs], [q[3] / 1e3 for q in qs], color=BLUE, lw=7)
+    a3.scatter([q[2] / 1e3 for q in qs], y, color="white", edgecolors=INK, s=36, zorder=4)
+    for yi, q in zip(y, qs):
+        a3.text(q[4] / 1e3 + 8, yi, f"median ${q[2] / 1e3:,.0f}k", va="center", fontsize=8, color=INK2)
+    a3.set_yticks(y, names, fontsize=8.5, color=INK2)
+    a3.set_xlabel("x = surplus above the reserve in 2033, $ thousands (95% range, middle 50%, median)", color=INK2, fontsize=9)
+    a3.set_title(f"x for {mname(pr.multiplier)}, {pr.stock_share_of_growth:.0%} stocks in growth", color=INK, fontsize=11.5, loc="left", fontweight="bold")
+    a3.set_xlim(left=-10)
+    a3.grid(axis="x", color=GRID, lw=0.6)
+    style(a3)
+    fig.tight_layout()
+    fig.savefig(os.path.join(OUT_DIR, "cppi_projection.png"), dpi=140, facecolor=SURFACE)
+    plt.close(fig)
+
 
 
 if __name__ == "__main__":

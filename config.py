@@ -99,6 +99,12 @@ MC_PATHS = 30000
 BLOCK_MONTHS = 6             # bootstrap draws 6-month blocks of history, keeping vol clustering and correlation
 STOCK_ALPHA_KEEP = 0.5       # share of the stock strategy's backtested alpha (+2.2%/yr, t=0.8) we count on going forward
 MAX_SHORTFALL = 0.05         # the "risk-limited" pick must leave at most this chance of ending 2033 below the reserve
+# Reserve-first strategies (optimize.py): a Treasury sleeve that is guaranteed to grow into the operating reserve, plus a growth sleeve.
+# CPPI puts (multiplier x cushion) in the growth sleeve, where cushion = portfolio value minus the PV of the reserve.
+CPPI_MULTIPLIERS = [1, 2, 3, 4, 5, 6]
+RISKY_STOCK_STEP = 0.1       # growth sleeve is funds/stocks; try every stock share in steps of this
+MAX_STOCK_SHARE_OF_GROWTH = 0.5   # diversification rule: the stock strategy is at most half the growth sleeve, index funds the rest
+MIN_X_90 = 50000             # we want to be 90% sure x (surplus above the reserve, before the flexibility hold-back) is at least this
 # Futures the Monte Carlo draws from: (S&P 500 compound return, bond-sleeve compound return, volatility multiplier, probability).
 # Funds and Stocks follow the S&P 500 through their historical betas (Stocks also get a share of the strategy's alpha).
 # The mix is meant to span the real 6-year range (S&P 0% to 21%/yr at the 5th-95th percentile) and go a bit worse on the downside.
