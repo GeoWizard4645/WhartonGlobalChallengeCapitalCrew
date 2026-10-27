@@ -52,6 +52,7 @@ python3 buckets.py                           # risk/reward map of every split
 python3 dcf.py                               # DCF + margin of safety for stock picks
 .venv/bin/python optimize.py                 # backtest + Monte Carlo of every bonds/funds/stocks split; heatmaps and the range of x
 ```
+`visuals.py` redraws the team charts for the adopted plan (`config.ADOPTED_SPLIT`) into `output/team/`.
 `optimize.py` (settings: the ALLOCATION OPTIMIZER block in `config.py`) uses the stock strategy's monthly returns in `output/stock_sleeve.csv`
 (`python -m quant.run --sleeve-only` refreshes it) and writes `output/allocation/`: `grid.csv` (every split), `scenarios.csv`,
 `x_projection.csv` (95% interval, IQR, median, mean of x), `cppi_grid.csv` and the heatmap / x-range charts.
