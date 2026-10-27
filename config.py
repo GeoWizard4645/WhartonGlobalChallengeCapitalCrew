@@ -101,7 +101,7 @@ STOCK_ALPHA_KEEP = 0.5       # share of the stock strategy's backtested alpha (+
 MAX_SHORTFALL = 0.05         # the "risk-limited" pick must leave at most this chance of ending 2033 below the reserve
 # Reserve-first strategies (optimize.py): a Treasury sleeve that is guaranteed to grow into the operating reserve, plus a growth sleeve.
 # CPPI puts (multiplier x cushion) in the growth sleeve, where cushion = portfolio value minus the PV of the reserve.
-CPPI_MULTIPLIERS = [1, 2, 3, 4, 5, 6]
+CPPI_MULTIPLIERS = [1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5, 5.5, 6]
 RISKY_STOCK_STEP = 0.1       # growth sleeve is funds/stocks; try every stock share in steps of this
 MAX_STOCK_SHARE_OF_GROWTH = 0.5   # diversification rule: the stock strategy is at most half the growth sleeve, index funds the rest
 RANGE_CONFIDENCE = 0.80      # the projected range of x we quote is the central interval with this confidence (10th to 90th percentile at 80%)
