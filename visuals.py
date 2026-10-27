@@ -1,6 +1,6 @@
 # Team charts for the plan we adopted (config.ADOPTED_SPLIT + config.ADOPTED_FUNDED), in plain language, one question per chart.
 # Run: .venv/bin/python visuals.py        (about 1 minute; same simulation as optimize.py)
-# Writes output/team/: 1_plan.png ... 7_options.png
+# Writes output/team/: 1_plan.png ... 12_cppi_ranges.png (charts 8-12 need cppi_options_grid.csv from optimize.py)
 import os
 
 import matplotlib
@@ -440,8 +440,10 @@ def cppi_data(d):
     g50 = o.grow_returns(d["X"], 0.5)
     v0, _, sh0 = o.run_reserve_first(g50, 2.0)
     d["cppi_orig"] = {**stats(v0, o.RESERVE), "bonds": 1 - sh0[:, ::12]}
+    d["cppi_orig_v"] = v0
     vb, _, _ = o.run_reserve_first(g50, 2.0, reserve=RES_BUF)
     d["cppi_orig_buf"] = stats(vb, RES_BUF)
+    d["cppi_orig_buf_v"] = vb
     return c, menu, paths
 
 
@@ -639,6 +641,70 @@ def chart_cppi_glide(d, c, menu, paths):
     save(fig, "11_cppi_glide.png")
 
 
+def chart_cppi_ranges(d, c, menu, paths):
+    """Numbers, not pictures: the range of x at every 10% confidence level and the odds of reaching fixed amounts, for every option and reference."""
+    cols = [("REF 1", "Steady 55/12.5/32.5", "no buffer", d["v"], o.RESERVE, True), ("REF 1b", "same split*", "5% buffer", d["v"], RES_BUF, True),
+            ("REF 2", "CPPI m=2 (earlier)", "no buffer", d["cppi_orig_v"], o.RESERVE, True), ("REF 2b", "same CPPI", "5% buffer", d["cppi_orig_buf_v"], RES_BUF, True)]
+    for letter, i in menu.items():
+        r = c.loc[i]
+        cols.append((letter, f"CPPI m={r.multiplier:g}", f"start {r.start_bonds:.0%} bonds", paths[letter]["v"], RES_BUF, False))
+    xs = [np.maximum(col[3] - col[4], 0) for col in cols]
+    levels = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.95]
+    amounts = [50e3, 100e3, 150e3, 200e3, 300e3, 400e3]
+    n, nr1, nr2 = len(cols), len(levels) + 1, len(amounts) + 1
+    fig = page("What x could be, by multiplier: the range at every confidence level, and the odds of reaching an amount",
+               "Top table: the range that holds x that share of the time (80% = from the 10th to the 90th percentile). Bottom table: chance x is at least that amount. All in $ thousands.",
+               size=(19.5, 11.6), note=NOTE_CPPI + "\n*REF 1b is approximate (its January rule was tuned for the unbuffered reserve). REF rows keep the earlier plans; 'no buffer' rows are exactly as first reported.")
+    ax = fig.add_axes([0, 0.05, 1, 0.82])
+    ax.set_xlim(0, 1)
+    ax.set_ylim(0, 1)
+    ax.axis("off")
+    x0, cw = 0.15, (0.975 - 0.15) / n
+    total = 3 + nr1 + nr2 + 2.2                              # header + two titles + rows + gaps
+    rh = 1 / total
+    y = 1.0
+    # column headers
+    for j, col in enumerate(cols):
+        gx = x0 + j * cw
+        ax.add_patch(Rectangle((gx + 0.002, y - 2.4 * rh), cw - 0.004, 2.4 * rh, color="#e4e2dc" if col[5] else LIGHT, lw=0))
+        ax.text(gx + cw / 2, y - 0.5 * rh, col[0], ha="center", va="center", fontsize=13, fontweight="bold", color=INK)
+        ax.text(gx + cw / 2, y - 1.15 * rh, col[1], ha="center", va="center", fontsize=9.3, color=INK)
+        ax.text(gx + cw / 2, y - 1.75 * rh, col[2], ha="center", va="center", fontsize=8.8, color=INK2)
+    y -= 2.6 * rh
+
+    def block(title, labels, cells, shade, note_fmt=None):
+        nonlocal y
+        ax.text(0.005, y - 0.45 * rh, title, fontsize=12, fontweight="bold", color=INK, va="center")
+        y -= 0.9 * rh
+        from matplotlib.colors import LinearSegmentedColormap
+        cm = LinearSegmentedColormap.from_list("b", ["#f3f8fe", "#9ec5f4", "#3987e5", "#184f95"])
+        allv = np.array(shade, dtype=float)
+        lo_, hi_ = np.nanmin(allv), np.nanmax(allv)
+        for i, (lab, row, sh) in enumerate(zip(labels, cells, shade)):
+            ax.text(x0 - 0.008, y - 0.5 * rh, lab, ha="right", va="center", fontsize=10.5, color=INK, fontweight="bold" if lab.startswith("Median") else "normal")
+            for j, (txt, v) in enumerate(zip(row, sh)):
+                t = (v - lo_) / (hi_ - lo_ + 1e-12)
+                ax.add_patch(Rectangle((x0 + j * cw + 0.002, y - rh + 0.0015), cw - 0.004, rh - 0.003, color=cm(t * 0.92), lw=0))
+                ax.text(x0 + j * cw + cw / 2, y - 0.5 * rh, txt, ha="center", va="center", fontsize=10, color="white" if t > 0.6 else INK)
+            y -= rh
+        y -= 0.35 * rh
+
+    labels, cells, shade = ["Median (50%)"], [[f"{np.median(x) / 1e3:,.0f}" for x in xs]], [[np.median(x) for x in xs]]
+    for cl in levels:
+        lo_p, hi_p = (1 - cl) / 2 * 100, (1 + cl) / 2 * 100
+        labels.append(f"{cl:.0%} range  ({lo_p:g}th to {hi_p:g}th pct)")
+        cells.append([f"{np.percentile(x, lo_p) / 1e3:,.0f} to {np.percentile(x, hi_p) / 1e3:,.0f}" for x in xs])
+        shade.append([np.percentile(x, lo_p) for x in xs])
+    block("Range of x at each confidence level ($ thousands; shade = how high the low end is)", labels, cells, shade)
+    labels2, cells2, shade2 = ["Reserve fully covered"], [[f"{1 - float((col[3] < col[4]).mean()):.1%}" for col in cols]], [[1 - float((col[3] < col[4]).mean()) for col in cols]]
+    for a in amounts:
+        labels2.append(f"x at least ${a / 1e3:,.0f}k")
+        cells2.append([f"{float((x >= a).mean()):.0%}" for x in xs])
+        shade2.append([float((x >= a).mean()) for x in xs])
+    block("Chance of reaching at least this extra contribution (shade = higher chance)", labels2, cells2, shade2)
+    save(fig, "12_cppi_ranges.png")
+
+
 def main():
     os.makedirs(OUT, exist_ok=True)
     d = compute()
@@ -650,6 +716,9 @@ def main():
         chart_cppi_heatmaps(d, c, menu)
         chart_cppi_menu(d, c, menu, paths)
         chart_cppi_glide(d, c, menu, paths)
+        chart_cppi_ranges(d, c, menu, paths)
+    else:
+        print("Charts 8-12 need output/allocation/cppi_options_grid.csv: run optimize.py first.")
     print("Wrote", OUT)
 
 
