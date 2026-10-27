@@ -91,4 +91,25 @@ STRESS = {
     "2022 bear":       ("2022-01-03", "2022-10-12"),
 }
 
+# ---------------------------------------------------------------------------
+# ALLOCATION OPTIMIZER (optimize.py): backtest + Monte Carlo of every bonds / funds / stocks split
+# ---------------------------------------------------------------------------
+OPT_STEP = 0.025             # grid step for the full 0-100% splits
+MC_PATHS = 30000
+BLOCK_MONTHS = 6             # bootstrap draws 6-month blocks of history, keeping vol clustering and correlation
+STOCK_ALPHA_KEEP = 0.5       # share of the stock strategy's backtested alpha (+2.2%/yr, t=0.8) we count on going forward
+MAX_SHORTFALL = 0.05         # the "risk-limited" pick must leave at most this chance of ending 2033 below the reserve
+# Futures the Monte Carlo draws from: (S&P 500 compound return, bond-sleeve compound return, volatility multiplier, probability).
+# Funds and Stocks follow the S&P 500 through their historical betas (Stocks also get a share of the strategy's alpha).
+# The mix is meant to span the real 6-year range (S&P 0% to 21%/yr at the 5th-95th percentile) and go a bit worse on the downside.
+SCENARIOS = {
+    "Crash decade":  (-0.03, 0.030, 1.3, 0.05),  # lost decade, flight to bonds
+    "Terrible":      (0.015, 0.015, 1.2, 0.10),   # stagflation: stocks flat, bonds lose to inflation
+    "Below average": (0.045, 0.035, 1.1, 0.15),
+    "Expected":      (0.075, 0.045, 1.0, 0.35),
+    "Good":          (0.105, 0.050, 0.95, 0.17),
+    "Above average": (0.14, 0.055, 0.9, 0.13),
+    "Insane":        (0.19, 0.060, 1.0, 0.05),    # late-1990s / 2010s style melt-up
+}
+
 ALL_TICKERS = sorted({t for b in BUCKETS.values() for t in b} | {BENCHMARK})

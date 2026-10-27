@@ -50,7 +50,11 @@ python3 backtest.py [bonds funds stocks]     # how a split behaved historically
 python3 montecarlo.py [bonds funds stocks]   # lump-sum Monte Carlo on historical averages
 python3 buckets.py                           # risk/reward map of every split
 python3 dcf.py                               # DCF + margin of safety for stock picks
+.venv/bin/python optimize.py                 # backtest + Monte Carlo of every bonds/funds/stocks split; heatmaps and the range of x
 ```
+`optimize.py` (settings: the ALLOCATION OPTIMIZER block in `config.py`) uses the stock strategy's monthly returns in `output/stock_sleeve.csv`
+(`python -m quant.run --sleeve-only` refreshes it) and writes `output/allocation/`: `grid.csv` (every split), `scenarios.csv`,
+`x_projection.csv` (95% interval, IQR, median, mean of x), and the heatmap / x-range charts.
 
 ## Stock strategies (`quant/`)
 

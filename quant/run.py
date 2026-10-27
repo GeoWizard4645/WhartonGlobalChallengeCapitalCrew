@@ -229,6 +229,16 @@ def picks(ctx, name: str, params: dict) -> pd.DataFrame:
     return out
 
 
+def write_sleeve(ctx, chosen: dict[str, dict], end: pd.Timestamp) -> None:
+    """Monthly net returns of the 50/50 momentum + Magic Formula split (the stock sleeve the team trades), for optimize.py."""
+    q = qm.monthly_returns(chosen["quality_momentum"], ctx=ctx, start=qm.first_signal_date(ctx), end=end)
+    m = mf.make_grid_fn(ctx, start=mf.common_start(ctx), end=end)(chosen["magic_formula"])
+    both = pd.concat([q, m], axis=1).dropna()
+    out = both.mean(axis=1).rename("ret").round(6)
+    out.index = out.index.strftime("%Y-%m")
+    out.rename_axis("month").to_csv(settings.OUTPUT / "stock_sleeve.csv")
+
+
 def write_picks(ctx, chosen: dict[str, dict]) -> None:
     for name, params in chosen.items():
         p = picks(ctx, name, params)
@@ -241,6 +251,7 @@ def write_picks(ctx, chosen: dict[str, dict]) -> None:
 def main(argv=None) -> None:
     ap = argparse.ArgumentParser(description="Backtest the three strategies and list today's picks.")
     ap.add_argument("--live-only", action="store_true", help="only recompute today's picks (stored parameters)")
+    ap.add_argument("--sleeve-only", action="store_true", help="only write output/stock_sleeve.csv (stored parameters)")
     a = ap.parse_args(argv)
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(message)s", datefmt="%H:%M:%S")
 
@@ -250,6 +261,9 @@ def main(argv=None) -> None:
 
     if a.live_only:
         write_picks(ctx, json.loads(PARAMS_FILE.read_text()))
+        return
+    if a.sleeve_only:
+        write_sleeve(ctx, json.loads(PARAMS_FILE.read_text()), last_complete_month_end(ctx))
         return
 
     end = last_complete_month_end(ctx)
@@ -263,6 +277,7 @@ def main(argv=None) -> None:
     res.to_csv(settings.OUTPUT / "results.csv", index=False)
     chart(runs, spy, settings.OUTPUT / "performance.png")
     chosen = {r["name"]: r["chosen"] for r in runs}
+    write_sleeve(ctx, chosen, end)
     PARAMS_FILE.write_text(json.dumps(chosen, indent=2, default=str) + "\n")
     meta = {r["name"]: dict(fallback=r["fallback"], fallback_reason=r["fallback_reason"],
                             pbo=round(float(r["pbo"]), 3), dsr=round(float(r["dsr"]), 3)) for r in runs}
