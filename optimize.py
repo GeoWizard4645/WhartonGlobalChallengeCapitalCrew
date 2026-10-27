@@ -359,6 +359,8 @@ def main():
     xp, cgrid, pick, share_p, path, optima = reserve_first(h, X, slices, xp)
     charts(g, w, in_bounds, picks, rec, base, xp, X, slices)
     cppi_charts(cgrid, pick, share_p, path, slices, optima)
+    xp, sgrid, spick, sstatic, soptima, sbonds, svpath = steady_split(h, X, slices, xp, w, in_bounds)
+    steady_charts(sgrid, spick, sstatic, soptima, sbonds, svpath, slices, w, in_bounds)
     print(f"\nWrote {OUT_DIR}")
 
 
@@ -530,6 +532,176 @@ def mname(m):
 
 def v_mc_slice(v, a, b):
     return v[a:b]
+
+
+# ---------- steady split: one split now, nudged by at most ADJUST_STEP each January ----------
+
+def bond_limits(w0):
+    """Range of the Bonds weight that keeps Bonds, Funds and Stocks inside the team bounds while the Funds:Stocks ratio stays fixed."""
+    rs = w0[:, 2] / (w0[:, 1] + w0[:, 2])
+    (bl, bh), (fl, fh), (sl, sh) = config.BOUNDS
+    g_hi = np.minimum(fh / (1 - rs), sh / rs)           # most the non-bond part may be
+    g_lo = np.maximum(fl / (1 - rs), sl / rs)           # least the non-bond part may be
+    return np.maximum(bl, 1 - g_hi), np.minimum(bh, 1 - g_lo), rs
+
+
+def adaptive_run(Xt, w0, f_lo, f_hi, track=False):
+    """Monthly-rebalanced Bonds/Funds/Stocks. Xt (months, paths, [Bonds, Funds, Stocks, Mkt]); w0 (splits, 3) = the split on day one.
+    Each January from the second year: funded ratio = (portfolio + deposit) / PV of the reserve; below f_lo Bonds +step, above f_hi Bonds -step.
+    Returns value in 2033 (paths, splits), annualized ratios, and (if track) the Bonds weight each January and the value path."""
+    n, a = Xt.shape[1], len(w0)
+    b_lo, b_hi, rs = bond_limits(w0)
+    b = np.tile(w0[:, 0], (n, 1))
+    v = np.zeros((n, a))
+    sums = np.zeros((4, a))
+    bonds_path = np.empty((MONTHS // 12, n, a)) if track else None
+    vpath = np.empty((MONTHS + 1, n, a)) if track else None
+    for t in range(MONTHS):
+        floor = RESERVE / (1 + config.PLANNING_YIELD) ** ((MONTHS - t) / 12)
+        tot = v + DEPOSITS[t]
+        if t % 12 == 0:
+            if t > 0:
+                f = tot / floor
+                b = np.clip(b + config.ADJUST_STEP * ((f < f_lo).astype(float) - (f > f_hi)), b_lo, b_hi)
+            if track:
+                bonds_path[t // 12] = b
+        if track:
+            vpath[t] = tot
+        x = Xt[t]
+        r = b * x[:, 0:1] + (1 - b) * ((1 - rs) * x[:, 1:2] + rs * x[:, 2:3])
+        v = tot * (1 + r)
+        e = r - RF_M
+        sums[0] += e.sum(0)
+        sums[1] += (e * e).sum(0)
+        sums[2] += (np.minimum(e, 0) ** 2).sum(0)
+        sums[3] += (e * (x[:, 3:4] - RF_M)).sum(0)
+    if track:
+        vpath[MONTHS] = v
+    em = Xt[:, :, 3] - RF_M
+    return v, ratios(n * MONTHS, sums[0], sums[1], sums[2], sums[3], em.sum(), (em ** 2).sum()), bonds_path, vpath
+
+
+def steady_split(h, X, slices, xp, w, in_bounds):
+    """Search every starting split inside the team bounds x every nudge rule; pick one; replay it on real history."""
+    w0 = w[in_bounds]
+    Xt_all = np.ascontiguousarray(X.astype(np.float64).transpose(1, 0, 2))
+    Xt = np.ascontiguousarray(Xt_all[:, ::len(X) // config.STEADY_SEARCH_PATHS, :])
+    variants = [("static (no nudges)", -np.inf, np.inf)] + [(f"nudge if funded ratio < {lo:g} or > {hi:g}", lo, hi)
+                                                           for lo in config.FUNDED_LO for hi in config.FUNDED_HI if lo < hi]
+    rows = []
+    for name, lo, hi in variants:
+        for c0 in range(0, len(w0), 40):
+            wc = w0[c0:c0 + 40]
+            v, r, _, _ = adaptive_run(Xt, wc, lo, hi)
+            x = np.maximum(v - RESERVE, 0)
+            q = np.percentile(x, [2.5, 25, 50, 75, 97.5, RLO, RHI], axis=0)
+            for j in range(len(wc)):
+                rows.append({"variant": name, "f_lo": lo, "f_hi": hi, "bonds": wc[j, 0], "funds": wc[j, 1], "stocks": wc[j, 2],
+                             "x_mean": x[:, j].mean(), "x_range_lo": q[5, j], "x_range_hi": q[6, j], "x_p2_5": q[0, j], "x_p25": q[1, j],
+                             "x_median": q[2, j], "x_p75": q[3, j], "x_p97_5": q[4, j], "p_shortfall": float((v[:, j] < RESERVE).mean()),
+                             **{k: float(r[k][j]) for k in ("vol", "beta", "sharpe", "sortino", "treynor")}})
+    c = pd.DataFrame(rows)
+    c["safe"] = c["p_shortfall"] <= 1 - config.SAFETY_PROB
+    c["rules"] = c["safe"] & (c["x_range_lo"] >= config.MIN_X_LOW)
+    pool = c[c["rules"]] if c["rules"].any() else c[c["safe"]]
+    metrics = ["x_median", "sharpe", "sortino", "treynor"]
+    c["rank_score"] = np.nan
+    c.loc[pool.index, "rank_score"] = np.mean([pool[m].rank(ascending=False, na_option="bottom") for m in metrics], axis=0)
+    pick = int(c["rank_score"].idxmin())
+    static = c[c["variant"] == variants[0][0]]
+    static_pool = static[static["rules"]] if static["rules"].any() else static[static["safe"]]
+    static_best = int(static_pool["x_median"].idxmax()) if len(static_pool) else int(static["p_shortfall"].idxmin())
+
+    def line(i):
+        r = c.loc[i]
+        return (f"Bonds {r.bonds:5.1%} / Funds {r.funds:5.1%} / Stocks {r.stocks:5.1%} | {r.variant:40} | x median {r.x_median:>8,.0f}  "
+                f"{RC:.0%} range [{r.x_range_lo:>8,.0f}, {r.x_range_hi:>9,.0f}]  P(short) {r.p_shortfall:5.2%} | Sharpe {r.sharpe:5.2f} Sortino {r.sortino:5.2f} Treynor {r.treynor:6.3f}")
+    print(f"\nSTEADY SPLIT: one split now, Bonds weight nudged at most {config.ADJUST_STEP:.0%} a year (every January from {FIRST_YEAR + 1}), Funds:Stocks ratio fixed")
+    print(f"  {len(c)} combinations ({len(w0)} starting splits in the team bounds x {len(variants)} nudge rules, {Xt.shape[1]:,} futures each); safe = reserve short in <= {1 - config.SAFETY_PROB:.0%} of futures "
+          f"({int(c['safe'].sum())} qualify, {int(c['rules'].sum())} also have a {RC:.0%} range starting at {dollars(config.MIN_X_LOW)}+)")
+    print("  CHOSEN (best average rank of median x, Sharpe, Sortino, Treynor among those):\n    ", line(pick))
+    print("  best static split (no nudges), same rules:\n    ", line(static_best))
+    print("  OPTIMUM FOR EACH OBJECTIVE")
+    objectives = {"x_mean": "Max profit (mean x)", "x_median": "Max median x", "sharpe": "Max Sharpe", "sortino": "Max Sortino", "treynor": "Max Treynor"}
+    optima = {}
+    for col, nm in objectives.items():
+        a_ = int(c[c["safe"]][col].idxmax())
+        b_ = int(pool[col].idxmax())
+        optima[col] = (a_, b_)
+        print(f"   {nm}\n      safe only:    {line(a_)}")
+        if b_ != a_:
+            print(f"      + {RC:.0%} range rule: {line(b_)}")
+
+    # re-run the winner and the best static split on every path, with tracking
+    def full(i):
+        r = c.loc[i]
+        wi = np.array([[r.bonds, r.funds, r.stocks]])
+        v, rr_, bp, vp = adaptive_run(Xt_all, wi, r.f_lo, r.f_hi, track=True)
+        return v[:, 0], rr_, bp[:, :, 0], vp[:, :, 0]
+    v_pick, r_pick, bonds_p, vpath = full(pick)
+    v_static, _, _, _ = full(static_best)
+    r = c.loc[pick]
+    print(f"\nCHOSEN: start Bonds {r.bonds:.1%} / Funds {r.funds:.1%} / Stocks {r.stocks:.1%}; rule: {r.variant}")
+    print(f"  full run ({len(v_pick):,} futures): x median {np.median(np.maximum(v_pick - RESERVE, 0)):,.0f}, P(short) {(v_pick < RESERVE).mean():.2%}")
+    print(f"  nudge size actually used: Bonds weight at the start of each year (25th / median / 75th pct, min-max)")
+    prev = None
+    for k in range(MONTHS // 12):
+        bk = bonds_p[k]
+        lo_, md, hi_ = np.percentile(bk, [25, 50, 75])
+        chg = "" if prev is None else f"   moved from last year: up {(bk > prev + 1e-9).mean():4.0%}, down {(bk < prev - 1e-9).mean():4.0%}, same {(abs(bk - prev) <= 1e-9).mean():4.0%}"
+        print(f"    {FIRST_YEAR + k}: {lo_:5.1%} / {md:5.1%} / {hi_:5.1%}   ({bk.min():5.1%} - {bk.max():5.1%}){chg}")
+        prev = bk
+    print(f"  x by future (surplus above the reserve):")
+    for name, (a_, b_) in zip(config.SCENARIOS, slices):
+        st = x_stats(v_pick[a_:b_])
+        print(f"    {name:14} median {st['x_median']:>9,.0f}  {RC:.0%} [{st['x_range_lo']:>8,.0f}, {st['x_range_hi']:>9,.0f}]  IQR [{st['x_p25']:>8,.0f}, {st['x_p75']:>9,.0f}]  P(short) {st['p_shortfall']:5.1%}")
+    st = x_stats(v_pick)
+    print(f"    {'All futures':14} median {st['x_median']:>9,.0f}  mean {st['x_mean']:>9,.0f}  {RC:.0%} [{st['x_range_lo']:>8,.0f}, {st['x_range_hi']:>9,.0f}]  95% [{st['x_p2_5']:>8,.0f}, {st['x_p97_5']:>9,.0f}]  IQR [{st['x_p25']:>8,.0f}, {st['x_p75']:>9,.0f}]  P(short) {st['p_shortfall']:5.2%}")
+    fac = np.maximum(v_pick - RESERVE, 0) * (1 - config.FLEX_PCT)
+    qf = np.percentile(fac, [2.5, 5, RLO, 25, 50, 75, RHI, 95, 97.5])
+    print(f"\n  FACILITY CONTRIBUTION after holding back {config.FLEX_PCT:.0%} for flexibility (what to tell co-sponsors in 2031):")
+    print(f"    RANGE TO QUOTE: {dollars(qf[2])} to {dollars(qf[6])}  ({RC:.0%} confident the contribution lands inside; {1 - RLO / 100:.0%} confident she can give at least {dollars(qf[2])})")
+    print(f"    for reference: 95% confident at least {dollars(qf[1])};  95% interval {dollars(qf[0])} to {dollars(qf[8])};  median {dollars(qf[4])};  middle 50% {dollars(qf[3])} to {dollars(qf[5])}")
+    infl = (1 + config.INFLATION) ** (config.TARGET_YEAR - 2026)
+    print(f"    in today's dollars (deflated {config.INFLATION:.1%}/yr to 2026): {1 - RLO / 100:.0%} confident at least {dollars(qf[2] / infl)}, median {dollars(qf[4] / infl)}")
+
+    # replay on real history (stocks before 2011 are modeled)
+    sleeves = h[NAMES + ["Mkt"]].to_numpy()
+    starts = np.arange(len(h) - MONTHS + 1)
+    Xh = np.ascontiguousarray(sleeves[starts[:, None] + np.arange(MONTHS)].transpose(1, 0, 2))
+    def hist(i):
+        rr_ = c.loc[i]
+        return adaptive_run(Xh, np.array([[rr_.bonds, rr_.funds, rr_.stocks]]), rr_.f_lo, rr_.f_hi)[0][:, 0]
+    v_h, v_hs = hist(pick), hist(static_best)
+    sh = x_stats(v_h)
+    print(f"\n  REAL-HISTORY REPLAY ({len(v_h)} six-year stretches): x median {sh['x_median']:,.0f}, {RC:.0%} [{sh['x_range_lo']:,.0f}, {sh['x_range_hi']:,.0f}], "
+          f"P(short) {sh['p_shortfall']:.1%}, worst stretch x {max(v_h.min() - RESERVE, 0):,.0f} (value {v_h.min():,.0f})")
+    ends = h.index[MONTHS - 1:]
+    for lbl, end in {"dot-com bust": "2002-10", "financial crisis": "2009-02", "COVID crash": "2020-03", "2022 bear": "2022-09"}.items():
+        hit = np.where(ends.strftime("%Y-%m") == end)[0]
+        if len(hit):
+            j = int(hit[0])
+            print(f"    6y ending {end} ({lbl}): x {max(v_h[j] - RESERVE, 0):>9,.0f}   portfolio {v_h[j]:>9,.0f}")
+
+    def add(label_, v_mc_, v_hist_, i):
+        out = []
+        ri = c.loc[i]
+        for fut, sl in [("All futures (Monte Carlo)", None)] + list(zip(config.SCENARIOS, slices)):
+            v = v_mc_ if sl is None else v_mc_[sl[0]:sl[1]]
+            out.append({"split": label_, "bonds": ri.bonds, "funds": ri.funds, "stocks": ri.stocks, "scenario": fut, "n": len(v), **x_stats(v),
+                        "x_median_after_flex": x_stats(v, True)["x_median"]})
+        out.append({"split": label_, "bonds": ri.bonds, "funds": ri.funds, "stocks": ri.stocks, "scenario": "Real-history stretches (backtest)", "n": len(v_hist_),
+                    **x_stats(v_hist_), "x_median_after_flex": x_stats(v_hist_, True)["x_median"]})
+        return out
+    new = add(f"Steady split [chosen]: {r.bonds:.1%}/{r.funds:.1%}/{r.stocks:.1%}, {r.variant}", v_pick, v_h, pick)
+    if static_best != pick:
+        rs_ = c.loc[static_best]
+        new += add(f"Steady split, no nudges: {rs_.bonds:.1%}/{rs_.funds:.1%}/{rs_.stocks:.1%}", v_static, v_hs, static_best)
+    xp = pd.concat([xp, pd.DataFrame(new)], ignore_index=True)
+    xp.round(4).to_csv(os.path.join(OUT_DIR, "x_projection.csv"), index=False)
+    keep = c[c["variant"].isin([r.variant, variants[0][0]])]
+    keep.round(5).to_csv(os.path.join(OUT_DIR, "steady_grid.csv"), index=False)
+    return xp, c, pick, static_best, optima, bonds_p, vpath
 
 
 # ---------- charts ----------
@@ -720,6 +892,107 @@ def cppi_charts(c, pick, share_p, path, slices, optima):
     style(a3)
     fig.tight_layout()
     fig.savefig(os.path.join(OUT_DIR, "cppi_projection.png"), dpi=140, facecolor=SURFACE)
+    plt.close(fig)
+
+
+
+def steady_charts(c, pick, static_best, optima, bonds_p, vpath, slices, w, in_bounds):
+    orange = LinearSegmentedColormap.from_list("orange", ["#fbe3d6", "#f4a37c", "#eb6834", "#b84a1f", "#7a2e10"])
+    r0 = c.loc[pick]
+    sub = c[c["variant"] == r0.variant]
+    stat = c[c["variant"] == c.loc[static_best, "variant"]].set_index(["bonds", "funds", "stocks"])
+    sub = sub.assign(gain=[row.x_median - stat.loc[(row.bonds, row.funds, row.stocks), "x_median"] for row in sub.itertuples()])
+    step = config.OPT_STEP
+    bs = np.round(np.arange(sub.bonds.min(), sub.bonds.max() + 1e-9, step), 4)
+    ss = np.round(np.arange(sub.stocks.min(), sub.stocks.max() + 1e-9, step), 4)
+    panels = [("x_mean", "Average x = profit ($k)", RAMP, 1e-3), ("x_median", "Median x ($k)", RAMP, 1e-3),
+              ("x_range_lo", f"Low end of the {RC:.0%} range of x ($k)", RAMP, 1e-3), ("p_shortfall", "Chance the reserve is short (%)", orange, 100),
+              ("sharpe", "Sharpe ratio", RAMP, 1), ("sortino", "Sortino ratio", RAMP, 1), ("treynor", "Treynor ratio", RAMP, 1),
+              ("gain", "Median x gained by nudging vs no nudges ($k)", RAMP, 1e-3)]
+    fig, axes = plt.subplots(2, 4, figsize=(23, 9.4), facecolor=SURFACE)
+    unsafe = np.full((len(ss), len(bs), 4), 0.0)
+    cellof = {}
+    for row in sub.itertuples():
+        i, j = int(np.argmin(abs(ss - row.stocks))), int(np.argmin(abs(bs - row.bonds)))
+        cellof[row.Index] = (j, i)
+        if not row.safe:
+            unsafe[i, j] = (0.35, 0.35, 0.35, 0.55)
+    ext = [bs[0] * 100 - step * 50, bs[-1] * 100 + step * 50, ss[0] * 100 - step * 50, ss[-1] * 100 + step * 50]
+    for ax, (m, ttl, cmap, scale) in zip(axes.flat, panels):
+        z = np.full((len(ss), len(bs)), np.nan)
+        for row in sub.itertuples():
+            j, i = cellof[row.Index]
+            z[i, j] = getattr(row, m) * scale
+        safe_vals = z[unsafe[:, :, 3] == 0]
+        lo, hi = np.nanpercentile(safe_vals, [5, 99]) if m != "p_shortfall" else (0, np.nanpercentile(z, 99))
+        im = ax.imshow(z, origin="lower", cmap=cmap, vmin=lo, vmax=hi, aspect="auto", interpolation="nearest", extent=ext)
+        ax.imshow(unsafe, origin="lower", aspect="auto", interpolation="nearest", extent=ext)
+        if m in optima:
+            safe_sub, rule_sub = sub[sub["safe"]], sub[sub["rules"]]
+            for part, mk, sz in ((safe_sub, "*", 200), (rule_sub, "D", 55)):
+                if len(part):
+                    i_ = part[m].idxmax()
+                    ax.scatter(sub.at[i_, "bonds"] * 100, sub.at[i_, "stocks"] * 100, marker=mk, s=sz, c="white", edgecolors=INK, linewidths=1.1, zorder=5)
+        ax.scatter(r0.bonds * 100, r0.stocks * 100, marker="o", s=60, c=INK, edgecolors="white", linewidths=1, zorder=7)
+        cb = fig.colorbar(im, ax=ax, fraction=0.046, pad=0.03)
+        cb.ax.tick_params(colors=INK2, labelsize=8)
+        cb.outline.set_edgecolor(GRID)
+        ax.set_xlabel("Bonds % at the start  (Funds % = 100 - Bonds - Stocks)", color=INK2, fontsize=8.5)
+        ax.set_ylabel("Stocks % at the start", color=INK2, fontsize=8.5)
+        ax.set_title(ttl, color=INK, fontsize=11, loc="left", fontweight="bold")
+        style(ax)
+    fig.suptitle(f"Steady split: one starting split, nudged at most {config.ADJUST_STEP:.0%} a year ({r0.variant})", color=INK, fontsize=14, fontweight="bold", x=0.01, ha="left")
+    fig.text(0.01, 0.925, f"Each cell is one starting Bonds / Funds / Stocks split inside the team bounds. Gray = reserve short in more than {1 - config.SAFETY_PROB:.0%} of futures (not allowed).  "
+             f"\u25cf = chosen ({r0.bonds:.1%}/{r0.funds:.1%}/{r0.stocks:.1%}), best average rank among safe splits with a {RC:.0%} range starting at {dollars(config.MIN_X_LOW)}+.\n"
+             f"\u2605 = best split for that panel's metric among safe splits.  \u25c6 = best that also meets the range rule.  Colors clipped at the 5th/99th percentile of safe splits.",
+             color=INK2, fontsize=8.8, ha="left", va="top", linespacing=1.5)
+    fig.tight_layout(rect=(0, 0, 1, 0.9))
+    fig.savefig(os.path.join(OUT_DIR, "heatmaps_steady.png"), dpi=130, facecolor=SURFACE)
+    plt.close(fig)
+
+    # chosen split: value vs floor, Bonds weight each January, x by future
+    yrs = FIRST_YEAR + np.arange(MONTHS + 1) / 12
+    floor = RESERVE / (1 + config.PLANNING_YIELD) ** ((MONTHS - np.arange(MONTHS + 1)) / 12)
+    pc = np.percentile(vpath, [RLO, 25, 50, 75, RHI], axis=1)
+    fig, (a1, a2, a3) = plt.subplots(1, 3, figsize=(17, 5.4), facecolor=SURFACE, gridspec_kw={"width_ratios": [1, 1, 1.15]})
+    a1.fill_between(yrs, pc[0] / 1e3, pc[4] / 1e3, color="#cde2fb", label=f"{RC:.0%} of futures", lw=0)
+    a1.fill_between(yrs, pc[1] / 1e3, pc[3] / 1e3, color="#6da7ec", label="middle 50%", lw=0)
+    a1.plot(yrs, pc[2] / 1e3, color="#184f95", lw=2, label="median")
+    a1.plot(yrs, floor / 1e3, color=INK, lw=1.2, ls="--", label="PV of the reserve")
+    a1.set_title("Portfolio value vs what the reserve needs", color=INK, fontsize=11.5, loc="left", fontweight="bold")
+    a1.set_ylabel("$ thousands", color=INK2, fontsize=9)
+    a1.legend(loc="upper left", fontsize=8.5, frameon=False, labelcolor=INK2)
+    a1.grid(color=GRID, lw=0.6)
+    style(a1)
+    ky = FIRST_YEAR + np.arange(bonds_p.shape[0])
+    q = np.percentile(bonds_p, [0, 25, 50, 75, 100], axis=1) * 100
+    a2.fill_between(ky, q[0], q[4], step="post", color="#cde2fb", lw=0, label="min to max")
+    a2.fill_between(ky, q[1], q[3], step="post", color="#6da7ec", lw=0, label="middle 50%")
+    a2.step(ky, q[2], where="post", color="#184f95", lw=2, label="median")
+    a2.set_title("Bonds weight each January", color=INK, fontsize=11.5, loc="left", fontweight="bold")
+    a2.set_ylabel("% of the portfolio in Bonds", color=INK2, fontsize=9)
+    a2.legend(loc="best", fontsize=8.5, frameon=False, labelcolor=INK2)
+    a2.grid(color=GRID, lw=0.6)
+    style(a2)
+    xv = np.maximum(vpath[-1] - RESERVE, 0)
+    names = ["All futures (n=30,000)"] + list(config.SCENARIOS)
+    parts = [xv] + [xv[a:b] for a, b in slices]
+    qs = [np.percentile(x, [RLO, 25, 50, 75, RHI]) for x in parts][::-1]
+    names = names[::-1]
+    y = np.arange(len(qs))
+    a3.hlines(y, [q_[0] / 1e3 for q_ in qs], [q_[4] / 1e3 for q_ in qs], color="#86b6ef", lw=1.6)
+    a3.hlines(y, [q_[1] / 1e3 for q_ in qs], [q_[3] / 1e3 for q_ in qs], color=BLUE, lw=7)
+    a3.scatter([q_[2] / 1e3 for q_ in qs], y, color="white", edgecolors=INK, s=36, zorder=4)
+    for yi, q_ in zip(y, qs):
+        a3.text(q_[4] / 1e3 + 8, yi, f"median ${q_[2] / 1e3:,.0f}k", va="center", fontsize=8, color=INK2)
+    a3.set_yticks(y, names, fontsize=8.5, color=INK2)
+    a3.set_xlabel(f"x = surplus above the reserve in 2033, $ thousands ({RC:.0%} range, middle 50%, median)", color=INK2, fontsize=9)
+    a3.set_title(f"x for {r0.bonds:.1%} / {r0.funds:.1%} / {r0.stocks:.1%} (Bonds / Funds / Stocks)", color=INK, fontsize=11.5, loc="left", fontweight="bold")
+    a3.set_xlim(left=-10)
+    a3.grid(axis="x", color=GRID, lw=0.6)
+    style(a3)
+    fig.tight_layout()
+    fig.savefig(os.path.join(OUT_DIR, "steady_projection.png"), dpi=140, facecolor=SURFACE)
     plt.close(fig)
 
 

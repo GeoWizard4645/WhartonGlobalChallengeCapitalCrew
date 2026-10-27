@@ -106,6 +106,13 @@ RISKY_STOCK_STEP = 0.1       # growth sleeve is funds/stocks; try every stock sh
 MAX_STOCK_SHARE_OF_GROWTH = 0.5   # diversification rule: the stock strategy is at most half the growth sleeve, index funds the rest
 RANGE_CONFIDENCE = 0.80      # the projected range of x we quote is the central interval with this confidence (10th to 90th percentile at 80%)
 MIN_X_LOW = 50000            # the low end of that range (x = surplus above the reserve, before the flexibility hold-back) should be at least this
+# Steady split (optimize.py): one Bonds/Funds/Stocks split now, nudged at most ADJUST_STEP (5 points) each January from 2028 on.
+# Funded ratio = portfolio / PV of the reserve. Below FUNDED_LO the Bonds weight goes up one step; above FUNDED_HI it goes down one step
+# (the Funds:Stocks ratio stays fixed). optimize.py tries every pair below and keeps the best.
+ADJUST_STEP = 0.05
+FUNDED_LO = [1.0, 1.1, 1.2, 1.3]
+FUNDED_HI = [1.3, 1.4, 1.5, 1.6, 1.8]
+STEADY_SEARCH_PATHS = 10000  # paths used to search; the winner is re-run on all MC_PATHS
 # Futures the Monte Carlo draws from: (S&P 500 compound return, bond-sleeve compound return, volatility multiplier, probability).
 # Funds and Stocks follow the S&P 500 through their historical betas (Stocks also get a share of the strategy's alpha).
 # The mix is meant to span the real 6-year range (S&P 0% to 21%/yr at the 5th-95th percentile) and go a bit worse on the downside.

@@ -55,7 +55,7 @@ python3 dcf.py                               # DCF + margin of safety for stock 
 `optimize.py` (settings: the ALLOCATION OPTIMIZER block in `config.py`) uses the stock strategy's monthly returns in `output/stock_sleeve.csv`
 (`python -m quant.run --sleeve-only` refreshes it) and writes `output/allocation/`: `grid.csv` (every split), `scenarios.csv`,
 `x_projection.csv` (95% interval, IQR, median, mean of x), `cppi_grid.csv` and the heatmap / x-range charts.
-It also runs the reserve-first strategies: a Treasury ladder that is guaranteed to grow into the operating reserve plus a growth sleeve, with a CPPI multiplier deciding how much of the surplus is risked.
+It also searches a steady split (one starting Bonds/Funds/Stocks split, nudged by at most 5 points a year from a funded-ratio rule; `steady_grid.csv`, `heatmaps_steady.png`, `steady_projection.png`) and the reserve-first strategies: a Treasury ladder that is guaranteed to grow into the operating reserve plus a growth sleeve, with a CPPI multiplier deciding how much of the surplus is risked.
 
 ## Stock strategies (`quant/`)
 
