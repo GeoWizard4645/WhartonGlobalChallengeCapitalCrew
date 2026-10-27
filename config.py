@@ -109,6 +109,11 @@ MIN_X_LOW = 50000            # the low end of that range (x = surplus above the 
 # The plan the team adopted (visuals.py draws the team charts for it): start split [Bonds, Funds, Stocks] and the funded-ratio band for nudges.
 ADOPTED_SPLIT = [0.55, 0.125, 0.325]
 ADOPTED_FUNDED = (1.3, 1.6)
+# Zero-risk CPPI options (optimize.py cppi_options): extra reserve on top of the PV of the ten payments, and what counts as 'zero risk'.
+# Counting the committed 2028 deposit as a safe asset (it is in the case timeline) is what lets CPPI start below 100% Bonds.
+CPPI_BUFFERS = [0.0, 0.05, 0.10]
+CPPI_BUFFER = 0.05           # the buffer the team wants
+CPPI_ZERO_RISK = 0.0005      # 'zero risk' = reserve short in at most this share of futures (0.05% = 15 of 30,000)
 # Steady split (optimize.py): one Bonds/Funds/Stocks split now, nudged at most ADJUST_STEP (5 points) each January from 2028 on.
 # Funded ratio = portfolio / PV of the reserve. Below FUNDED_LO the Bonds weight goes up one step; above FUNDED_HI it goes down one step
 # (the Funds:Stocks ratio stays fixed). optimize.py tries every pair below and keeps the best.

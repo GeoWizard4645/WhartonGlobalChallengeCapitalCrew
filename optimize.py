@@ -28,6 +28,8 @@ RESERVE = riskfree_reserve(config.PLANNING_YIELD)
 RF_M = config.RISK_FREE / 12
 RC = config.RANGE_CONFIDENCE
 RLO, RHI = (1 - RC) / 2 * 100, (1 + RC) / 2 * 100      # percentiles of the quoted range of x
+# present value, at month t, of the deposits still to come after month t (the committed 2028 deposit is a safe asset until it arrives)
+FUTURE_PV = np.array([sum(DEPOSITS[k] / (1 + config.PLANNING_YIELD) ** ((k - t) / 12) for k in range(t + 1, MONTHS)) for t in range(MONTHS)])
 BOUNDS = np.array(config.BOUNDS)
 
 
@@ -349,26 +351,32 @@ def main():
 
     xp, cgrid, pick, share_p, path, optima = reserve_first(h, X, slices, xp)
     xp, sgrid, spick, sstatic, soptima, sbonds, svpath = steady_split(h, X, slices, xp, w, in_bounds)
+    copt = cppi_options(X, slices)
+    print_cppi_options(copt, pick_menu(copt))
     print(f"\nWrote {OUT_DIR}")
 
 
 # ---------- reserve-first: Treasury ladder + growth sleeve, with CPPI ----------
 
-def run_reserve_first(rr, m, path=None):
+def run_reserve_first(rr, m, path=None, reserve=None, count_future=False):
     """CPPI with a Treasury-ladder floor. rr (paths, months): monthly return of the growth sleeve.
     The safe sleeve is a Treasury ladder earning the planning yield, so it is worth exactly the reserve in 2033 if it holds the
     present value of the reserve (the floor). Each month: growth = clip(m x (portfolio - floor), 0, portfolio), the rest is safe.
     m = 1 is the plain 'fund the reserve first, grow only the surplus' ladder.
+    reserve = the amount to reach in 2033 (default RESERVE; pass RESERVE x 1.05 for a 5% buffer).
+    count_future = also count the PV of deposits still to come as part of the cushion (they are committed in the case), so the first year
+    does not have to be 100% safe.
     Returns (value in 2033, portfolio monthly returns, growth share of the portfolio); path (paths, months+1), if given, is filled with the value."""
+    reserve = RESERVE if reserve is None else reserve
     n = rr.shape[0]
     g = (1 + config.PLANNING_YIELD) ** (1 / 12) - 1
     safe, risk = np.zeros(n), np.zeros(n)
     port = np.empty(rr.shape, np.float32)
     share = np.empty(rr.shape, np.float32)
     for t in range(MONTHS):
-        floor = RESERVE / (1 + config.PLANNING_YIELD) ** ((MONTHS - t) / 12)
+        floor = reserve / (1 + config.PLANNING_YIELD) ** ((MONTHS - t) / 12)
         tot = safe + risk + DEPOSITS[t]
-        risk = np.clip(m * (tot - floor), 0, tot)
+        risk = np.clip(m * (tot - floor + (FUTURE_PV[t] if count_future else 0.0)), 0, tot)
         safe = tot - risk
         share[:, t] = risk / tot
         if path is not None:
@@ -512,6 +520,76 @@ def reserve_first(h, X, slices, xp):
         lo, hi = np.percentile(gs, [25, 75])
         print(f"    {FIRST_YEAR + k:<6}{1 - med:>12.0%}{med * (1 - s):>9.0%}{med * s:>9.0%}   {lo:>14.0%} to {hi:.0%}")
     return xp, c, pick, share_p, path, optima
+
+
+# ---------- zero-risk CPPI options: extra reserve buffer, committed deposit counted, start mix ----------
+
+def cppi_options(X, slices):
+    """Every multiplier x growth mix x buffer, with and without counting the committed 2028 deposit as a safe asset.
+    Writes cppi_options_grid.csv and returns the table. x is measured above the buffered reserve."""
+    em = X[:, :, 3] - RF_M
+    shares = np.round(np.arange(0, 1 + 1e-9, config.RISKY_STOCK_STEP), 4)
+    rows = []
+    for buf in config.CPPI_BUFFERS:
+        res = RESERVE * (1 + buf)
+        for count in (False, True):
+            for m in config.CPPI_MULTIPLIERS:
+                for s in shares:
+                    v, port, share = run_reserve_first(grow_returns(X, s), float(m), reserve=res, count_future=count)
+                    e = port.astype(np.float64) - RF_M
+                    r = ratios(e.size, e.sum(), (e ** 2).sum(), (np.minimum(e, 0) ** 2).sum(), (e * em).sum(), em.sum(dtype=np.float64), (em.astype(np.float64) ** 2).sum())
+                    x = np.maximum(v - res, 0)
+                    q = np.percentile(x, [2.5, 25, 50, 75, 97.5, RLO, RHI])
+                    jan = share[:, ::12]                                   # growth share each January 2027..2032
+                    g0 = float(jan[:, 0].mean())
+                    row = {"buffer": buf, "reserve": res, "count_deposit": count, "multiplier": m, "stock_share_of_growth": s,
+                           "start_bonds": 1 - g0, "start_funds": g0 * (1 - s), "start_stocks": g0 * s,
+                           "x_mean": x.mean(), "x_median": q[2], "x_range_lo": q[5], "x_range_hi": q[6], "x_p25": q[1], "x_p75": q[3],
+                           "x_p2_5": q[0], "x_p97_5": q[4], "p_shortfall": float((v < res - 1).mean()),
+                           "chg_2028": float(np.abs(jan[:, 1] - jan[:, 0]).mean()), "chg_after": float(np.abs(np.diff(jan[:, 1:], axis=1)).mean()),
+                           **{k: float(r[k]) for k in ("vol", "beta", "sharpe", "sortino", "treynor")}}
+                    for k in range(jan.shape[1]):
+                        row[f"bonds_{FIRST_YEAR + k}"] = float(1 - np.median(jan[:, k]))
+                    rows.append(row)
+    c = pd.DataFrame(rows)
+    c["zero_risk"] = c["p_shortfall"] <= config.CPPI_ZERO_RISK
+    c.round(5).to_csv(os.path.join(OUT_DIR, "cppi_options_grid.csv"), index=False)
+    return c
+
+
+def pick_menu(c):
+    """One option per multiplier (so per starting Bonds weight): buffered reserve, committed deposit counted, zero risk,
+    stocks within the cap of the growth sleeve, best median x. Returns row labels A, B, C... as {letter: row index}, safest start first."""
+    ok = c[(c["buffer"] == config.CPPI_BUFFER) & c["count_deposit"] & c["zero_risk"] & (c["stock_share_of_growth"] <= config.MAX_STOCK_SHARE_OF_GROWTH + 1e-9)]
+    best = ok.sort_values(["x_median", "x_range_lo"], ascending=False).groupby("multiplier").head(1).sort_values("multiplier")
+    best = best[best["start_bonds"] > 0.2]                                  # a start under 20% bonds is not an 'option' for a team that wants safety
+    return {chr(65 + i): idx for i, idx in enumerate(best.index)}
+
+
+def print_cppi_options(c, menu):
+    def line(i):
+        r = c.loc[i]
+        return (f"CPPI m={r.multiplier:<3g} start Bonds {r.start_bonds:4.0%} / Funds {r.start_funds:4.0%} / Stocks {r.start_stocks:4.0%} | x median {r.x_median:>8,.0f}  "
+                f"{RC:.0%} range [{r.x_range_lo:>8,.0f}, {r.x_range_hi:>9,.0f}]  P(short) {r.p_shortfall:6.3%} | Sharpe {r.sharpe:4.2f} Sortino {r.sortino:4.2f} Treynor {r.treynor:5.3f}")
+    res = RESERVE * (1 + config.CPPI_BUFFER)
+    print(f"\nZERO-RISK CPPI OPTIONS with a {config.CPPI_BUFFER:.0%} buffer: reserve target {dollars(res)} instead of {dollars(RESERVE)}; x is what is left above the buffered amount")
+    print(f"  {len(c)} runs = buffers {config.CPPI_BUFFERS} x deposit counted yes/no x {len(config.CPPI_MULTIPLIERS)} multipliers x {c['stock_share_of_growth'].nunique()} stock shares; "
+          f"zero risk = reserve short in <= {config.CPPI_ZERO_RISK:.2%} of futures")
+    base = c[(c["buffer"] == config.CPPI_BUFFER) & ~c["count_deposit"] & c["zero_risk"] & (c["stock_share_of_growth"] <= config.MAX_STOCK_SHARE_OF_GROWTH + 1e-9)]
+    if len(base):
+        i = int(base["x_median"].idxmax())
+        print(f"  STANDARD CPPI (2028 deposit not counted): every setting starts {c.loc[i, 'start_bonds']:.0%} Bonds in 2027. Best zero-risk:\n    ", line(i))
+    print("  OPTIONS (2028 deposit counted as a safe asset; growth sleeve at the stock cap; one per multiplier = one per starting Bonds weight):")
+    for letter, i in menu.items():
+        r = c.loc[i]
+        path = "  ".join(f"{FIRST_YEAR + k}: {r[f'bonds_{FIRST_YEAR + k}']:.0%}" for k in range(MONTHS // 12))
+        print(f"    {letter}  {line(i)}\n       median Bonds weight each January  {path}   | typical yearly move after 2028: {r.chg_after * 100:.1f} points")
+    print(f"  what the {config.CPPI_BUFFER:.0%} buffer costs at the same settings (median x, no buffer -> buffer):")
+    for letter, i in menu.items():
+        r = c.loc[i]
+        nb = c[(c["buffer"] == 0) & c["count_deposit"] & (c["multiplier"] == r.multiplier) & (c["stock_share_of_growth"] == r.stock_share_of_growth)].iloc[0]
+        print(f"    {letter} m={r.multiplier:g}: {nb.x_median:>8,.0f} -> {r.x_median:>8,.0f}  ({r.x_median - nb.x_median:+,.0f})")
+    print("  NOTE: counting the 2028 deposit assumes the $150k really arrives (the case timeline says it does). If it did not, no allocation could fund the reserve anyway.")
 
 
 def mname(m):

@@ -38,12 +38,12 @@ def setup(ax, grid="y"):
         ax.set_axisbelow(True)
 
 
-def page(title, sub=None, size=(13.5, 7.4)):
+def page(title, sub=None, size=(13.5, 7.4), note=None):
     fig = plt.figure(figsize=size, facecolor=SURFACE)
     fig.text(0.035, 0.955, title, fontsize=17, fontweight="bold", color=INK, va="top", ha="left")
     if sub:
         fig.text(0.035, 0.905, sub, fontsize=11.5, color=INK2, va="top", ha="left")
-    fig.text(0.035, 0.018, NOTE, fontsize=8.3, color=INK2, ha="left", va="bottom")
+    fig.text(0.035, 0.018, note or NOTE, fontsize=8.3, color=INK2, ha="left", va="bottom")
     return fig
 
 
@@ -413,11 +413,226 @@ def chart_options(d):
     save(fig, "7_options.png")
 
 
+# ---------- 8-11: zero-risk CPPI options (5% buffer, committed 2028 deposit counted) ----------
+
+BUF = config.CPPI_BUFFER
+RES_BUF = o.RESERVE * (1 + BUF)
+NOTE_CPPI = (f"Reserve target = {o.dollars(o.RESERVE)} x {1 + BUF:.2f} = {o.dollars(RES_BUF)}; x is what is left above that. Zero risk = reserve short in at most {config.CPPI_ZERO_RISK:.2%} of {config.MC_PATHS:,} simulated futures. "
+             f"The $150k deposit in 2028 is counted as a safe asset (it is in the case timeline).")
+
+
+def cppi_data(d):
+    import pandas as pd
+    c = pd.read_csv(os.path.join(o.OUT_DIR, "cppi_options_grid.csv"))
+    menu = o.pick_menu(c)
+    paths = {}
+    for letter, i in menu.items():
+        r = c.loc[i]
+        v, _, share = o.run_reserve_first(o.grow_returns(d["X"], r.stock_share_of_growth), float(r.multiplier), reserve=RES_BUF, count_future=True)
+        paths[letter] = {"v": v, "bonds": 1 - share[:, ::12]}
+    ref = o.x_stats(d["v"]) if False else None
+    xs = np.maximum(d["v"] - RES_BUF, 0)
+    d["steady_ref"] = {"x_median": np.median(xs), "x_range_lo": np.percentile(xs, o.RLO), "x_range_hi": np.percentile(xs, o.RHI), "x_p25": np.percentile(xs, 25),
+                       "x_p75": np.percentile(xs, 75), "p_short": float((d["v"] < RES_BUF).mean())}
+    return c, menu, paths
+
+
+def chart_cppi_frontier(d, c, menu):
+    from matplotlib.colors import LinearSegmentedColormap, Normalize
+    cmap = LinearSegmentedColormap.from_list("b", ["#9ec5f4", "#3987e5", "#184f95", "#0d366b"])
+    sub = c[(c.buffer == BUF) & c.count_deposit]
+    std = c[(c.buffer == BUF) & ~c.count_deposit & c.zero_risk]
+    fig = page("CPPI no longer has to start at 100% bonds, and it still never misses the reserve",
+               f"Each dot = one CPPI setting with the {BUF:.0%} buffer. Further right = starts with less in bonds; higher = bigger median extra contribution.", note=NOTE_CPPI)
+    ax = fig.add_axes([0.075, 0.13, 0.72, 0.7])
+    nz = sub[~sub.zero_risk]
+    ax.scatter(nz.start_bonds * 100, nz.x_median / 1e3, s=22, facecolors="none", edgecolors="#b9b7b0", lw=0.9, label="reserve can be short (not allowed)", zorder=2)
+    ok = sub[sub.zero_risk]
+    sc = ax.scatter(ok.start_bonds * 100, ok.x_median / 1e3, s=34, c=ok.multiplier, cmap=cmap, norm=Normalize(1, 6), zorder=3, label="zero risk")
+    ax.scatter(std.start_bonds * 100, std.x_median / 1e3, s=60, marker="s", c=ORANGE, zorder=4, label="standard CPPI (2028 deposit not counted): all start at 100% bonds")
+    ref = d["steady_ref"]
+    ax.axhline(ref["x_median"] / 1e3, color=INK2, lw=1.2, ls="--")
+    ax.text(80, ref["x_median"] / 1e3 + 3, f"adopted steady split, same buffer (approx.): median {K(ref['x_median'])},\nbut {ref['p_short']:.1%} chance the reserve is short", fontsize=9.3, color=INK2, va="bottom", linespacing=1.4)
+    for letter, i in menu.items():
+        r = c.loc[i]
+        ax.scatter(r.start_bonds * 100, r.x_median / 1e3, s=330, marker="o", c="white", edgecolors=INK, linewidths=1.6, zorder=6)
+        ax.text(r.start_bonds * 100, r.x_median / 1e3, letter, ha="center", va="center", fontsize=11, fontweight="bold", color=INK, zorder=7)
+    ax.set_xlim(104, -4)
+    ax.set_xlabel("Bonds % in 2027 (the starting split)", fontsize=11, color=INK2)
+    ax.set_ylabel("median extra contribution x ($ thousands)", fontsize=11, color=INK2)
+    ax.legend(loc="upper left", frameon=False, fontsize=9.5, labelcolor=INK2)
+    setup(ax, "both")
+    cb = fig.colorbar(sc, ax=ax, fraction=0.035, pad=0.02)
+    cb.set_label("CPPI multiplier", fontsize=10, color=INK2)
+    cb.ax.tick_params(colors=INK2, labelsize=9)
+    cb.outline.set_edgecolor(GRID)
+    t = fig.add_axes([0.83, 0.13, 0.16, 0.7])
+    t.axis("off")
+    t.text(0, 1, "The options", fontsize=12.5, fontweight="bold", color=INK, va="top")
+    y = 0.93
+    for letter, i in menu.items():
+        r = c.loc[i]
+        t.text(0, y, f"{letter}  m={r.multiplier:g}", fontsize=10.5, fontweight="bold", color=INK, va="top")
+        t.text(0, y - 0.045, f"start {r.start_bonds:.0%} bonds\nmedian x {K(r.x_median)}", fontsize=9.3, color=INK2, va="top", linespacing=1.4)
+        y -= 0.17
+    save(fig, "8_cppi_options.png")
+
+
+def chart_cppi_heatmaps(d, c, menu):
+    from matplotlib.colors import LinearSegmentedColormap
+    blue = LinearSegmentedColormap.from_list("b", ["#cde2fb", "#86b6ef", "#3987e5", "#1c5cab", "#0d366b"])
+    orange = LinearSegmentedColormap.from_list("o", ["#fbe3d6", "#f4a37c", "#eb6834", "#b84a1f", "#7a2e10"])
+    sub = c[(c.buffer == BUF) & c.count_deposit]
+    cols = sorted(sub.multiplier.unique())
+    rows = sorted(sub.stock_share_of_growth.unique())
+    panels = [("start_bonds", "Bonds % in 2027 (the start)", blue, 100, "{:.0f}"), ("x_median", "Median extra contribution x ($k)", blue, 1e-3, "{:.0f}"),
+              ("x_range_lo", f"Low end of the {o.RC:.0%} range of x ($k)", blue, 1e-3, "{:.0f}"), ("p_shortfall", "Chance the reserve is short (%)", orange, 100, "{:.2f}"),
+              ("sharpe", "Sharpe ratio", blue, 1, "{:.2f}"), ("sortino", "Sortino ratio", blue, 1, "{:.2f}"), ("treynor", "Treynor ratio", blue, 1, "{:.3f}"),
+              ("chg_after", "Typical yearly move in the split after 2028 (points)", blue, 100, "{:.0f}")]
+    fig = page(f"Every CPPI setting we tried with the {BUF:.0%} buffer and the 2028 deposit counted",
+               "Columns = CPPI multiplier (how hard we lean into stocks and funds). Rows = how much of the growth part is stocks (rest funds). Gray = reserve can be short. Circled letters = the options.",
+               size=(21, 10.4), note=NOTE_CPPI)
+    gs = fig.add_gridspec(2, 4, left=0.04, right=0.985, top=0.83, bottom=0.1, hspace=0.38, wspace=0.38)
+    for k, (col, ttl, cmap, scale, fmt) in enumerate(panels):
+        ax = fig.add_subplot(gs[k // 4, k % 4])
+        z = np.full((len(rows), len(cols)), np.nan)
+        bad = np.zeros((len(rows), len(cols), 4))
+        for r in sub.itertuples():
+            i, j = rows.index(r.stock_share_of_growth), cols.index(r.multiplier)
+            z[i, j] = getattr(r, col) * scale
+            if not r.zero_risk and col != "p_shortfall":
+                bad[i, j] = (0.83, 0.82, 0.79, 1.0)
+        good = z[bad[:, :, 3] == 0]
+        lo, hi = (np.nanpercentile(good, [3, 99]) if col != "p_shortfall" else (0, np.nanmax(z))) if len(good) else (0, 1)
+        im = ax.imshow(z, origin="lower", cmap=cmap, vmin=lo, vmax=hi, aspect="auto", interpolation="nearest")
+        ax.imshow(bad, origin="lower", aspect="auto", interpolation="nearest")
+        for i in range(len(rows)):
+            for j in range(len(cols)):
+                if np.isfinite(z[i, j]) and bad[i, j, 3] == 0:
+                    dark = (z[i, j] - lo) / (hi - lo + 1e-12) > 0.55
+                    ax.text(j, i, fmt.format(z[i, j]), ha="center", va="center", fontsize=6.6, color="white" if dark else INK)
+        for letter, idx in menu.items():
+            r = c.loc[idx]
+            j, i = cols.index(r.multiplier), rows.index(r.stock_share_of_growth)
+            ax.scatter(j, i, s=210, c="white", edgecolors=INK, linewidths=1.5, zorder=5)
+            ax.text(j, i, letter, ha="center", va="center", fontsize=9, fontweight="bold", color=INK, zorder=6)
+        ax.set_xticks(range(len(cols)), [f"{m:g}" for m in cols], fontsize=8, color=INK2)
+        ax.set_yticks(range(len(rows)), [f"{x:.0%}" for x in rows], fontsize=8, color=INK2)
+        ax.set_xlabel("CPPI multiplier", fontsize=9, color=INK2)
+        ax.set_ylabel("stocks share of growth part", fontsize=9, color=INK2)
+        ax.set_title(ttl, fontsize=11, fontweight="bold", color=INK, loc="left")
+        cb = fig.colorbar(im, ax=ax, fraction=0.046, pad=0.03)
+        cb.ax.tick_params(colors=INK2, labelsize=8)
+        cb.outline.set_edgecolor(GRID)
+        setup(ax, None)
+    save(fig, "9_cppi_heatmaps.png")
+
+
+def chart_cppi_menu(d, c, menu, paths):
+    names, starts, xs, shorts, subs = [], [], [], [], []
+    for letter, i in menu.items():
+        r = c.loc[i]
+        names.append(f"{letter}   CPPI m={r.multiplier:g}")
+        starts.append((r.start_bonds, r.start_funds, r.start_stocks))
+        xs.append((r.x_range_lo, r.x_p25, r.x_median, r.x_p75, r.x_range_hi))
+        shorts.append(r.p_shortfall)
+        subs.append(f"moves ~{r.chg_after * 100:.0f} pts/yr after 2028")
+    std = c[(c.buffer == BUF) & ~c.count_deposit & c.zero_risk & (c.stock_share_of_growth <= config.MAX_STOCK_SHARE_OF_GROWTH + 1e-9)]
+    if len(std):
+        r = c.loc[std.x_median.idxmax()]
+        names.append(f"Standard CPPI m={r.multiplier:g}")
+        starts.append((1.0, 0.0, 0.0))
+        xs.append((r.x_range_lo, r.x_p25, r.x_median, r.x_p75, r.x_range_hi))
+        shorts.append(r.p_shortfall)
+        subs.append("starts 100% bonds")
+    ref = d["steady_ref"]
+    names.append("Adopted steady split*")
+    starts.append(tuple(SPLIT))
+    xs.append((ref["x_range_lo"], ref["x_p25"], ref["x_median"], ref["x_p75"], ref["x_range_hi"]))
+    shorts.append(ref["p_short"])
+    subs.append("nudges 5 pts at most; has risk")
+    n = len(names)
+    fig = page("The options side by side: start split, payoff, and risk of missing the reserve",
+               f"Start split = Bonds / Funds / Stocks in 2027. Payoff = extra contribution x above the {BUF:.0%}-buffered reserve ({o.RC:.0%} range, middle half, median).",
+               note=NOTE_CPPI + "\n*Steady split shown against the same buffered reserve, approximate (its January rule was tuned for the unbuffered reserve).", size=(15, 7.6))
+    gs = fig.add_gridspec(1, 3, left=0.2, right=0.975, top=0.8, bottom=0.12, wspace=0.08, width_ratios=[1, 1.25, 0.28])
+    ypos = np.arange(n)[::-1]
+    a = fig.add_subplot(gs[0])
+    for yi, st in zip(ypos, starts):
+        left = 0
+        for val, col in zip(st, (DARK, MID, BLUE)):
+            a.barh(yi, val * 100, left=left, color=col, height=0.6)
+            if val >= 0.07:
+                a.text(left + val * 50, yi, f"{val * 100:.0f}", ha="center", va="center", fontsize=9.5, color="white", fontweight="bold")
+            left += val * 100
+    a.set_yticks(ypos, names, fontsize=10.5, color=INK)
+    for yi, sb in zip(ypos, subs):
+        a.text(-2, yi - 0.4, sb, transform=a.transData, ha="right", va="center", fontsize=8.2, color=INK2) if False else None
+    a.set_xlim(0, 100)
+    a.set_xlabel("start split, % (dark = Bonds, light = Funds, blue = Stocks)", fontsize=9.5, color=INK2)
+    a.set_title("Start in 2027", fontsize=12, fontweight="bold", color=INK, loc="left")
+    setup(a, None)
+    b = fig.add_subplot(gs[1], sharey=a)
+    for yi, (lo, q1, md, q3, hi) in zip(ypos, xs):
+        b.hlines(yi, lo / 1e3, hi / 1e3, color=MID, lw=2.4)
+        b.hlines(yi, q1 / 1e3, q3 / 1e3, color=BLUE, lw=11)
+        b.scatter(md / 1e3, yi, s=85, color="white", edgecolors=INK, zorder=4)
+        b.text(hi / 1e3 + 10, yi, f"median {K(md)}", fontsize=9.6, color=INK2, va="center")
+    plt.setp(b.get_yticklabels(), visible=False)
+    b.set_xlabel("x, extra contribution in 2033 ($ thousands)", fontsize=9.5, color=INK2)
+    b.set_title("Payoff", fontsize=12, fontweight="bold", color=INK, loc="left")
+    b.set_xlim(-10, 880)
+    setup(b, "x")
+    r_ = fig.add_subplot(gs[2], sharey=a)
+    r_.axis("off")
+    r_.set_title("Reserve short", fontsize=12, fontweight="bold", color=INK, loc="left")
+    for yi, sh in zip(ypos, shorts):
+        bad = sh > config.CPPI_ZERO_RISK
+        r_.text(0, yi, f"{sh:.1%}" if bad else "0%", fontsize=15, fontweight="bold", color=ORANGE if bad else INK, va="center")
+    save(fig, "10_cppi_menu.png")
+
+
+def chart_cppi_glide(d, c, menu, paths):
+    yrs = o.FIRST_YEAR + np.arange(o.MONTHS // 12)
+    n = len(menu)
+    fig = page("How the split moves over time for each option (Bonds weight at the start of each year)",
+               "Line = median future, band = middle half of futures. The jump in 2028 is the $150k deposit arriving as safe money.", size=(18, 6.8), note=NOTE_CPPI)
+    gs = fig.add_gridspec(1, n, left=0.05, right=0.985, top=0.78, bottom=0.16, wspace=0.12)
+    for k, (letter, i) in enumerate(menu.items()):
+        r = c.loc[i]
+        ax = fig.add_subplot(gs[k], sharey=None if k == 0 else fig.axes[0])
+        bp = paths[letter]["bonds"] * 100
+        q = np.percentile(bp, [5, 25, 50, 75, 95], axis=0)
+        yx = np.append(yrs, yrs[-1] + 1)
+        qx = np.concatenate([q, q[:, -1:]], axis=1)
+        ax.fill_between(yx, qx[0], qx[4], step="post", color=LIGHT, lw=0)
+        ax.fill_between(yx, qx[1], qx[3], step="post", color=MID, lw=0)
+        ax.step(yx, qx[2], where="post", color=DARK, lw=2.4)
+        ax.text(yrs[0] + 0.05, q[2][0] + 3, f"{q[2][0]:.0f}%", fontsize=10, color=DARK, fontweight="bold")
+        ax.text(yrs[-1] + 0.05, q[2][-1] + 3, f"{q[2][-1]:.0f}%", fontsize=10, color=DARK, fontweight="bold")
+        ax.set_title(f"{letter}   CPPI m={r.multiplier:g}", fontsize=11.5, fontweight="bold", color=INK, loc="left")
+        ax.set_ylim(0, 100)
+        ax.set_xlim(yx[0], yx[-1])
+        ax.set_xticks(yrs[::2], [str(y) for y in yrs[::2]], fontsize=9, color=INK2)
+        if k == 0:
+            ax.set_ylabel("Bonds % of the portfolio", fontsize=10, color=INK2)
+        else:
+            plt.setp(ax.get_yticklabels(), visible=False)
+        setup(ax)
+    save(fig, "11_cppi_glide.png")
+
+
 def main():
     os.makedirs(OUT, exist_ok=True)
     d = compute()
     for fn in (chart_plan, chart_projection, chart_x, chart_heatmaps, chart_history, chart_nudges, chart_options):
         fn(d)
+    if os.path.exists(os.path.join(o.OUT_DIR, "cppi_options_grid.csv")):
+        c, menu, paths = cppi_data(d)
+        chart_cppi_frontier(d, c, menu)
+        chart_cppi_heatmaps(d, c, menu)
+        chart_cppi_menu(d, c, menu, paths)
+        chart_cppi_glide(d, c, menu, paths)
     print("Wrote", OUT)
 
 
