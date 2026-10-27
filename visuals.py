@@ -430,10 +430,18 @@ def cppi_data(d):
         r = c.loc[i]
         v, _, share = o.run_reserve_first(o.grow_returns(d["X"], r.stock_share_of_growth), float(r.multiplier), reserve=RES_BUF, count_future=True)
         paths[letter] = {"v": v, "bonds": 1 - share[:, ::12]}
-    ref = o.x_stats(d["v"]) if False else None
-    xs = np.maximum(d["v"] - RES_BUF, 0)
-    d["steady_ref"] = {"x_median": np.median(xs), "x_range_lo": np.percentile(xs, o.RLO), "x_range_hi": np.percentile(xs, o.RHI), "x_p25": np.percentile(xs, 25),
-                       "x_p75": np.percentile(xs, 75), "p_short": float((d["v"] < RES_BUF).mean())}
+    def stats(v, res):
+        x = np.maximum(v - res, 0)
+        return {"x_median": np.median(x), "x_range_lo": np.percentile(x, o.RLO), "x_range_hi": np.percentile(x, o.RHI), "x_p25": np.percentile(x, 25),
+                "x_p75": np.percentile(x, 75), "p_short": float((v < res).mean())}
+    d["steady_ref"] = stats(d["v"], RES_BUF)               # adopted steady split against the buffered reserve (approx.)
+    d["steady_orig"] = stats(d["v"], o.RESERVE)            # adopted steady split, original basis (no buffer)
+    # reserve-first CPPI from the earlier work: m=2, 50/50 growth, deposit not counted (starts 100% bonds)
+    g50 = o.grow_returns(d["X"], 0.5)
+    v0, _, sh0 = o.run_reserve_first(g50, 2.0)
+    d["cppi_orig"] = {**stats(v0, o.RESERVE), "bonds": 1 - sh0[:, ::12]}
+    vb, _, _ = o.run_reserve_first(g50, 2.0, reserve=RES_BUF)
+    d["cppi_orig_buf"] = stats(vb, RES_BUF)
     return c, menu, paths
 
 
@@ -452,7 +460,14 @@ def chart_cppi_frontier(d, c, menu):
     ax.scatter(std.start_bonds * 100, std.x_median / 1e3, s=60, marker="s", c=ORANGE, zorder=4, label="standard CPPI (2028 deposit not counted): all start at 100% bonds")
     ref = d["steady_ref"]
     ax.axhline(ref["x_median"] / 1e3, color=INK2, lw=1.2, ls="--")
-    ax.text(80, ref["x_median"] / 1e3 + 3, f"adopted steady split, same buffer (approx.): median {K(ref['x_median'])},\nbut {ref['p_short']:.1%} chance the reserve is short", fontsize=9.3, color=INK2, va="bottom", linespacing=1.4)
+    ax.text(60, ref["x_median"] / 1e3 - 2.5, f"dashed line: adopted steady split against the buffered reserve\n(approx.): median {K(ref['x_median'])}, reserve short {ref['p_short']:.1%}", fontsize=9, color=INK2, va="top", linespacing=1.4)
+    so, co = d["steady_orig"], d["cppi_orig"]
+    ax.scatter(SPLIT[0] * 100, so["x_median"] / 1e3, s=190, marker="D", c=INK, zorder=6)
+    ax.annotate(f"REF  adopted steady split 55/12.5/32.5, original basis (no buffer):\nmedian {K(so['x_median'])}, reserve short {so['p_short']:.1%}", (SPLIT[0] * 100, so["x_median"] / 1e3),
+                (50, so["x_median"] / 1e3 + 9), fontsize=9.2, color=INK, va="center", arrowprops=dict(arrowstyle="-", color=INK2))
+    ax.scatter(100, co["x_median"] / 1e3, s=190, marker="s", c="white", edgecolors=INK, linewidths=1.8, zorder=6)
+    ax.annotate(f"REF  reserve CPPI m=2 (earlier work), original basis:\nmedian {K(co['x_median'])}, starts at 100% bonds", (100, co["x_median"] / 1e3),
+                (93, co["x_median"] / 1e3 + 14), fontsize=9.2, color=INK, va="center", arrowprops=dict(arrowstyle="-", color=INK2))
     for letter, i in menu.items():
         r = c.loc[i]
         ax.scatter(r.start_bonds * 100, r.x_median / 1e3, s=330, marker="o", c="white", edgecolors=INK, linewidths=1.6, zorder=6)
@@ -460,7 +475,7 @@ def chart_cppi_frontier(d, c, menu):
     ax.set_xlim(104, -4)
     ax.set_xlabel("Bonds % in 2027 (the starting split)", fontsize=11, color=INK2)
     ax.set_ylabel("median extra contribution x ($ thousands)", fontsize=11, color=INK2)
-    ax.legend(loc="upper left", frameon=False, fontsize=9.5, labelcolor=INK2)
+    ax.legend(loc="lower right", frameon=False, fontsize=9.5, labelcolor=INK2)
     setup(ax, "both")
     cb = fig.colorbar(sc, ax=ax, fraction=0.035, pad=0.02)
     cb.set_label("CPPI multiplier", fontsize=10, color=INK2)
@@ -529,53 +544,50 @@ def chart_cppi_heatmaps(d, c, menu):
 
 
 def chart_cppi_menu(d, c, menu, paths):
-    names, starts, xs, shorts, subs = [], [], [], [], []
+    rows = []                                              # (label, start split, x quantiles, P(short), group)
     for letter, i in menu.items():
         r = c.loc[i]
-        names.append(f"{letter}   CPPI m={r.multiplier:g}")
-        starts.append((r.start_bonds, r.start_funds, r.start_stocks))
-        xs.append((r.x_range_lo, r.x_p25, r.x_median, r.x_p75, r.x_range_hi))
-        shorts.append(r.p_shortfall)
-        subs.append(f"moves ~{r.chg_after * 100:.0f} pts/yr after 2028")
-    std = c[(c.buffer == BUF) & ~c.count_deposit & c.zero_risk & (c.stock_share_of_growth <= config.MAX_STOCK_SHARE_OF_GROWTH + 1e-9)]
-    if len(std):
-        r = c.loc[std.x_median.idxmax()]
-        names.append(f"Standard CPPI m={r.multiplier:g}")
-        starts.append((1.0, 0.0, 0.0))
-        xs.append((r.x_range_lo, r.x_p25, r.x_median, r.x_p75, r.x_range_hi))
-        shorts.append(r.p_shortfall)
-        subs.append("starts 100% bonds")
-    ref = d["steady_ref"]
-    names.append("Adopted steady split*")
-    starts.append(tuple(SPLIT))
-    xs.append((ref["x_range_lo"], ref["x_p25"], ref["x_median"], ref["x_p75"], ref["x_range_hi"]))
-    shorts.append(ref["p_short"])
-    subs.append("nudges 5 pts at most; has risk")
-    n = len(names)
-    fig = page("The options side by side: start split, payoff, and risk of missing the reserve",
-               f"Start split = Bonds / Funds / Stocks in 2027. Payoff = extra contribution x above the {BUF:.0%}-buffered reserve ({o.RC:.0%} range, middle half, median).",
-               note=NOTE_CPPI + "\n*Steady split shown against the same buffered reserve, approximate (its January rule was tuned for the unbuffered reserve).", size=(15, 7.6))
-    gs = fig.add_gridspec(1, 3, left=0.2, right=0.975, top=0.8, bottom=0.12, wspace=0.08, width_ratios=[1, 1.25, 0.28])
-    ypos = np.arange(n)[::-1]
+        rows.append((f"{letter}   CPPI m={r.multiplier:g}, 5% buffer", (r.start_bonds, r.start_funds, r.start_stocks),
+                     (r.x_range_lo, r.x_p25, r.x_median, r.x_p75, r.x_range_hi), r.p_shortfall, "new"))
+    def q(st):
+        return (st["x_range_lo"], st["x_p25"], st["x_median"], st["x_p75"], st["x_range_hi"])
+    rows.append(("REF 1   Adopted steady split 55/12.5/32.5\n        original basis: no buffer", tuple(SPLIT), q(d["steady_orig"]), d["steady_orig"]["p_short"], "ref"))
+    rows.append(("REF 1b   same split, 5% buffer (approx.)", tuple(SPLIT), q(d["steady_ref"]), d["steady_ref"]["p_short"], "ref"))
+    rows.append(("REF 2   Reserve CPPI m=2, 50/50 growth\n        original basis: no buffer", (1.0, 0.0, 0.0), q(d["cppi_orig"]), d["cppi_orig"]["p_short"], "ref"))
+    rows.append(("REF 2b   same CPPI, 5% buffer", (1.0, 0.0, 0.0), q(d["cppi_orig_buf"]), d["cppi_orig_buf"]["p_short"], "ref"))
+    n_new = sum(1 for r in rows if r[4] == "new")
+    ypos, y = [], len(rows) + 1.0
+    for k, r in enumerate(rows):
+        y -= 1
+        if k == n_new:
+            y -= 0.7                                       # gap before the references
+        ypos.append(y)
+    fig = page("The options side by side, with the earlier plans kept as references",
+               f"Start split = Bonds / Funds / Stocks in 2027. Payoff = extra contribution x ({o.RC:.0%} range, middle half, median).\nNew options and the REF b-rows are measured above the {BUF:.0%}-buffered reserve; REF 1 and REF 2 are exactly as first reported.",
+               note=NOTE_CPPI + "\nREF 1b is approximate (its January rule was tuned for the unbuffered reserve). REF 2 starts 100% bonds and moves to about 57% in 2028 and 44% by 2032.", size=(16, 8.6))
+    gs = fig.add_gridspec(1, 3, left=0.25, right=0.975, top=0.8, bottom=0.12, wspace=0.08, width_ratios=[1, 1.25, 0.28])
     a = fig.add_subplot(gs[0])
-    for yi, st in zip(ypos, starts):
+    for yi, r in zip(ypos, rows):
         left = 0
-        for val, col in zip(st, (DARK, MID, BLUE)):
-            a.barh(yi, val * 100, left=left, color=col, height=0.6)
+        for val, col in zip(r[1], (DARK, MID, BLUE)):
+            a.barh(yi, val * 100, left=left, color=col, height=0.62, alpha=1 if r[4] == "new" else 0.78)
             if val >= 0.07:
                 a.text(left + val * 50, yi, f"{val * 100:.0f}", ha="center", va="center", fontsize=9.5, color="white", fontweight="bold")
             left += val * 100
-    a.set_yticks(ypos, names, fontsize=10.5, color=INK)
-    for yi, sb in zip(ypos, subs):
-        a.text(-2, yi - 0.4, sb, transform=a.transData, ha="right", va="center", fontsize=8.2, color=INK2) if False else None
+    a.set_yticks(ypos, [r[0] for r in rows], fontsize=9.8, color=INK)
+    a.axhline((ypos[n_new - 1] + ypos[n_new]) / 2, color=GRID, lw=1.5)
+    a.text(100, (ypos[n_new - 1] + ypos[n_new]) / 2 + 0.08, "REFERENCES (kept from the earlier work)", ha="right", va="bottom", fontsize=9, color=INK2, fontweight="bold")
+    a.set_ylim(min(ypos) - 0.6, max(ypos) + 0.6)
     a.set_xlim(0, 100)
     a.set_xlabel("start split, % (dark = Bonds, light = Funds, blue = Stocks)", fontsize=9.5, color=INK2)
     a.set_title("Start in 2027", fontsize=12, fontweight="bold", color=INK, loc="left")
     setup(a, None)
     b = fig.add_subplot(gs[1], sharey=a)
-    for yi, (lo, q1, md, q3, hi) in zip(ypos, xs):
-        b.hlines(yi, lo / 1e3, hi / 1e3, color=MID, lw=2.4)
-        b.hlines(yi, q1 / 1e3, q3 / 1e3, color=BLUE, lw=11)
+    for yi, r in zip(ypos, rows):
+        lo, q1, md, q3, hi = r[2]
+        col = (MID, BLUE) if r[4] == "new" else ("#b9b7b0", "#8a8983")
+        b.hlines(yi, lo / 1e3, hi / 1e3, color=col[0], lw=2.4)
+        b.hlines(yi, q1 / 1e3, q3 / 1e3, color=col[1], lw=11)
         b.scatter(md / 1e3, yi, s=85, color="white", edgecolors=INK, zorder=4)
         b.text(hi / 1e3 + 10, yi, f"median {K(md)}", fontsize=9.6, color=INK2, va="center")
     plt.setp(b.get_yticklabels(), visible=False)
@@ -586,31 +598,36 @@ def chart_cppi_menu(d, c, menu, paths):
     r_ = fig.add_subplot(gs[2], sharey=a)
     r_.axis("off")
     r_.set_title("Reserve short", fontsize=12, fontweight="bold", color=INK, loc="left")
-    for yi, sh in zip(ypos, shorts):
-        bad = sh > config.CPPI_ZERO_RISK
-        r_.text(0, yi, f"{sh:.1%}" if bad else "0%", fontsize=15, fontweight="bold", color=ORANGE if bad else INK, va="center")
+    for yi, r in zip(ypos, rows):
+        bad = r[3] > config.CPPI_ZERO_RISK
+        r_.text(0, yi, f"{r[3]:.1%}" if bad else "0%", fontsize=15, fontweight="bold", color=ORANGE if bad else INK, va="center")
     save(fig, "10_cppi_menu.png")
 
 
 def chart_cppi_glide(d, c, menu, paths):
     yrs = o.FIRST_YEAR + np.arange(o.MONTHS // 12)
-    n = len(menu)
-    fig = page("How the split moves over time for each option (Bonds weight at the start of each year)",
-               "Line = median future, band = middle half of futures. The jump in 2028 is the $150k deposit arriving as safe money.", size=(18, 6.8), note=NOTE_CPPI)
-    gs = fig.add_gridspec(1, n, left=0.05, right=0.985, top=0.78, bottom=0.16, wspace=0.12)
-    for k, (letter, i) in enumerate(menu.items()):
-        r = c.loc[i]
+    panels = [("REF 2  Reserve CPPI m=2\n(earlier work)", d["cppi_orig"]["bonds"], True),
+              ("REF 1  Adopted steady split\n55 / 12.5 / 32.5", d["bonds"].T, True)]
+    for letter, i in menu.items():
+        panels.append((f"{letter}   CPPI m={c.loc[i].multiplier:g}\n5% buffer", paths[letter]["bonds"], False))
+    n = len(panels)
+    fig = page("How the split moves over time: the earlier plans (gray) next to the new options",
+               "Bonds weight at the start of each year. Line = median future, band = middle half (light = 5th to 95th percentile). The 2028 jump is the $150k deposit arriving as safe money.",
+               size=(22, 6.8), note=NOTE_CPPI)
+    gs = fig.add_gridspec(1, n, left=0.04, right=0.99, top=0.73, bottom=0.16, wspace=0.12)
+    for k, (title, bonds, ref) in enumerate(panels):
         ax = fig.add_subplot(gs[k], sharey=None if k == 0 else fig.axes[0])
-        bp = paths[letter]["bonds"] * 100
+        bp = bonds * 100
         q = np.percentile(bp, [5, 25, 50, 75, 95], axis=0)
         yx = np.append(yrs, yrs[-1] + 1)
         qx = np.concatenate([q, q[:, -1:]], axis=1)
-        ax.fill_between(yx, qx[0], qx[4], step="post", color=LIGHT, lw=0)
-        ax.fill_between(yx, qx[1], qx[3], step="post", color=MID, lw=0)
-        ax.step(yx, qx[2], where="post", color=DARK, lw=2.4)
-        ax.text(yrs[0] + 0.05, q[2][0] + 3, f"{q[2][0]:.0f}%", fontsize=10, color=DARK, fontweight="bold")
-        ax.text(yrs[-1] + 0.05, q[2][-1] + 3, f"{q[2][-1]:.0f}%", fontsize=10, color=DARK, fontweight="bold")
-        ax.set_title(f"{letter}   CPPI m={r.multiplier:g}", fontsize=11.5, fontweight="bold", color=INK, loc="left")
+        cl, cm, cd = ("#e4e2dc", "#bdbbb4", "#52514e") if ref else (LIGHT, MID, DARK)
+        ax.fill_between(yx, qx[0], qx[4], step="post", color=cl, lw=0)
+        ax.fill_between(yx, qx[1], qx[3], step="post", color=cm, lw=0)
+        ax.step(yx, qx[2], where="post", color=cd, lw=2.4)
+        ax.text(yrs[0] + 0.05, q[2][0] + (3 if q[2][0] < 90 else -9), f"{q[2][0]:.0f}%", fontsize=10, color=cd, fontweight="bold")
+        ax.text(yrs[-1] + 0.05, q[2][-1] + 3, f"{q[2][-1]:.0f}%", fontsize=10, color=cd, fontweight="bold")
+        ax.set_title(title, fontsize=10, fontweight="bold", color=INK, loc="left")
         ax.set_ylim(0, 100)
         ax.set_xlim(yx[0], yx[-1])
         ax.set_xticks(yrs[::2], [str(y) for y in yrs[::2]], fontsize=9, color=INK2)
