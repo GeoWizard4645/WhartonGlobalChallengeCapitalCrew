@@ -5,17 +5,12 @@
 # Stocks = the team's 50/50 momentum + Magic Formula strategy (output/stock_sleeve.csv, written by quant.run).
 # Bonds and Funds = the long-history fund proxies in config.BUCKETS. Settings: the ALLOCATION OPTIMIZER block of config.py.
 #
-# Run: .venv/bin/python optimize.py        (needs numpy, pandas, matplotlib; ~2 minutes)
-# Writes output/allocation/: grid.csv, scenarios.csv, x_projection.csv, cppi_grid.csv, heatmaps_montecarlo.png,
-#                            heatmaps_backtest.png, x_projection.png, heatmaps_cppi.png, cppi_projection.png
+# Run: .venv/bin/python optimize.py        (needs numpy, pandas; about 40 seconds)
+# Writes output/allocation/: grid.csv, scenarios.csv, x_projection.csv, cppi_grid.csv, steady_grid.csv (the charts are in visuals.py)
 import os
 
-import matplotlib
-matplotlib.use("Agg")
-import matplotlib.pyplot as plt  # noqa: E402
 import numpy as np  # noqa: E402
 import pandas as pd  # noqa: E402
-from matplotlib.colors import LinearSegmentedColormap  # noqa: E402
 
 import config  # noqa: E402
 from goal import dollars, riskfree_reserve  # noqa: E402
@@ -35,10 +30,6 @@ RC = config.RANGE_CONFIDENCE
 RLO, RHI = (1 - RC) / 2 * 100, (1 + RC) / 2 * 100      # percentiles of the quoted range of x
 BOUNDS = np.array(config.BOUNDS)
 
-# chart colors (dataviz reference palette: blue sequential ramp, neutral ink)
-INK, INK2, SURFACE, GRID = "#0b0b0b", "#52514e", "#fcfcfb", "#d9d8d3"
-BLUE = "#2a78d6"
-RAMP = LinearSegmentedColormap.from_list("blue", ["#cde2fb", "#86b6ef", "#3987e5", "#1c5cab", "#0d366b"])
 
 
 # ---------- history ----------
@@ -357,10 +348,7 @@ def main():
         print(f"  yield {y:.1%}: reserve {res:>9,.0f}   x median {np.median(x):>9,.0f}   95% [{np.percentile(x, 2.5):>9,.0f}, {np.percentile(x, 97.5):>9,.0f}]   P(short) {(v_mc[:, rec] < res).mean():5.1%}")
 
     xp, cgrid, pick, share_p, path, optima = reserve_first(h, X, slices, xp)
-    charts(g, w, in_bounds, picks, rec, base, xp, X, slices)
-    cppi_charts(cgrid, pick, share_p, path, slices, optima)
     xp, sgrid, spick, sstatic, soptima, sbonds, svpath = steady_split(h, X, slices, xp, w, in_bounds)
-    steady_charts(sgrid, spick, sstatic, soptima, sbonds, svpath, slices, w, in_bounds)
     print(f"\nWrote {OUT_DIR}")
 
 
@@ -702,299 +690,6 @@ def steady_split(h, X, slices, xp, w, in_bounds):
     keep = c[c["variant"].isin([r.variant, variants[0][0]])]
     keep.round(5).to_csv(os.path.join(OUT_DIR, "steady_grid.csv"), index=False)
     return xp, c, pick, static_best, optima, bonds_p, vpath
-
-
-# ---------- charts ----------
-
-def style(ax):
-    ax.set_facecolor(SURFACE)
-    for s in ax.spines.values():
-        s.set_color(GRID)
-    ax.tick_params(colors=INK2, labelsize=8)
-
-
-def heatmaps(g, w, in_bounds, tag, title, path, rec):
-    n = round(1 / config.OPT_STEP)
-    panels = [("profit", "Profit: mean gain by 2033 ($k)", 1e-3), ("sharpe", "Sharpe ratio", 1), ("treynor", "Treynor ratio", 1), ("sortino", "Sortino ratio", 1)]
-    fig, axes = plt.subplots(2, 2, figsize=(11.5, 10.6), facecolor=SURFACE)
-    bi, si = np.round(w[:, 0] * n).astype(int), np.round(w[:, 2] * n).astype(int)
-    inb = np.full((n + 1, n + 1), 0.0)
-    inb[si[in_bounds], bi[in_bounds]] = 1.0
-    for ax, (m, ttl, scale) in zip(axes.flat, panels):
-        z = np.full((n + 1, n + 1), np.nan)
-        vals = g[f"{tag}_{m}"].to_numpy() * scale
-        z[si, bi] = vals
-        lo, hi = np.nanpercentile(vals, [1 if m == "profit" else 10, 99])
-        im = ax.imshow(z, origin="lower", extent=[-0.5 / n * 100, 100 + 0.5 / n * 100] * 2, cmap=RAMP, vmin=lo, vmax=hi, interpolation="nearest")
-        ax.contour(np.linspace(0, 100, n + 1), np.linspace(0, 100, n + 1), inb, levels=[0.5], colors=[INK], linewidths=1.1, linestyles="--")
-        free = int(np.nanargmax(vals))
-        bnd = int(np.nanargmax(np.where(in_bounds, vals, -np.inf)))
-        ax.scatter(w[free, 0] * 100, w[free, 2] * 100, marker="*", s=230, c="white", edgecolors=INK, linewidths=1.2, zorder=5, clip_on=False)
-        ax.scatter(w[bnd, 0] * 100, w[bnd, 2] * 100, marker="D", s=70, c="white", edgecolors=INK, linewidths=1.2, zorder=6)
-        ax.scatter(w[rec, 0] * 100, w[rec, 2] * 100, marker="o", s=70, c=INK, edgecolors="white", linewidths=1.0, zorder=7)
-        ax.set_xlim(-1, 101)
-        ax.set_ylim(-1, 101)
-        ax.set_xlabel("Bonds %   (Funds % = 100 - Bonds - Stocks)", color=INK2, fontsize=9)
-        ax.set_ylabel("Stocks %", color=INK2, fontsize=9)
-        ax.set_title(ttl, color=INK, fontsize=11.5, loc="left", fontweight="bold")
-        ax.text(0.99, 0.99, f"★ best overall  {label(w[free])}  ({vals[free]:,.2f})\n◆ best in team bounds  {label(w[bnd])}  ({vals[bnd]:,.2f})",
-                transform=ax.transAxes, ha="right", va="top", fontsize=8, color=INK, linespacing=1.5)
-        cb = fig.colorbar(im, ax=ax, fraction=0.046, pad=0.03)
-        cb.ax.tick_params(colors=INK2, labelsize=8)
-        cb.outline.set_edgecolor(GRID)
-        ax.set_aspect("equal")
-        style(ax)
-    fig.suptitle(title, color=INK, fontsize=13.5, fontweight="bold", x=0.02, ha="left")
-    fig.text(0.02, 0.925, "Each cell is one Bonds / Funds / Stocks split.  Dashed line = team bounds.\n● = recommended (best average rank of the four, Monte Carlo).  "
-             "Colors clipped at the 10th/99th percentile (1st for profit).", color=INK2, fontsize=8.5, ha="left")
-    fig.tight_layout(rect=(0, 0, 1, 0.93))
-    fig.savefig(path, dpi=140, facecolor=SURFACE)
-    plt.close(fig)
-
-
-def charts(g, w, in_bounds, picks, rec, base, xp, X, slices):
-    heatmaps(g, w, in_bounds, "mc", "Monte Carlo: which split earns the most for the risk (30,000 futures, 2027-2033)",
-             os.path.join(OUT_DIR, "heatmaps_montecarlo.png"), rec)
-    heatmaps(g, w, in_bounds, "bt", "Backtest on real history (1993-2026, every 6-year stretch; stocks before 2011 modeled)",
-             os.path.join(OUT_DIR, "heatmaps_backtest.png"), rec)
-
-    # x projection: value fan chart + x range by future for the recommended split
-    R = np.einsum("ntj,j->nt", X[:, :, :3], w[rec].astype(np.float32))
-    v = np.zeros(len(X))
-    path = np.zeros((len(X), MONTHS + 1))
-    for t in range(MONTHS):
-        v = (v + DEPOSITS[t]) * (1 + R[:, t])
-        path[:, t + 1] = v
-    path[:, 0] = DEPOSITS[0]
-    yrs = FIRST_YEAR + np.arange(MONTHS + 1) / 12
-    pc = np.percentile(path, [RLO, 25, 50, 75, RHI], axis=0)
-    fig, (a1, a2) = plt.subplots(1, 2, figsize=(13, 5.4), facecolor=SURFACE, gridspec_kw={"width_ratios": [1, 1.15]})
-    a1.fill_between(yrs, pc[0] / 1e3, pc[4] / 1e3, color="#cde2fb", label=f"{RC:.0%} of futures", lw=0)
-    a1.fill_between(yrs, pc[1] / 1e3, pc[3] / 1e3, color="#6da7ec", label="middle 50%", lw=0)
-    a1.plot(yrs, pc[2] / 1e3, color="#184f95", lw=2, label="median")
-    a1.axhline(RESERVE / 1e3, color=INK, lw=1, ls="--")
-    a1.text(yrs[1], RESERVE / 1e3 + 8, f"reserve for the 10 payments ${RESERVE / 1e3:,.0f}k", color=INK, fontsize=8.5, bbox=dict(facecolor=SURFACE, edgecolor="none", pad=1.5))
-    a1.set_title(f"Portfolio value, split {label(w[rec])} (Bonds/Funds/Stocks)", color=INK, fontsize=11.5, loc="left", fontweight="bold")
-    a1.set_ylabel("$ thousands", color=INK2, fontsize=9)
-    a1.legend(loc="upper left", fontsize=8.5, frameon=False, labelcolor=INK2)
-    a1.grid(color=GRID, lw=0.6)
-    style(a1)
-
-    sub = xp[(xp["split"] == "Recommended (best avg rank)") & (xp["n"] > 1) & ~xp["scenario"].str.startswith("Real-history")]
-    sub = sub.iloc[::-1]
-    y = np.arange(len(sub))
-    a2.hlines(y, sub.x_range_lo / 1e3, sub.x_range_hi / 1e3, color="#86b6ef", lw=1.6)
-    a2.hlines(y, sub.x_p25 / 1e3, sub.x_p75 / 1e3, color="#2a78d6", lw=7)
-    a2.scatter(sub.x_median / 1e3, y, color="white", edgecolors=INK, s=36, zorder=4)
-    for yi, (_, r) in zip(y, sub.iterrows()):
-        a2.text(r.x_range_hi / 1e3 + 6, yi, f"median ${r.x_median / 1e3:,.0f}k", va="center", fontsize=8, color=INK2)
-    a2.set_yticks(y, [f"{s} (n={n:,})" if s.startswith("All") else s for s, n in zip(sub.scenario, sub.n)], fontsize=8.5, color=INK2)
-    a2.set_xlabel(f"x = extra contribution available in 2033, $ thousands ({RC:.0%} range, middle 50%, median)", color=INK2, fontsize=9)
-    a2.set_title("How much x depends on the market we get", color=INK, fontsize=11.5, loc="left", fontweight="bold")
-    a2.set_xlim(left=-10)
-    a2.grid(axis="x", color=GRID, lw=0.6)
-    style(a2)
-    fig.tight_layout()
-    fig.savefig(os.path.join(OUT_DIR, "x_projection.png"), dpi=140, facecolor=SURFACE)
-    plt.close(fig)
-
-
-def cppi_charts(c, pick, share_p, path, slices, optima):
-    orange = LinearSegmentedColormap.from_list("orange", ["#fbe3d6", "#f4a37c", "#eb6834", "#b84a1f", "#7a2e10"])
-    panels = [("x_mean", "Average x = profit ($k)", RAMP, 1e-3, "{:.0f}"), ("x_median", "Median x ($k)", RAMP, 1e-3, "{:.0f}"),
-              ("x_range_lo", f"Low end of the {RC:.0%} range of x ($k)", RAMP, 1e-3, "{:.0f}"),
-              ("p_shortfall", "Chance the reserve is short (%)", orange, 100, "{:.1f}"),
-              ("sharpe", "Sharpe ratio", RAMP, 1, "{:.2f}"), ("sortino", "Sortino ratio", RAMP, 1, "{:.2f}"), ("treynor", "Treynor ratio", RAMP, 1, "{:.3f}"),
-              ("avg_growth_share", "Average share in the growth sleeve (%)", RAMP, 100, "{:.0f}")]
-    cols = [float(m) for m in config.CPPI_MULTIPLIERS]
-    shares = sorted(c["stock_share_of_growth"].unique())
-    fig, axes = plt.subplots(2, 4, figsize=(24, 10.4), facecolor=SURFACE)
-    pr = c.loc[pick]
-
-    def cell(i):
-        return cols.index(float(c.at[i, "multiplier"])), shares.index(c.at[i, "stock_share_of_growth"])
-    for ax, (m, ttl, cmap, scale, fmt) in zip(axes.flat, panels):
-        z = np.full((len(shares), len(cols)), np.nan)
-        for j, mm in enumerate(cols):
-            for i, s in enumerate(shares):
-                z[i, j] = c[(c.multiplier == mm) & (c.stock_share_of_growth == s)][m].iloc[0] * scale
-        lo, hi = np.nanpercentile(z, [5, 99]) if m != "p_shortfall" else (0, np.nanmax(z))
-        ax.imshow(z, origin="lower", cmap=cmap, vmin=lo, vmax=hi, aspect="auto", interpolation="nearest")
-        for i in range(len(shares)):
-            for j in range(len(cols)):
-                if np.isfinite(z[i, j]):
-                    dark = (z[i, j] - lo) / (hi - lo + 1e-12) > 0.55
-                    ax.text(j, i, fmt.format(z[i, j]), ha="center", va="center", fontsize=6.4, color="white" if dark else INK)
-        if m in optima:
-            a, b = optima[m]
-            ja, ia = cell(a)
-            ax.add_patch(plt.Rectangle((ja - 0.5, ia - 0.5), 1, 1, fill=False, ec=INK, lw=1.3, ls="--"))
-            jb, ib = cell(b)
-            ax.text(jb - 0.44, ib + 0.4, "\u25c6", fontsize=8, va="center", ha="left", color=INK, bbox=dict(facecolor="white", edgecolor="none", pad=0.4, alpha=0.8))
-        j0, i0 = cell(pick)
-        ax.add_patch(plt.Rectangle((j0 - 0.5, i0 - 0.5), 1, 1, fill=False, ec=INK, lw=2.4))
-        ax.set_xticks(range(len(cols)), [("1 (ladder)" if mm == 1 else f"{mm:g}") for mm in cols], fontsize=7.5, color=INK2, rotation=45)
-        ax.set_yticks(range(len(shares)), [f"{s:.0%}" for s in shares], fontsize=8, color=INK2)
-        ax.set_xlabel("CPPI multiplier", color=INK2, fontsize=9)
-        ax.set_ylabel("Stocks share of growth sleeve (rest Funds)", color=INK2, fontsize=8.5)
-        ax.set_title(ttl, color=INK, fontsize=11, loc="left", fontweight="bold")
-        style(ax)
-    fig.suptitle("Reserve-first strategies: Treasury ladder plus a growth sleeve, every multiplier and mix (30,000 futures, 2027-2033)", color=INK, fontsize=14, fontweight="bold", x=0.01, ha="left")
-    fig.text(0.01, 0.925, f"Solid box = chosen ({mname(pr.multiplier)}, {pr.stock_share_of_growth:.0%} stocks in the growth sleeve): best average rank of median x, Sharpe, Sortino and Treynor among strategies with at most "
-             f"{1 - config.SAFETY_PROB:.0%} chance the reserve is short, a {RC:.0%} range starting at {dollars(config.MIN_X_LOW)}+, and stocks <= {config.MAX_STOCK_SHARE_OF_GROWTH:.0%} of the growth sleeve.\n"
-             f"Dashed box = best cell for that panel's metric among safe strategies (no other rules).  \u25c6 = best cell for that metric that also meets the team rules.  Colors clipped at the 5th/99th percentile.",
-             color=INK2, fontsize=8.8, ha="left", va="top", linespacing=1.5)
-    fig.tight_layout(rect=(0, 0, 1, 0.9))
-    fig.savefig(os.path.join(OUT_DIR, "heatmaps_cppi.png"), dpi=130, facecolor=SURFACE)
-    plt.close(fig)
-
-    # chosen strategy: value fan with the floor, growth share over time, x by future
-    yrs = FIRST_YEAR + np.arange(MONTHS + 1) / 12
-    floor = RESERVE / (1 + config.PLANNING_YIELD) ** ((MONTHS - np.arange(MONTHS + 1)) / 12)
-    pc = np.percentile(path, [RLO, 25, 50, 75, RHI], axis=0)
-    sp = np.percentile(share_p, [25, 50, 75], axis=0) * 100
-    fig, (a1, a2, a3) = plt.subplots(1, 3, figsize=(17, 5.4), facecolor=SURFACE, gridspec_kw={"width_ratios": [1, 1, 1.15]})
-    a1.fill_between(yrs, pc[0] / 1e3, pc[4] / 1e3, color="#cde2fb", label=f"{RC:.0%} of futures", lw=0)
-    a1.fill_between(yrs, pc[1] / 1e3, pc[3] / 1e3, color="#6da7ec", label="middle 50%", lw=0)
-    a1.plot(yrs, pc[2] / 1e3, color="#184f95", lw=2, label="median")
-    a1.plot(yrs, floor / 1e3, color=INK, lw=1.2, ls="--", label="floor = PV of the reserve")
-    a1.set_title("Portfolio value vs the floor", color=INK, fontsize=11.5, loc="left", fontweight="bold")
-    a1.set_ylabel("$ thousands", color=INK2, fontsize=9)
-    a1.legend(loc="upper left", fontsize=8.5, frameon=False, labelcolor=INK2)
-    a1.grid(color=GRID, lw=0.6)
-    style(a1)
-    xs = yrs[:-1]
-    a2.fill_between(xs, sp[0], sp[2], color="#6da7ec", lw=0, label="middle 50%")
-    a2.plot(xs, sp[1], color="#184f95", lw=2, label="median")
-    a2.set_title("Share of the portfolio in the growth sleeve", color=INK, fontsize=11.5, loc="left", fontweight="bold")
-    a2.set_ylabel("%", color=INK2, fontsize=9)
-    a2.set_ylim(0, 100)
-    a2.legend(loc="upper left", fontsize=8.5, frameon=False, labelcolor=INK2)
-    a2.grid(color=GRID, lw=0.6)
-    style(a2)
-
-    xv = np.maximum(path[:, -1] - RESERVE, 0)
-    names = ["All futures (n=30,000)"] + list(config.SCENARIOS)
-    parts = [xv] + [xv[a:b] for a, b in slices]
-    qs = [np.percentile(x, [RLO, 25, 50, 75, RHI]) for x in parts][::-1]
-    names = names[::-1]
-    y = np.arange(len(qs))
-    a3.hlines(y, [q[0] / 1e3 for q in qs], [q[4] / 1e3 for q in qs], color="#86b6ef", lw=1.6)
-    a3.hlines(y, [q[1] / 1e3 for q in qs], [q[3] / 1e3 for q in qs], color=BLUE, lw=7)
-    a3.scatter([q[2] / 1e3 for q in qs], y, color="white", edgecolors=INK, s=36, zorder=4)
-    for yi, q in zip(y, qs):
-        a3.text(q[4] / 1e3 + 8, yi, f"median ${q[2] / 1e3:,.0f}k", va="center", fontsize=8, color=INK2)
-    a3.set_yticks(y, names, fontsize=8.5, color=INK2)
-    a3.set_xlabel(f"x = surplus above the reserve in 2033, $ thousands ({RC:.0%} range, middle 50%, median)", color=INK2, fontsize=9)
-    a3.set_title(f"x for {mname(pr.multiplier)}, {pr.stock_share_of_growth:.0%} stocks in growth", color=INK, fontsize=11.5, loc="left", fontweight="bold")
-    a3.set_xlim(left=-10)
-    a3.grid(axis="x", color=GRID, lw=0.6)
-    style(a3)
-    fig.tight_layout()
-    fig.savefig(os.path.join(OUT_DIR, "cppi_projection.png"), dpi=140, facecolor=SURFACE)
-    plt.close(fig)
-
-
-
-def steady_charts(c, pick, static_best, optima, bonds_p, vpath, slices, w, in_bounds):
-    orange = LinearSegmentedColormap.from_list("orange", ["#fbe3d6", "#f4a37c", "#eb6834", "#b84a1f", "#7a2e10"])
-    r0 = c.loc[pick]
-    sub = c[c["variant"] == r0.variant]
-    stat = c[c["variant"] == c.loc[static_best, "variant"]].set_index(["bonds", "funds", "stocks"])
-    sub = sub.assign(gain=[row.x_median - stat.loc[(row.bonds, row.funds, row.stocks), "x_median"] for row in sub.itertuples()])
-    step = config.OPT_STEP
-    bs = np.round(np.arange(sub.bonds.min(), sub.bonds.max() + 1e-9, step), 4)
-    ss = np.round(np.arange(sub.stocks.min(), sub.stocks.max() + 1e-9, step), 4)
-    panels = [("x_mean", "Average x = profit ($k)", RAMP, 1e-3), ("x_median", "Median x ($k)", RAMP, 1e-3),
-              ("x_range_lo", f"Low end of the {RC:.0%} range of x ($k)", RAMP, 1e-3), ("p_shortfall", "Chance the reserve is short (%)", orange, 100),
-              ("sharpe", "Sharpe ratio", RAMP, 1), ("sortino", "Sortino ratio", RAMP, 1), ("treynor", "Treynor ratio", RAMP, 1),
-              ("gain", "Median x gained by nudging vs no nudges ($k)", RAMP, 1e-3)]
-    fig, axes = plt.subplots(2, 4, figsize=(23, 9.4), facecolor=SURFACE)
-    unsafe = np.full((len(ss), len(bs), 4), 0.0)
-    cellof = {}
-    for row in sub.itertuples():
-        i, j = int(np.argmin(abs(ss - row.stocks))), int(np.argmin(abs(bs - row.bonds)))
-        cellof[row.Index] = (j, i)
-        if not row.safe:
-            unsafe[i, j] = (0.35, 0.35, 0.35, 0.55)
-    ext = [bs[0] * 100 - step * 50, bs[-1] * 100 + step * 50, ss[0] * 100 - step * 50, ss[-1] * 100 + step * 50]
-    for ax, (m, ttl, cmap, scale) in zip(axes.flat, panels):
-        z = np.full((len(ss), len(bs)), np.nan)
-        for row in sub.itertuples():
-            j, i = cellof[row.Index]
-            z[i, j] = getattr(row, m) * scale
-        safe_vals = z[unsafe[:, :, 3] == 0]
-        lo, hi = np.nanpercentile(safe_vals, [5, 99]) if m != "p_shortfall" else (0, np.nanpercentile(z, 99))
-        im = ax.imshow(z, origin="lower", cmap=cmap, vmin=lo, vmax=hi, aspect="auto", interpolation="nearest", extent=ext)
-        ax.imshow(unsafe, origin="lower", aspect="auto", interpolation="nearest", extent=ext)
-        if m in optima:
-            safe_sub, rule_sub = sub[sub["safe"]], sub[sub["rules"]]
-            for part, mk, sz in ((safe_sub, "*", 200), (rule_sub, "D", 55)):
-                if len(part):
-                    i_ = part[m].idxmax()
-                    ax.scatter(sub.at[i_, "bonds"] * 100, sub.at[i_, "stocks"] * 100, marker=mk, s=sz, c="white", edgecolors=INK, linewidths=1.1, zorder=5)
-        ax.scatter(r0.bonds * 100, r0.stocks * 100, marker="o", s=60, c=INK, edgecolors="white", linewidths=1, zorder=7)
-        cb = fig.colorbar(im, ax=ax, fraction=0.046, pad=0.03)
-        cb.ax.tick_params(colors=INK2, labelsize=8)
-        cb.outline.set_edgecolor(GRID)
-        ax.set_xlabel("Bonds % at the start  (Funds % = 100 - Bonds - Stocks)", color=INK2, fontsize=8.5)
-        ax.set_ylabel("Stocks % at the start", color=INK2, fontsize=8.5)
-        ax.set_title(ttl, color=INK, fontsize=11, loc="left", fontweight="bold")
-        style(ax)
-    fig.suptitle(f"Steady split: one starting split, nudged at most {config.ADJUST_STEP:.0%} a year ({r0.variant})", color=INK, fontsize=14, fontweight="bold", x=0.01, ha="left")
-    fig.text(0.01, 0.925, f"Each cell is one starting Bonds / Funds / Stocks split inside the team bounds. Gray = reserve short in more than {1 - config.SAFETY_PROB:.0%} of futures (not allowed).  "
-             f"\u25cf = chosen ({r0.bonds:.1%}/{r0.funds:.1%}/{r0.stocks:.1%}), best average rank among safe splits with a {RC:.0%} range starting at {dollars(config.MIN_X_LOW)}+.\n"
-             f"\u2605 = best split for that panel's metric among safe splits.  \u25c6 = best that also meets the range rule.  Colors clipped at the 5th/99th percentile of safe splits.",
-             color=INK2, fontsize=8.8, ha="left", va="top", linespacing=1.5)
-    fig.tight_layout(rect=(0, 0, 1, 0.9))
-    fig.savefig(os.path.join(OUT_DIR, "heatmaps_steady.png"), dpi=130, facecolor=SURFACE)
-    plt.close(fig)
-
-    # chosen split: value vs floor, Bonds weight each January, x by future
-    yrs = FIRST_YEAR + np.arange(MONTHS + 1) / 12
-    floor = RESERVE / (1 + config.PLANNING_YIELD) ** ((MONTHS - np.arange(MONTHS + 1)) / 12)
-    pc = np.percentile(vpath, [RLO, 25, 50, 75, RHI], axis=1)
-    fig, (a1, a2, a3) = plt.subplots(1, 3, figsize=(17, 5.4), facecolor=SURFACE, gridspec_kw={"width_ratios": [1, 1, 1.15]})
-    a1.fill_between(yrs, pc[0] / 1e3, pc[4] / 1e3, color="#cde2fb", label=f"{RC:.0%} of futures", lw=0)
-    a1.fill_between(yrs, pc[1] / 1e3, pc[3] / 1e3, color="#6da7ec", label="middle 50%", lw=0)
-    a1.plot(yrs, pc[2] / 1e3, color="#184f95", lw=2, label="median")
-    a1.plot(yrs, floor / 1e3, color=INK, lw=1.2, ls="--", label="PV of the reserve")
-    a1.set_title("Portfolio value vs what the reserve needs", color=INK, fontsize=11.5, loc="left", fontweight="bold")
-    a1.set_ylabel("$ thousands", color=INK2, fontsize=9)
-    a1.legend(loc="upper left", fontsize=8.5, frameon=False, labelcolor=INK2)
-    a1.grid(color=GRID, lw=0.6)
-    style(a1)
-    ky = FIRST_YEAR + np.arange(bonds_p.shape[0])
-    q = np.percentile(bonds_p, [0, 25, 50, 75, 100], axis=1) * 100
-    a2.fill_between(ky, q[0], q[4], step="post", color="#cde2fb", lw=0, label="min to max")
-    a2.fill_between(ky, q[1], q[3], step="post", color="#6da7ec", lw=0, label="middle 50%")
-    a2.step(ky, q[2], where="post", color="#184f95", lw=2, label="median")
-    a2.set_title("Bonds weight each January", color=INK, fontsize=11.5, loc="left", fontweight="bold")
-    a2.set_ylabel("% of the portfolio in Bonds", color=INK2, fontsize=9)
-    a2.legend(loc="best", fontsize=8.5, frameon=False, labelcolor=INK2)
-    a2.grid(color=GRID, lw=0.6)
-    style(a2)
-    xv = np.maximum(vpath[-1] - RESERVE, 0)
-    names = ["All futures (n=30,000)"] + list(config.SCENARIOS)
-    parts = [xv] + [xv[a:b] for a, b in slices]
-    qs = [np.percentile(x, [RLO, 25, 50, 75, RHI]) for x in parts][::-1]
-    names = names[::-1]
-    y = np.arange(len(qs))
-    a3.hlines(y, [q_[0] / 1e3 for q_ in qs], [q_[4] / 1e3 for q_ in qs], color="#86b6ef", lw=1.6)
-    a3.hlines(y, [q_[1] / 1e3 for q_ in qs], [q_[3] / 1e3 for q_ in qs], color=BLUE, lw=7)
-    a3.scatter([q_[2] / 1e3 for q_ in qs], y, color="white", edgecolors=INK, s=36, zorder=4)
-    for yi, q_ in zip(y, qs):
-        a3.text(q_[4] / 1e3 + 8, yi, f"median ${q_[2] / 1e3:,.0f}k", va="center", fontsize=8, color=INK2)
-    a3.set_yticks(y, names, fontsize=8.5, color=INK2)
-    a3.set_xlabel(f"x = surplus above the reserve in 2033, $ thousands ({RC:.0%} range, middle 50%, median)", color=INK2, fontsize=9)
-    a3.set_title(f"x for {r0.bonds:.1%} / {r0.funds:.1%} / {r0.stocks:.1%} (Bonds / Funds / Stocks)", color=INK, fontsize=11.5, loc="left", fontweight="bold")
-    a3.set_xlim(left=-10)
-    a3.grid(axis="x", color=GRID, lw=0.6)
-    style(a3)
-    fig.tight_layout()
-    fig.savefig(os.path.join(OUT_DIR, "steady_projection.png"), dpi=140, facecolor=SURFACE)
-    plt.close(fig)
-
 
 
 if __name__ == "__main__":
